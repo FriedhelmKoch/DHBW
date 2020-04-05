@@ -1,0 +1,86 @@
+/* Standardauflösung - Notebook */
+* {
+    margin: 0;
+	padding: 0;
+	color: white;
+}
+#visual {
+	margin: 30px auto;
+	width: 960px;
+}
+#header {
+	width: 100%;
+	background: blue;
+	margin-bottom: 2%;
+	height: 150px;
+}
+#content {
+	float: left;
+	width: 56%;
+	margin-right: 2%;
+	background: white;
+}
+#sidebar1 {
+	float: left;
+	width: 20%;
+	margin-right: 2%;
+	background: gray;
+	height: 250px;
+}
+#sidebar2 {
+	float: left;
+	width: 20%;
+	background: darkgray;
+	height: 250px;
+}
+.button {
+	background-color: #4CAF50;
+	border: none;
+	color: white;
+	padding: 15px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	margin: 4px 2px;
+	cursor: pointer;
+}
+
+/* Tablet */
+@media only screen and (max-width: 1024px) {
+	#visual { width: 90%; }
+	#content { width: 78%; }
+	#sidebar1 {
+		width: 20%;
+		margin-right: 0;
+		margin-bottom: 2%;
+	}
+	#sidebar2 {
+		width: 100%;
+		height: 100px;
+	}
+}
+
+/* Smartphone */
+@media only screen and (max-width: 480px) {
+	#visual { width: 90%; }
+ 	#header {
+		width: 100%;
+		height: 100px;
+	}
+	#content {
+		width: 100%;
+		margin-right: 0;
+		margin-bottom: 2%;
+	}
+	#sidebar1 {
+		width: 100%;
+		height: 100px;
+		margin-bottom: 2%;
+	}
+	#sidebar2 {
+		width: 100%;
+		height: 100px;
+		margin-top: 2%;
+	}
+}

@@ -1,0 +1,11 @@
+{  
+  "name": "Notification Demo",  
+  "short_name": "Notification Demo",  
+  "icons": [{  
+        "src": "./notify-icon.png",  
+        "sizes": "40x40",
+        "type": "image/png"
+      }],  
+  "start_url": "./index.html",  
+  "display": "standalone",  
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html lang="de">
+<head>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="keywords" content="PWA Beispiel">
+	<meta name="description" content="Responsive und Cache Demo">
+	<meta name="language" content="DE">
+	<meta name="robots" content="noindex,follow">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="apple-mobile-web-app-title" content="PWA-demo">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<!-- Ohne Browser URL-Zeile iOS-->
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<!-- Ohne Browser URL-Zeile Chrome for Android-->
+	<meta name="mobile-web-app-capable" content="yes">
+	<!-- Kein Bottom Control mehr -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<!-- Title that will shown when website is added to Home Screen -->
+	<meta name="apple-mobile-web-app-title" content="PWA-Demo">
+
+  	<title>Beispiel Media Queries für Smartphone, Tablet und Service Worker</title>
+
+	<link rel="stylesheet" href="./pwa.css">
+
+	<!-- Favicon Icon -->
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+		
+	<!-- Home Icons -->
+	<link rel="apple-touch-icon" sizes="57x57" href="./icon-57.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="./icon-76.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="./icon-120.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="./icon-152.png">	
+	<link rel="apple-touch-icon" sizes="167x167" href="./icon-167.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">		
+
+	<!-- Startup Splash Screen (640x1136) -->
+	<link rel="apple-touch-startup-image" href="./Splash-iPhone.png">
+
+	<!-- Web-Manifest, siehe auch: https://developer.mozilla.org/de/docs/Web/Manifest -->
+	<link rel="manifest" href="./pwa.webmanifest">
+
+</head>
+
+<body>
+<div id="visual">
+	<div id="header">Header<br>
+		<center><button class="button">Drück mich</button></center>
+	</div>
+  	<div id="content"><img src="./DHBW_Logo.png" width="100%" height="auto"></div>
+  	<div id="sidebar1">Sidebar 1</div>
+  	<div id="sidebar2">Sidebar 2</div>
+  	<div style="clear:both;"></div>
+</div>
+
+<script type="text/javascript" src="./pwa.js"></script>
+
+</body>
+</html>

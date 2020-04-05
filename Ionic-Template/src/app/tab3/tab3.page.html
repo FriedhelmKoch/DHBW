@@ -1,0 +1,50 @@
+<ion-header>
+  <ion-toolbar color="medium">
+    <ion-title>
+      Dialogflow Test
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <div class="ion-padding" class="embed-container">
+      <iframe id="idIframe"
+        allow="microphone;" 
+        onload="iframeLoaded()" 
+        style="border: none;" 
+        allowfullscreen scrolling="no"
+        width="100%"
+        height="auto"
+        src="https://console.dialogflow.com/api-client/demo/embedded/052cfc4b-5272-4cec-ae95-3c1024f263a6">
+      </iframe>
+    </div>
+  </ion-content>
+  
+  <ion-footer>
+    <ion-toolbar color="success">
+      <ion-title>
+        Fußzeile individuell zu gestalten...
+      </ion-title>
+    </ion-toolbar>
+  </ion-footer>
+  
+  <style type="text/css">
+    .embed-container iframe {
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    }
+    </style>
+  
+  <script type="text/javascript">
+    function iframeLoaded() {
+        var iFrameID = document.getElementById('idIframe');
+        if(iFrameID) {
+          iFrameID.height = "";
+          iFrameID.height = iFrameID.contentWindow.document.body.scrollHeight + "px";
+        }   
+    }
+  </script>
+  

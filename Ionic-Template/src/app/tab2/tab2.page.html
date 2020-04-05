@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Tab Two
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<div>
+
+<p>Variablen-Beispiel: {{title}}!</p>
+<p>Lambda-Beispiel, während der Laufzeit wird die Variable verändert: {{hallo}}!</p>
+
+<p>*ngFor Beispiel mit Click-Event:</p>
+      <ul>
+        <li *ngFor="let student of students; let i = index">
+          {{ i }}:
+          {{ student.firstname }}
+          {{ student.lastname }}
+          <button (click)="onDeleteStudent(i)">löschen</button>
+        </li>
+      </ul>
+<button (click)='onAddStudent()'>Neuer Student</button>
+
+<p>*ngIf Beispiel:<br/>(Wenn das Wort 'test' eingegeben wird, dann wird der Text ausgegeben.)</p>
+<p><input type="text" (keyup)="onInputChange($event.target.value)" /></p>
+<p *ngIf='inputValue=="test"'>Ausgabe mit folgendem Text: {{ inputValue }}</p>
+
+<p>Ein *ngIf Stoppuhr Beispiel</p>
+<p *ngIf='!counterRunning'><button (click)='onStartCounter()'>Stoppuhr starten</button></p>
+<p *ngIf='counterRunning'>{{ currentTime }}</p>
+<p><button *ngIf='counterRunning' (click)='onStopCounter()'>Stoppuhr anhalten</button></p>
+
+
+</div>
+
+<ion-content></ion-content>

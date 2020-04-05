@@ -1,0 +1,21 @@
+{
+	"vscode.tsc.compiler.alertOnError": "never",
+	"workbench.colorTheme": "Default Light+",
+	"diffEditor.ignoreTrimWhitespace": false,
+	"diffEditor.renderSideBySide": false,
+	"editor.minimap.enabled": true,
+	"editor.renderControlCharacters": false,
+	"explorer.confirmDelete": false,
+	"window.zoomLevel": 0,
+	"git.enableSmartCommit": true,
+	"git.confirmSync": false,
+	"git.autofetch": true,
+	"breadcrumbs.enabled": true,
+	"editor.tabSize": 2,
+	"editor.insertSpaces": false,
+	"vs-kubernetes": {
+		"vs-kubernetes.helm-path": "/Users/freddy/.vs-kubernetes/tools/helm/darwin-amd64/helm",
+		"vs-kubernetes.draft-path": "/Users/freddy/.vs-kubernetes/tools/draft/darwin-amd64/draft",
+		"vs-kubernetes.minikube-path": "/Users/freddy/.vs-kubernetes/tools/minikube/darwin-amd64/minikube"
+	}
+}
