@@ -1,4 +1,4 @@
-## Available Scripts
+## Vorliegende Besipiele
 
 ```
 - React Training
@@ -22,6 +22,5 @@
 >**Note: Die Templates müssen mit: `npm install` erweitert und mit: `npm start` gestartet werden.
 
 ## Errata
-```
+
 Die vorliegen Beispiele dienen ausschließlich zur Vorlesung Web-Engineering II und haben keinerlei Anspruch auf Vollständigkeit. Sie unterliegen jedoch meinem Copyright und sollen nur zu meinen Lehrzwecken verwendet werden.  
-```
