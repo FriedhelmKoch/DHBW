@@ -51,7 +51,7 @@ class TodoAdd extends Component {
                     <button 
                         onClick={this.onTodoAdd}
                         style={buttonStyles}>
-                        Todo hinzufügen ({this.state.newTodo.length})
+                        To-Do hinzufügen ({this.state.newTodo.length})
                     </button>
                 ) : null)}
             </Card>
