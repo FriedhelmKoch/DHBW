@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import { v4 as uuidv4 } from 'uuid';  // https://www.npmjs.com/package/uuid
 import Button from "./Button";
-import Panel from "./Panel";
+import Card from "./Card";
 import TodoList from "./TodoList";
 import TodoAdd from "./TodoAdd";
 import './App.css';
@@ -11,15 +12,14 @@ class App extends Component {
     super(props);
 
     this.state = {   
-      name: "Welt",
+      name: "Erde",
       counter: 0,
       todos: [
-        {id: 1, title: "Obst kaufen"},
-        {id: 2, title: "Programmieren lernen"},
-        {id: 3, title: "3. TODO"}
+        {id: uuidv4(), title: "08.04. - 10:30 Uhr: Teil 1 - Web-Engineering II"},
+        {id: uuidv4(), title: "09.04. - 09:00 Uhr: Nachbereitung Kurs"},
+        {id: uuidv4(), title: "15.04. - 10:30 Uhr: Teil 2 - Web-Enineering II"}
       ]
     }
-
     this.changeName = this.changeName.bind(this);
     this.incrementCounter = this.incrementCounter.bind(this);
     this.addTodo = this.addTodo.bind(this);
@@ -57,7 +57,7 @@ class App extends Component {
     }
 
     /*todos.push({id: (maxId + 1), title: "4. Todo"});   // Todo unten anhängen */
-    todos.unshift({id: (maxId + 1), title: title});  // Todo landet oberhalb
+    todos.unshift({id: uuidv4(), title: title});  // Todo landet oberhalb
     this.setState({
       todos: todos
     })
@@ -76,21 +76,21 @@ class App extends Component {
         </div>
 
         <br />
-        <Panel title="Überschrift">
+        <Card title="Überschrift">
           <p>Ich bin ein Absatz!</p>
           <Button label="Klick mich!" />
-        </Panel>
+        </Card>
 
         <br />
-        <Panel title="Noch eine Überschrift">
+        <Card title="Noch eine Überschrift">
           <button onClick={this.changeName}>Verändere die Überschrift in Venus</button>
-        </Panel>
+        </Card>
 
         <br />
-        <Panel title="Counter">
+        <Card title="Counter">
           <h1>Der aktuelle Zählerstand ist: {this.state.counter}</h1>
           <button onClick={this.incrementCounter}>Zähle hoch!</button>
-        </Panel>
+        </Card>
 
         <h1>ToDo-Liste</h1>
           {/*hier muss der state als props der anderen Komponente übergeben werden!*/}

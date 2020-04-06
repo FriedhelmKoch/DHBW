@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Panel from "./Panel";
+import Card from "./Card";
 
 class TodoAdd extends Component {
 
@@ -36,7 +36,7 @@ class TodoAdd extends Component {
             backgroundColor: (this.state.newTodo.length < 3 ? "yellow" : "green")
         }
         return (
-            <Panel title="Todo hinzufügen">
+            <Card title="Todo hinzufügen">
                 {/*     type - Eingabefeld definieren 
                         onChange - bei veränderung wird die Funktinon ausgeführt
                         value - und im Wert steht immer newTodo des States - den React immer automatisch aktualisiert! 
@@ -47,14 +47,14 @@ class TodoAdd extends Component {
                     value={this.state.newTodo}
                 />
                 {/* Button wird erst angezeigt, wenn im Input-Feld etwas steht */}
-                {(this.state.newTodo != "" ? (
+                {(this.state.newTodo !== "" ? (
                     <button 
                         onClick={this.onTodoAdd}
                         style={buttonStyles}>
                         Todo hinzufügen ({this.state.newTodo.length})
                     </button>
                 ) : null)}
-            </Panel>
+            </Card>
         )
     }
 
