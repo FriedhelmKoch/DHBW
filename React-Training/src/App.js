@@ -76,23 +76,23 @@ class App extends Component {
         </div>
 
         <br />
-        <Card title="Überschrift">
-          <p>Ich bin ein Absatz!</p>
+        <Card title="Das ist eine Card mit Button">
+          <p>Hier ein Absatz mittels &lt;p&gt;&lt;/p&gt;!</p>
           <Button label="Klick mich!" />
         </Card>
 
         <br />
-        <Card title="Noch eine Überschrift">
-          <button onClick={this.changeName}>Verändere die Überschrift in Venus</button>
+        <Card title="Header-Titel">
+          <button onClick={this.changeName}>Kopftext ändern in Venus</button>
         </Card>
 
         <br />
         <Card title="Counter">
-          <h1>Der aktuelle Zählerstand ist: {this.state.counter}</h1>
-          <button onClick={this.incrementCounter}>Zähle hoch!</button>
+          <h1>Klick-Zähler: {this.state.counter}</h1>
+          <button onClick={this.incrementCounter}>Hochzählen!</button>
         </Card>
 
-        <h1>ToDo-Liste</h1>
+        <h1>To-Do Liste</h1>
           {/*hier muss der state als props der anderen Komponente übergeben werden!*/}
         <TodoList todos={this.state.todos} />  
         <br />
