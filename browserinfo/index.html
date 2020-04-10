@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Browser-Info</title>
+</head>
+
+<body style="margin: 5;">
+
+	<h2>Browser-Info</h2>
+	<script language="JavaScript">
+		var browserCodename = navigator.appCodeName;
+		var browserLanguage = navigator.language; 
+		var browserPlatform = navigator.platform;
+		var browserCookies = navigator.cookieEnabled;
+		var browserUserAgent = navigator.userAgent;
+
+		document.writeln("<table cellspacing=2 cellpadding=5 width='400px' bgcolor='#ccffff'>");
+			document.writeln("<tr>"); 
+				document.writeln("<td width='200px'>Browser Codename:</td>");
+				document.writeln("<td width='200px'>" + browserCodename + "</td>");
+			document.writeln("</tr><tr>");
+				document.writeln("<td width='200px'>Browser-Sprache: </td>");
+				document.writeln("<td width='200px'>" + browserLanguage + "</td>");
+			document.writeln("</tr><tr>");
+				document.writeln("<td width='200px'>Browser-Plattform: </td>");
+				document.writeln("<td width='200px'>" + browserPlatform + "</td>");
+			document.writeln("</tr><tr>");
+				document.writeln("<td width='200px'>Cookies erlaubt: </td>");
+				document.writeln("<td width='200px'>" + browserCookies + "</td>");	
+			document.writeln("</tr>");
+		document.writeln("</table>");
+		</script>
+
+    <script>
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('./sw.js')
+				.then(reg => console.log('Registrierung erfolgreich. Scope ist ' + reg))
+				.catch(err => console.log('Registrierung fehlgeschlagen mit ' + err));
+		}
+	</script>
+
+</body>
+</html>

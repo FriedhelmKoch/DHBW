@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>IP-Adresse</title>
+</head>
+
+<body style="margin: 5;">
+
+	<h2><IP-Adresse></h2>
+	<script language="JavaScript">
+
+		// IP-Adresse über AJAX abfragen
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) { 
+				document.writeln("IP-Adresse: " + this.responseText); 
+				console.log('ÌP-Adresse: ' + this.responseText); } 
+    };
+    xhttp.open("GET", "getIP.php", true);
+    xhttp.send();
+
+	</script>
+
+  <script>
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('./sw.js')
+				.then(reg => console.log('Registrierung erfolgreich. Scope ist ' + reg))
+				.catch(err => console.log('Registrierung fehlgeschlagen mit ' + err));
+		}
+	</script>
+
+</body>
+</html>
