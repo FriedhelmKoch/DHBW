@@ -6,11 +6,9 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>Geo-Koordinaten</title>
 </head>
-
 <body style="margin: 5;">
 
 	<script language="JavaScript">
-
 		var geoOptions = {
       enableHighAccuracy: true,     // Super-Präzisions-Modus
       timeout: 1000,                // Maximum Wartezeit
@@ -18,14 +16,17 @@
     }
     function geoSuccess(pos) {
 			var crd = pos.coords;
+			var lon = crd.longitude;  // Längengrad
+			var lat = crd.latitude;   // Breitengrad
+
 			document.writeln("<h2>Geo-Koordinaten</h2>");
 			document.writeln("<table cellspacing=2 cellpadding=5 width='400px' bgcolor='#ccffff'>");
 				document.writeln("<tr>"); 
 					document.writeln("<td width='250px'>Latitude [Grad-Dez]:</td>");
-					document.writeln("<td width='150px'>" + crd.latitude + "</td>");
+					document.writeln("<td width='150px'>" + lat + "</td>");
 				document.writeln("</tr><tr>");
 					document.writeln("<td width='250px'>Longitude [Grad-Dez]: </td>");
-					document.writeln("<td width='150px'>" + crd.longitude + "</td>");
+					document.writeln("<td width='150px'>" + lon + "</td>");
 				document.writeln("</tr><tr>");
 					document.writeln("<td width='250px'>Höhe über Meerespiegel [m]: </td>");
 					document.writeln("<td width='150px'>" + crd.altitude + "</td>");
@@ -34,6 +35,8 @@
 					document.writeln("<td width='150px'>" + crd.accuracy + "</td>");	
 				document.writeln("</tr>");
 			document.writeln("</table>");
+
+			reverseGeocoding(lon, lat);
     }
     function geoError(err) {
       console.warn(`ERROR(${err.code}): ${err.message}`);
@@ -44,7 +47,43 @@
     } else {
       alert("ACHTUNG: Geolocation wird von diesem System/Device nicht unterstützt! Die Funktionalität von viaLinked ist daher nur eingeschränkt möglich!");
 		}
-		
+
+		function reverseGeocoding(lon, lat) {
+			fetch('http://nominatim.openstreetmap.org/reverse?format=json&lon=' + lon + '&lat=' + lat).
+			then(function(response) {
+					return response.json();
+			}).
+			then(function(json) {
+				console.log(json.display_name);
+				//document.getElementById('location').innerHTML = json.display_name;
+
+				const target = {};
+				const add = json.display_name.split(', ');
+				const streetNo = add[0];
+				const street = add[1];
+				const suburb = add[2];
+				const city = add[3];
+				const county = add[4];
+				const country = add[5];
+				const zipcode = add[6];
+				const state = add[7];
+
+				document.writeln("<h2>Reverse Geocoding</h2>");
+				document.writeln("<table cellspacing=2 cellpadding=5 width='400px' bgcolor='#ccffff'>");
+					document.writeln("<tr>"); 
+						document.writeln("<td width='70px'>Strasse:</td>");
+						document.writeln("<td width='330px'>" + street + " " + streetNo + "</td>");
+					document.writeln("</tr><tr>");
+						document.writeln("<td width='70px'>Plz Ort: </td>");
+						document.writeln("<td width='330px'>" + zipcode + " " + city + "</td>");
+					document.writeln("</tr><tr>");
+						document.writeln("<td width='70px'>Land: </td>");
+						document.writeln("<td width='330px'>" + state + "</td>");	
+					document.writeln("</tr>");
+				document.writeln("</table>");
+				
+			})
+		}
 		</script>
 
 </body>
