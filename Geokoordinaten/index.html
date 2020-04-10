@@ -57,28 +57,20 @@
 				console.log(json.display_name);
 				//document.getElementById('location').innerHTML = json.display_name;
 
-				const target = {};
 				const add = json.display_name.split(', ');
-				const streetNo = add[0];
-				const street = add[1];
-				const suburb = add[2];
-				const city = add[3];
-				const county = add[4];
-				const country = add[5];
-				const zipcode = add[6];
-				const state = add[7];
+				const pos = {streetNo: add[0], street: add[1], suburb: add[2], city: add[3], county: add[4], country: add[5], zip: add[6], state: add[7] };
 
 				document.writeln("<h2>Reverse Geocoding</h2>");
 				document.writeln("<table cellspacing=2 cellpadding=5 width='400px' bgcolor='#ccffff'>");
 					document.writeln("<tr>"); 
 						document.writeln("<td width='70px'>Strasse:</td>");
-						document.writeln("<td width='330px'>" + street + " " + streetNo + "</td>");
+						document.writeln("<td width='330px'>" + pos.street + " " + pos.streetNo + "</td>");
 					document.writeln("</tr><tr>");
 						document.writeln("<td width='70px'>Plz Ort: </td>");
-						document.writeln("<td width='330px'>" + zipcode + " " + city + "</td>");
+						document.writeln("<td width='330px'>" + pos.zip + " " + pos.city + "</td>");
 					document.writeln("</tr><tr>");
 						document.writeln("<td width='70px'>Land: </td>");
-						document.writeln("<td width='330px'>" + state + "</td>");	
+						document.writeln("<td width='330px'>" + pos.state + "</td>");	
 					document.writeln("</tr>");
 				document.writeln("</table>");
 				
