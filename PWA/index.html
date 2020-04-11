@@ -2,15 +2,20 @@
 <html lang="de">
 <head>
 
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta charset="UTF-8">
+	<meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content:" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover" />
+
 	<meta name="keywords" content="PWA Beispiel">
-	<meta name="description" content="Responsive und Cache Demo">
 	<meta name="language" content="DE">
 	<meta name="robots" content="noindex,follow">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<meta name="apple-mobile-web-app-title" content="PWA-demo">
 	<meta name="format-detection" content="telephone=no">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<!-- Wichtig - Cache ausschalten! -->
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<meta http-equiv="pragma" content="no-cache">
 
 	<!-- Ohne Browser URL-Zeile iOS-->
 	<meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,7 +26,7 @@
 	<!-- Title that will shown when website is added to Home Screen -->
 	<meta name="apple-mobile-web-app-title" content="PWA-Demo">
 
-  	<title>Beispiel Media Queries für Smartphone, Tablet und Service Worker</title>
+  <title>Beispiel Media Queries für Smartphone, Tablet und Service Worker</title>
 
 	<link rel="stylesheet" href="./pwa.css">
 
@@ -44,7 +49,7 @@
 
 </head>
 
-<body>
+<body style="margin: 5;">
 <div id="visual">
 	<div id="header">Header<br>
 		<center><button class="button">Drück mich</button></center>
