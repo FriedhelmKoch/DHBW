@@ -1,8 +1,10 @@
 ## Vorliegende Besipiele
 
 ```
-- React Training
-	- einfache Code Beispiele für Components, Klickzähler, Cards, Listen etc.
+- React Training1
+	- einfache Code Beispiele für Variablen, Objekten, Arrays, Destructuring, Rest-Operator etc.
+- React Training2
+	- einfache Code Beispiele für Components, Klickzähler, Cards, Listen (Key) etc.
 - PWA
 	- eine einfache PWA inkl. Serviceworker und Media Queries
 - Kamera
@@ -17,6 +19,12 @@
 	- einige kleine Code Sniplets in TypeScript
 - Ionic-Template
 	- ein Mobile-Template unter Angular und Ionic als mobile Framework
+- Browserinfo
+	- Liest Informationen des Browser aus: Plattform, Sprache, Typ,...
+- userIP
+	- Auslesen der IP-Adresse mittel AJAX und PHP-Script.
+- Geokoordinaten
+	- Hier wird das HTML5-Geolocation-Modell genutzt und mittels Reverse-Geocoding über 'Nominatim' die Adresse im Klartext mit Strasse/Nr/PLZ/Ort... extrahiert
 ```
 
 >**Note: Die Templates müssen mit: `npm install` erweitert und mit: `npm start` gestartet werden.
