@@ -12,7 +12,7 @@
 - Speech
 	- Sprachwiedergabe eines kurzen Textes
 - Notification
-	- eine Notification nicht unter Safari und iOS
+	- eine Notification gemäß PWA (funktioniert nicht unter Safari und iOS)
 - F7-React-Template
 	- ein Mobile-Template unter React und Framework7 als mobile Framework 
 - TypeScript
