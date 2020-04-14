@@ -6,11 +6,12 @@ class TodoAdd extends Component {
     constructor(props) {
         super(props);
 
+        this.onTodoAdd = this.onTodoAdd.bind(this);
+        this.onTodoInputChange = this.onTodoInputChange.bind(this);
+
         this.state = {
             newTodo: "Eingabe"
         }
-        this.onTodoAdd = this.onTodoAdd.bind(this);
-        this.onTodoInputChange = this.onTodoInputChange.bind(this);
     }
 
     onTodoAdd() {

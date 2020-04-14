@@ -5,7 +5,6 @@ import Card from "./Card";
 import TodoList from "./TodoList";
 import TodoAdd from "./TodoAdd";
 import './App.css';
-import Language from './polymorph';
 
 class App extends Component {
 
@@ -94,11 +93,11 @@ class App extends Component {
         </Card>
 
         <h1>To-Do Liste</h1>
-        {/*hier muss der state als props der anderen Komponente übergeben werden!*/}
+          {/*hier muss der state als props der anderen Komponente übergeben werden!*/}
         <TodoList todos={this.state.todos} />  
         <br />
         <TodoAdd onAdd={this.addTodo} /> {/* Funktion übergeben */}
-      
+
         <p></p>
 
       </div>
