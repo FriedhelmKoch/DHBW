@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Marker Leaflet Map</title>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" type="text/css" href="./leaflet.css" />
+</head>
+<body>
+
+	<div id="map" style="width: 600px; height: 400px">
+	</div>
+
+	<script src="./leaflet.js" ></script>
+
+	<script>
+
+			var map = L.map('map').setView([48.130064, 11.583815], 14);
+			mapLink = 
+				'<a href="http://openstreetmap.org">OpenStreetMap</a>';
+			L.tileLayer(
+				'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; ' + mapLink + ' Contributors',
+				maxZoom: 18,
+			}).addTo(map);
+			var marker = L.marker([48.130064, 11.583815],
+				{draggable: true,        // Make the icon dragable
+				title: 'Hover Text',     // Add a title
+				opacity: 0.5}            // Adjust the opacity
+			)
+			.addTo(map)
+
+			.bindPopup("<b>Deutsches Museum</b><br>Museumsinsel München")
+			.openPopup();
+
+	</script>
+		
+</body>
+</html>

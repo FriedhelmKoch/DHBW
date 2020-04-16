@@ -25,6 +25,8 @@
 	- Auslesen der IP-Adresse mittel AJAX und PHP-Script.
 - Geokoordinaten
 	- Hier wird das HTML5-Geolocation-Modell genutzt und mittels Reverse-Geocoding über 'Nominatim' die Adresse im Klartext mit Strasse/Nr/PLZ/Ort... extrahiert
+- Maps
+	- Eine Karte über Leaflet, Openstreetmap und Markers	
 ```
 
 >**Note: Die Templates müssen mit: `npm install` erweitert und mit: `npm start` gestartet werden.
