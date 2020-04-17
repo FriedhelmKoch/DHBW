@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+<title>Fibonacci</title>
+</head>
+
+<body>
+
+<h3 style="text-align:center;">Leonardo Fibonacci 1170-1250</h3>
+Ein Kaninchenpaar lebt abgegrenzt von der Umwelt. Wenn ein  Kaninchenpaar jeden Monat ein weiteres Paar "züchten" kann, wieviele Paare können in einem Jahr entstehen?
+
+<script type="text/javascript">
+
+  var limit = prompt("Anzahl Monate 'n' für die Fibonacci Folge:", " ");
+  var f1=0;
+  var f2=1;
+  var sum=1;
+
+  document.write("<br/>Anzahl Monate: ",limit, "<br/>");
+  document.write("Fibonacci Folge : ");
+  document.write("",f1,", ");
+  document.write("",f2,", ");
+
+  limit=parseInt(limit)+1;
+  var i,f3;
+  
+  for(i=2; i<limit; i++)
+  {
+    f3=f1+f2;
+    document.write("",f3,", ");
+    sum+=f3;
+    f1=f2;
+    f2=f3;
+  }
+
+  document.write("<br/>Nach ",limit, " Monaten sind ",sum," Kaninchenpaare entstanden.<br/>");
+
+</script>
+
+</body>
+</html>
