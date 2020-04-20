@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';  // https://www.npmjs.com/package/uuid
 import Button from "./Button";
 import Card from "./Card";
-import TodoList from "./TodoList";
-import TodoAdd from "./TodoAdd";
+import TaskList from "./TaskList";
+import TaskAdd from "./TaskAdd";
 import './App.css';
 
 class App extends Component {
@@ -15,9 +15,9 @@ class App extends Component {
       name: "Erde",
       counter: 0,
       todos: [
-        {id: uuidv4(), title: "08.04. - 10:30 Uhr: Teil 1 - Web-Engineering II"},
-        {id: uuidv4(), title: "09.04. - 09:00 Uhr: Nachbereitung Kurs"},
-        {id: uuidv4(), title: "15.04. - 10:30 Uhr: Teil 2 - Web-Enineering II"}
+        {id: uuidv4(), title: "2020-04-08T08.30.00Z Uhr: Teil 1 - Web-Engineering II"},
+        {id: uuidv4(), title: "2020-04-09T11.45.00Z Uhr: Nachbereitung Kurs Teil 1"},
+        {id: uuidv4(), title: "2020-04-24T09.00.00Z Uhr: Teil 2 - Web-Enineering II"}
       ]
     }
     this.changeName = this.changeName.bind(this);
@@ -88,15 +88,15 @@ class App extends Component {
 
         <br />
         <Card title="Counter">
-          <h1>Klick-Zähler: {this.state.counter}</h1>
+          <h1>Counter: {this.state.counter}</h1>
           <button onClick={this.incrementCounter}>Hochzählen!</button>
         </Card>
 
-        <h1>To-Do Liste</h1>
+        <h1>Task Liste</h1>
           {/*hier muss der state als props der anderen Komponente übergeben werden!*/}
-        <TodoList todos={this.state.todos} />  
+        <TaskList todos={this.state.todos} />  
         <br />
-        <TodoAdd onAdd={this.addTodo} /> {/* Funktion übergeben */}
+        <TaskAdd onAdd={this.addTodo} /> {/* Funktion übergeben */}
 
         <p></p>
 

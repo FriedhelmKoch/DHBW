@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Card from "./Card";
 
-class TodoAdd extends Component {
+class TaskAdd extends Component {
 
     constructor(props) {
         super(props);
@@ -10,7 +10,7 @@ class TodoAdd extends Component {
         this.onTodoInputChange = this.onTodoInputChange.bind(this);
 
         this.state = {
-            newTodo: "Eingabe"
+            newTodo: "2020-04-22T09.30.00Z Uhr: Teil 3 - Web-Enineering II"
         }
     }
 
@@ -33,10 +33,10 @@ class TodoAdd extends Component {
     render() {
         console.log(this);  // Debugging nach TodoAdd
         let buttonStyles = {
-            backgroundColor: (this.state.newTodo.length < 3 ? "yellow" : "green")
+            backgroundColor: (this.state.newTodo.length < 5 ? "yellow" : "green")
         }
         return (
-            <Card title="Todo hinzufügen">
+            <Card title="Task hinzufügen">
                 {/*     type - Eingabefeld definieren 
                         onChange - bei veränderung wird die Funktinon ausgeführt
                         value - und im Wert steht immer newTodo des States - den React immer automatisch aktualisiert! 
@@ -51,7 +51,7 @@ class TodoAdd extends Component {
                     <button 
                         onClick={this.onTodoAdd}
                         style={buttonStyles}>
-                        To-Do hinzufügen ({this.state.newTodo.length})
+                        Task hinzufügen ({this.state.newTodo.length})
                     </button>
                 ) : null)}
             </Card>
@@ -61,8 +61,8 @@ class TodoAdd extends Component {
 }
 
 
-TodoAdd.propTypes = {
+TaskAdd.propTypes = {
     onAdd: React.PropTypes.func.isRequired
 }
 
-export default TodoAdd;
+export default TaskAdd;

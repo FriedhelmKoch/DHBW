@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import Card from "./Card";
 import './App.css';
 
-class TodoList extends Component {
+class TaskList extends Component {
 
     render() {
         return(
         
             /* der state wird als props aufgenommen */
-            <Card title="Todos">
+            <Card title="Tasks">
                 <ul className="App-todo">
                     
                     {this.props.todos.map(function(todo) {
@@ -22,4 +22,4 @@ class TodoList extends Component {
     }
 }
 
-export default TodoList;
+export default TaskList;
