@@ -16,7 +16,7 @@ class App extends Component {
       counter: 0,
       todos: [
         {id: uuidv4(), title: "2020-04-08T08.30.00Z Uhr: Teil 1 - Web-Engineering II"},
-        {id: uuidv4(), title: "2020-04-09T11.45.00Z Uhr: Nachbereitung Kurs Teil 1"},
+        {id: uuidv4(), title: "2020-04-22T11.45.00Z Uhr: Nachbereitung Kurs"},
         {id: uuidv4(), title: "2020-04-24T09.00.00Z Uhr: Teil 2 - Web-Enineering II"}
       ]
     }

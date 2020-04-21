@@ -60,7 +60,10 @@ class TaskAdd extends Component {
 
 }
 
-
+/**  
+	Typprüfung - Fehler abfangen
+	Wenn ein ungültiger Wert für ein Prop angegeben wird, wird in der Konsole eine Warnung angezeigt.
+**/
 TaskAdd.propTypes = {
     onAdd: React.PropTypes.func.isRequired
 }
