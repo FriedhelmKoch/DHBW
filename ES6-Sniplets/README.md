@@ -9,6 +9,8 @@
 	- Rechnet Datum und Uhrzeit von UTC Zulu Zeit (UTC +0) in die lokale Zeit, Zeitzone, Wochentag etc. um 
 - md5.js
 	- Bildet aus einem String einen MD5 -Hash (z.B. für Verschlüsselung von Passwörtern)
+- passwort.html
+	- Fragt Passwort ab, verschlüsselt und vergleicht mit wiederholtem Passwort (nutzt md5.js)
 - sprintf.js
 	- Bildet die Stringmanipulation aus der Perl-Funktion 'sprintf' nach  
 ```

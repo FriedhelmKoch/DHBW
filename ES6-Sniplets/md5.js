@@ -23,14 +23,10 @@
  * 
  */
 
-
-
 function array(n) {
   for(i=0;i<n;i++) this[i]=0;
   this.length=n;
 }
-
-
 
 /* Einige grundlegenden Funktionen müssen wegen
  * Javascript Fehlern umgeschrieben werden.
@@ -409,7 +405,4 @@ function MD5(nachricht)
  document.write(s);
 }
 
-
 // EOF
-
-

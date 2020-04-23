@@ -25,21 +25,55 @@ let timeOffset = datUTC.getTimezoneOffset() / -60;
 let offsetString = timeOffset >0 ? "+" + timeOffset : timeOffset; 
 console.log("Unsere Zeitzone zu UTC Zulu: " + offsetString);
 
-
 let hhLocal = (parseInt(hh) + parseInt(timeOffset)).toString();
 console.log("Lokale Uhrzeit in unsere Zeitzone ist Std.: " + hhLocal + ", Min.: " + mm + ", Sek.: " + ss + "\n");
 
 console.log("Aktuelles Datum und Uhrzeit: " + heute);
 
 let h_YYYY = heute.getFullYear();
-let h_MM = ("00" + heute.getMonth()).slice(-2);  // führende Nullen erzwingen
+let h_MM = ("00" + (parseInt(heute.getMonth()) + 1)).slice(-2);  // führende Null erzwingen
 let h_DD = ("00" + heute.getDate()).slice(-2); 
 let h_WT = ("00" + heute.getDay()).slice(-2);
 let h_hh = ("00" + (heute.getHours() - timeOffset)).slice(-2);
 let h_mm = ("00" + heute.getMinutes()).slice(-2);
 let h_ss = ("00" + heute.getSeconds()).slice(-2);
 
-
 let zulu = h_YYYY + "-" + h_MM + "-" + h_DD + "T" + h_hh + ":" + h_mm + ":" + h_ss + "Z";  
 
-console.log("Aktuelles Datum und Zeit als Zulu Datum (UTC +0) ist: " + zulu);
+console.log("Aktuelles Datum und Zeit als Zulu-Datum (UTC +0) ist: " + zulu + "\n");
+
+// Aktuelles Datum und Uhrzeit in Zulu-Darstellung
+function GetActualZulu() {
+	const heute = new Date(); // aktuelles Datum und aktuelle Zeit
+	const h_YYYY = heute.getFullYear();
+	const h_MM = ("00" + (parseInt(heute.getMonth()) + 1)).slice(-2);
+	const h_DD = ("00" + heute.getDate()).slice(-2); // führende Null erzwingen
+	const h_WT = ("00" + heute.getDay()).slice(-2);
+	const h_hh = ("00" + (heute.getHours() - timeOffset)).slice(-2);
+	const h_mm = ("00" + heute.getMinutes()).slice(-2);
+	const h_ss = ("00" + heute.getSeconds()).slice(-2);
+	return h_YYYY + "-" + h_MM + "-" + h_DD + "T" + h_hh + ":" + h_mm + ":" + h_ss + "Z";  
+}
+
+// Zulu-Zeit-String in Locale-Zeit-Darstellung
+// Beispiel: dat = "2020-02-03T09:05:08Z" 
+function ZuluToLocal(dat){
+	const YYYY = dat.substring(0, 4);
+	const MM = dat.substring(5, 7);
+	const DD = dat.substring(8, 10);
+	const hh = dat.substring(11, 13);
+	const mm = dat.substring(14, 16);
+	const ss = dat.substring(17, 19);
+	const datUTC = new Date(Date.UTC(YYYY, MM, DD, hh, mm, ss));
+	const timeOffset = datUTC.getTimezoneOffset() / -60;
+	const hhLocal = (parseInt(hh) + parseInt(timeOffset)).toString();
+	return YYYY + "-" + MM + "-" + DD + "T" + hhLocal + ":" + mm + ":" + ss + "Z";
+}
+
+console.log("*** Test der Functions:");
+
+const zuluTime = GetActualZulu();
+console.log("Aktuelles Datum und Uhrzeit -> " + zuluTime);
+
+const zuluLocal = ZuluToLocal("2020-02-03T09:05:08Z");  // Achtung Winterzeit!
+console.log("Zulu zu Local 2020-02-03T09:05:08Z -> " + zuluLocal);

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <script src="md5.js"></script>
+  <title>MD5 Passwort</title>
+</head>
+
+<body>
+
+<h3 style="text-align:center;">Passwort MD5 verschlüsseln und abfragen</h3>
+
+<script type="text/javascript">
+
+  const pass = prompt("Passwort:");
+  const crypt = MD5(pass);
+  document.write("<br/>Passwort verschlüsselt: " , crypt , "<br/>");
+
+  const pass_2nd = prompt("Passwort wiederholen:");
+  const crypt_2nd = MD5(pass_2nd);
+  const vergleich = crypt != crypt_2nd ? "ungleich" : "gleich"; 
+  document.write("<br/>Passwörter sind " , vergleich , "!<br/>");
+
+</script>
+
+</body>
+</html>
