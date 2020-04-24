@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css?family=Lobster|Roboto&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.App {
+  width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+  font-family: 'Roboto', sans-serif;
+  margin-top: 50px;
+}
+h1 {
+  font-size: 50px;
+  font-family: 'Lobster', cursive;
+  margin-bottom: 20px;
+}
+.App form {
+  display: inline-block;
+  border-radius: 20px;
+  box-shadow: 0 0 19px 1px rgba(0, 0, 0, 0.39);
+  margin-bottom: 30px;
+}
+.App input {
+  line-height: 40px;
+  border-radius: 20px 0 0 20px;
+  border: none;
+  width: 400px;
+  padding: 0 20px;
+}
+.App input:focus {
+  outline: none;
+}
+.App button {
+  line-height: 40px;
+  border: none;
+  background-color: #f6f6f6;
+  padding: 0 20px;
+  border-radius: 0 20px 20px 0;
+  cursor: pointer;
+}
+.App button:focus {
+  outline: none;
+}
+.searchResultDiv {
+  width: 800px;
+  margin: 0 auto;
+  text-align: left;
+  margin-bottom: 20px;
+}
+.searchResultDiv h3 {
+  color: #1a0dab;
+}
+.searchResultDiv h3 a {
+  color: #1a0dab;
+  display: inline-block;
+  line-height: 16px;
+  text-decoration: none;
+}
+.searchResultDiv h3 a:hover {
+  border-bottom: 3px solid;
+}
+.searchResultDiv a:visited {
+  color: #1a0dab;
+}
+.searchResultDiv .link a {
+  text-decoration: none;
+  color: #287e44;
+}
+.searchResultDiv .link a:hover {
+  text-decoration: none;
+}
+.searchResultDiv .searchmatch {
+  font-weight: bold;
+}
+.searchResultDiv .description {
+  color: #414141;
+}

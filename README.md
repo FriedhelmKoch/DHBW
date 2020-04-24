@@ -1,10 +1,14 @@
 ## Vorliegende Besipiele
 
 ```
-- React Training1
+- React-Training1
 	- einfache Code Beispiele für Variablen, Objekten, Arrays, Destructuring, Rest-Operator etc.
-- React Training2
+- React-Training2
 	- einfache Code Beispiele für Components, Klickzähler, Cards, Listen (Key) etc.
+- React-Wikipedia-Api
+	- Wikipedia Abfrage als React Component
+	- Demo: https://simonjsuh.github.io/reactjs-wikipedia-search-api-app/
+	- Quelle: https://github.com/simonjsuh/Wikipedia-Search-API-using-React.js
 - PWA
 	- eine einfache PWA inkl. Serviceworker und Media Queries
 - Kamera
