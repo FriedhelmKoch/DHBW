@@ -1,0 +1,18 @@
+.Card {
+  border: 1px solid rgb(200, 200, 200);
+  margin: auto 5px;
+}
+
+.Card-title {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	border-bottom: 1px solid rgb(200, 200, 200);
+	background-color: rgb(179, 209, 255);
+	padding: 7px 10px;
+	text-align: left;
+}
+
+.Card-content {
+  padding: 7px 10px;
+  text-align: left;
+}

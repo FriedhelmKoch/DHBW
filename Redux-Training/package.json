@@ -1,0 +1,33 @@
+{
+  "name": "Redux-Training2",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "react-redux": "^5.0.3",
+    "redux": "^3.6.0",
+    "uuid": "^7.0.3"
+  },
+  "devDependencies": {
+    "react-scripts": "^3.4.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

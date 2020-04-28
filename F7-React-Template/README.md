@@ -2,6 +2,8 @@
 
 ## NPM Scripts
 
+* 🔥 `install` - install all dependencies
+---
 * 🔥 `start` - run development server
 * 🔧 `dev` - run development server
 * 🔧 `build-dev` - build web app using development mode (faster build without minification and optimization)
