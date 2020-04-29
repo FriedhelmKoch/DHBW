@@ -26,7 +26,7 @@ let mapStateToProps = function(state) {
     value: state.counter
   }
 }
-let mapDispatchToProps = {
+let mapDispatchToProps = () => {
   onIncrement: incrementCounter
 }
 let AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
