@@ -2,8 +2,6 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>IP-Adresse</title>
 </head>
 
@@ -22,14 +20,6 @@
     xhttp.open("GET", "getIP.php", true);
     xhttp.send();
 
-	</script>
-
-  <script>
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('./sw.js')
-				.then(reg => console.log('Registrierung erfolgreich. Scope ist ' + reg))
-				.catch(err => console.log('Registrierung fehlgeschlagen mit ' + err));
-		}
 	</script>
 
 </body>
