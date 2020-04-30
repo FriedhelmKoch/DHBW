@@ -1,10 +1,15 @@
 import React from 'react';
+import { GetActualZulu, ZuluToLocal } from './dateUTC';
 import './App.css';
 
 /* JSX Variablen und Destructuring */
 
+const datum = "2020-04-10T09:30:00Z";
+console.log("Aktuele Zeit in Zulu-Datum: " + GetActualZulu());
+console.log("Zulu-Datum (2020-04-10T09:30:00Z) in lokales Datum: " + ZuluToLocal(datum));
+
 const tit1 = "Hello";          // string
-const tit2 = "World";
+const tit2 = "DHBW";
 const combination = <h1>Hello {tit2}!</h1>;
 
 const title1 = `01: <h1>${tit1} ${tit2}!</h1>`;
@@ -32,9 +37,10 @@ const contact = {
   email: 'max@domain.ext',
 };
 
+
 const {person} = contact;
 const {adresse} = person;
-console.log(`${adresse.plz} ${adresse.ort}`);
+console.log(`${adresse.plz}    ${adresse.ort}`);
 
 const {vorName: name} = person;     //umbennen
 console.log(`Vorname=${name}`);
@@ -62,6 +68,7 @@ console.log(`Nachname=${lastName}`);  // Nachname=Mustermann
 
 console.log(`${firstName} kann ${759 * 0.30} EUR Fahrtkosten 
   steuerlich absetzen!`);
+
 
 /*
 const {person, ...rest} = contact;
