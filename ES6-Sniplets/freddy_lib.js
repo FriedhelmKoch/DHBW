@@ -126,5 +126,43 @@ function getIPAddress(sessionKey) {
     xhttp.send();
 }
 
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// Holt aktuelles Datum und Uhrzeit und konvertiert in Zulu-Darstellung
+// Bsp.: 
+//				Wenn aktuelles Datum (MEZ, UTC+1) der 1. Jan 2020 um 21:15:10 Uhr ist
+//				let dat = getActualZulu():
+//				console.log(dat); // 2020-01-01T20:15:10Z
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+function getActual2Zulu() {
+	const heute = new Date(); // aktuelles Datum und aktuelle Zeit
+	const h_YYYY = heute.getFullYear();
+	const h_MM = ("00" + (parseInt(heute.getMonth()) + 1)).slice(-2);
+	const h_DD = ("00" + heute.getDate()).slice(-2); // führende Null erzwingen
+	const h_WT = ("00" + heute.getDay()).slice(-2);
+	const h_hh = ("00" + (heute.getHours() - timeOffset)).slice(-2);
+	const h_mm = ("00" + heute.getMinutes()).slice(-2);
+	const h_ss = ("00" + heute.getSeconds()).slice(-2);
+	return h_YYYY + "-" + h_MM + "-" + h_DD + "T" + h_hh + ":" + h_mm + ":" + h_ss + "Z";  
+}
 
-export {geoDistance, getGeolocation, getBrowserInfo, getIPAddress};
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// Konvertiert einen Zulu-Zeit-String in Lokale-Zeit-Darstellung
+// Bsp.: 
+// 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt
+//				let dat = "2020-05-03T09:05:08Z" 
+//				console.log(dat); // 2020-05-03T11:05:08
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+function zulu2Local(dat){
+	const YYYY = dat.substring(0, 4);
+	const MM = dat.substring(5, 7);
+	const DD = dat.substring(8, 10);
+	const hh = dat.substring(11, 13);
+	const mm = dat.substring(14, 16);
+	const ss = dat.substring(17, 19);
+	const datUTC = new Date(Date.UTC(YYYY, MM, DD, hh, mm, ss));
+	const timeOffset = datUTC.getTimezoneOffset() / -60;
+	const hhLocal = (parseInt(hh) + parseInt(timeOffset)).toString();
+	return YYYY + "-" + MM + "-" + DD + "T" + hhLocal + ":" + mm + ":" + ss;
+}
+
+export {geoDistance, getGeolocation, getBrowserInfo, getIPAddress, getActual2Zulu, zulu2Local};
