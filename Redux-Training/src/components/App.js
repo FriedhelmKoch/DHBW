@@ -5,9 +5,6 @@ import Card from "./Card";
 import './App.css';
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-  }
 
   render() {
     return (
@@ -26,7 +23,7 @@ let mapStateToProps = function(state) {
     value: state.counter
   }
 }
-let mapDispatchToProps = () => {
+let mapDispatchToProps = {
   onIncrement: incrementCounter
 }
 let AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);

@@ -31,7 +31,7 @@ class TaskAdd extends Component {
 					onChange={this.onTaskInputChange}
 					value={this.state.newTask}
 				/>
-				{(this.state.newTask != "" ? (
+				{(this.state.newTask !== "" ? (
 					<button 
 						onClick={this.onTaskAdd}>
 						Task hinzufügen - Anzahl Zeichen: ({this.state.newTask.length})

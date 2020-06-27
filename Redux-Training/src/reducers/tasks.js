@@ -6,7 +6,7 @@ let initialState = [
 ];
 
 function tasks(state = initialState, action) {
-	if (action.type == "TASK_ADD") {
+	if (action.type === "TASK_ADD") {
 		let maxTaskId = 0;
 		for(let task of state) {
 			if (task.id > maxTaskId) {

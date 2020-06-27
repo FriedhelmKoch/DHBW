@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { incrementCounter, addTask } from '../actions/index';
+import { addTask } from '../actions/index';
 import { connect } from 'react-redux';
 import TaskAdd from "./TaskAdd";
 import Card from "./Card";

@@ -1,7 +1,7 @@
-let initialCount = 0;
+let initialState = 0;
 
-function counter(state = initialCount, action) {
-	if (action.type == "INCREMENT") {
+function counter(state = initialState, action) {
+	if (action.type === "INCREMENT") {
 		return state + 1;
 	} else {
 		return state;
