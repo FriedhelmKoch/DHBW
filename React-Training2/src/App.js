@@ -22,7 +22,6 @@ class App extends Component {
     }
     this.changeName = this.changeName.bind(this);
     this.incrementCounter = this.incrementCounter.bind(this);
-    this.addTodo = this.addTodo.bind(this);
   }  
 
   changeName() {
@@ -37,8 +36,7 @@ class App extends Component {
     this.setState({
       counter: this.state.counter + 1
     })
-
-    /* oder ausgührlich
+    /* oder ausführlich
     let c = this.state.counter;
     c = c + 1;
     this.setState({
@@ -49,19 +47,28 @@ class App extends Component {
 
   addTodo(title) {
     let todos = this.state.todos;
+    
+    /* Wenn nicht "uuid" genutzt wird, dann eigene aufsteigende ID berechnen
     let maxId = 0;
     for(let todo of todos) {
       if (todo.id > maxId) {
         maxId = todo.id;
       }
     }
+    todos.push({id: (maxId + 1), title: "4. Todo"});   // Todo unten anhängen */
 
-    /*todos.push({id: (maxId + 1), title: "4. Todo"});   // Todo unten anhängen */
     todos.unshift({id: uuidv4(), title: title});  // Todo landet oberhalb
     this.setState({
       todos: todos
     })
   }
+
+  /* Alternative zu addTodo, jedoch mit Spread-Operator
+  addTodo(title) {
+    this.setState({
+      todos: [{id: uuidv4(), title: title}, ...this.state.todos]
+    })
+  } */
   
   render() {
 
@@ -78,11 +85,11 @@ class App extends Component {
         <br />
         <Card title="Das ist eine Card mit Button">
           <p>Hier ein Absatz mittels &lt;p&gt;&lt;/p&gt;!</p>
-          <Button label="Klick mich!" />
+          <Button label="Das ist die DHBW!" />
         </Card>
 
         <br />
-        <Card title="Header-Titel">
+        <Card title="Header-Venus">
           <button onClick={this.changeName}>Kopftext ändern in Venus</button>
         </Card>
 
@@ -96,11 +103,12 @@ class App extends Component {
           {/*hier muss der state als props der anderen Komponente übergeben werden!*/}
         <TaskList todos={this.state.todos} />  
         <br />
-        <TaskAdd onAdd={this.addTodo} /> {/* Funktion übergeben */}
+        <TaskAdd onAdd={this.addTodo.bind(this)} /> {/* Funktion übergeben */}
 
         <p></p>
 
       </div>
+
     );
 
     /*console.log(output);

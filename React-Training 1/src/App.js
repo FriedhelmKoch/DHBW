@@ -4,9 +4,9 @@ import './App.css';
 
 /* JSX Variablen und Destructuring */
 
-const datum = "2020-04-10T09:30:00Z";
-console.log("Aktuele Zeit in Zulu-Datum: " + GetActualZulu());
-console.log("Zulu-Datum (2020-04-10T09:30:00Z) in lokales Datum: " + ZuluToLocal(datum));
+const datum = "2020-11-05T11:34:00Z";
+console.log("Aktuelle Zeit in Zulu-Datum: " + GetActualZulu());
+console.log("Zulu-Datum (2020-11-05T11:34:00Z) in lokales Datum: " + ZuluToLocal(datum));
 
 const tit1 = "Hello";          // string
 const tit2 = "DHBW";
@@ -20,7 +20,7 @@ console.log(title2);
 
 function getTitle() { 
   const tit1 = "Hello";          // string
-  const tit2 = "World";
+  const tit2 = "DHBW";
   return "03: <h1>" + tit1 + " " + tit2 + "!</h1>";
 }
 console.log(getTitle());
@@ -69,12 +69,9 @@ console.log(`Nachname=${lastName}`);  // Nachname=Mustermann
 console.log(`${firstName} kann ${759 * 0.30} EUR Fahrtkosten 
   steuerlich absetzen!`);
 
-
-/*
-const {person, ...rest} = contact;
-console.log(person); 
+const {person: pers, ...rest} = contact;
+console.log(pers); 
 console.log(rest);
-*/
 
 function App() {
   return (
