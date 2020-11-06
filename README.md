@@ -4,7 +4,7 @@
 - React-Training1
 	- einfache Code Beispiele für Variablen, Objekten, Arrays, Destructuring, Rest-Operator etc.
 - React-Training2
-	- einfache Code Beispiele für Components, Klickzähler, Cards, Listen (Key) etc.
+	- einfache Code Beispiele für Components, Klickzähler, Cards, Listen (Key), OpenStreetMap etc.
 - React-Wikipedia-Api
 	- Wikipedia Abfrage als React Component
 	- Demo: https://simonjsuh.github.io/reactjs-wikipedia-search-api-app/
@@ -30,7 +30,9 @@
 - Geokoordinaten
 	- Hier wird das HTML5-Geolocation-Modell genutzt und mittels Reverse-Geocoding über 'Nominatim' die Adresse im Klartext mit Strasse/Nr/PLZ/Ort... extrahiert
 - Maps
-	- Eine Karte über Leaflet, Openstreetmap und Markers	
+	- Eine Karte über Leaflet, OpenStreetMap und Markers in Vanilla-JavaScript
+- ES6-Sniplets
+	- Fibonacci, Passwort, Datumsumrechnung, Perl 'sprintf', MD5-Hash, ...	
 ```
 
 >**Note: Die Templates müssen mit: `npm install` erweitert und mit: `npm start` gestartet werden.

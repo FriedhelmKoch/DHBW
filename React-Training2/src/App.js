@@ -4,6 +4,7 @@ import Button from "./Button";
 import Card from "./Card";
 import TaskList from "./TaskList";
 import TaskAdd from "./TaskAdd";
+import Maps from "./Maps";
 import './App.css';
 
 class App extends Component {
@@ -104,6 +105,11 @@ class App extends Component {
         <TaskList todos={this.state.todos} />  
         <br />
         <TaskAdd onAdd={this.addTodo.bind(this)} /> {/* Funktion übergeben */}
+
+        <br />
+        <Card title="Straßenkarte">
+          <Maps></Maps>
+        </Card>
 
         <p></p>
 
