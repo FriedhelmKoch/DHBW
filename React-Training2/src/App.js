@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
+// Externe Components
 import { v4 as uuidv4 } from 'uuid';  // https://www.npmjs.com/package/uuid
+// Eigene Components
 import Button from "./Button";
 import Card from "./Card";
 import TaskList from "./TaskList";
 import TaskAdd from "./TaskAdd";
 import Maps from "./Maps";
+// Styles
 import './App.css';
 
 class App extends Component {
@@ -15,14 +18,20 @@ class App extends Component {
     this.state = {   
       name: "Erde",
       counter: 0,
+      geoLoc: {
+        pos: [48.130064, 11.583815],  // [Latitude (Breitengrad), Longitude (Längengrad)]
+        ort: "München Museumsinsel"
+      },
       todos: [
         {id: uuidv4(), title: "2020-04-08T08.30.00Z Uhr: Teil 1 - Web-Engineering II"},
         {id: uuidv4(), title: "2020-04-22T11.45.00Z Uhr: Nachbereitung Kurs"},
         {id: uuidv4(), title: "2020-04-24T09.00.00Z Uhr: Teil 2 - Web-Enineering II"}
       ]
     }
+
     this.changeName = this.changeName.bind(this);
     this.incrementCounter = this.incrementCounter.bind(this);
+
   }  
 
   changeName() {
@@ -58,7 +67,7 @@ class App extends Component {
     }
     todos.push({id: (maxId + 1), title: "4. Todo"});   // Todo unten anhängen */
 
-    todos.unshift({id: uuidv4(), title: title});  // Todo landet oberhalb
+    todos.unshift({id: uuidv4(), title: title});  // Todo landet oberhalb des Arrays
     this.setState({
       todos: todos
     })
@@ -73,7 +82,7 @@ class App extends Component {
   
   render() {
 
-    /*let output = (   // für Debugging */
+    /* let output = (   // für Debugging */
     return(
 
       <div className="App">
@@ -101,14 +110,14 @@ class App extends Component {
         </Card>
 
         <h1>Task Liste</h1>
-          {/*hier muss der state als props der anderen Komponente übergeben werden!*/}
+        {/*hier muss der state als props der anderen Komponente übergeben werden!*/}
         <TaskList todos={this.state.todos} />  
         <br />
         <TaskAdd onAdd={this.addTodo.bind(this)} /> {/* Funktion übergeben */}
 
         <br />
         <Card title="Straßenkarte">
-          <Maps></Maps>
+          <Maps geoLoc={this.state.geoLoc} />  {/* State geoLoc an Maps.js component übergeben */}
         </Card>
 
         <p></p>
@@ -117,7 +126,7 @@ class App extends Component {
 
     );
 
-    /*console.log(output);
+    /* console.log(output);
     return output;   // dienst dem Debugging und Kontrolle in der Konsole */
 
   }

@@ -7,8 +7,8 @@ import icon from './marker-icon.png';
 import iconShadow from './marker-shadow.png';
 
 class Maps extends Component {
-	constructor() {
-		super()
+	constructor(props) {
+		super(props)
 	}
 
 	// Leaflet Map Marker
@@ -22,6 +22,9 @@ class Maps extends Component {
 
 	render() {
 
+		// Location Ort-String aufteilen
+		const ort = this.props.geoLoc.ort.split(' ');
+
 		// Leaflet Customs Marker-Icons (Bug in React, therefore defining indiv. icons!)
 		let DefaultIcon = L.icon({
 			iconUrl: icon,
@@ -30,16 +33,23 @@ class Maps extends Component {
 		L.Marker.prototype.options.icon = DefaultIcon;
 
 		return (
-							
-			<Map center={[48.130064, 11.583815]} zoom='13' style={{width: 'auto', height: '400px'}} scrollWheelZoom={false} attributionControl={false}>
+
+			/* GeoLocation State wird als 'this.props.geoLoc' aus App.js übernommen */				
+			<Map 
+				center={this.props.geoLoc.pos} // [Latitude, Longitude]
+				zoom='13' 
+				style={{width: 'auto', height: '400px'}} 
+				scrollWheelZoom={false} 
+				attributionControl={false}	// Copyrightvermerk für 'Leaflet/OpenStreetMap' wird ausgeblendet
+			>
 				<TileLayer 
 					attribution='&amp;copy OpenStreetMap' 
 					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
 				/>
-				<Marker position={[48.130064, 11.583815]} ref={this.openPopup}>
+				<Marker position={this.props.geoLoc.pos} ref={this.openPopup}>
 					<Pop>
-						München<br />
-						Museumsinsel
+						{ort[0]}<br />
+						{ort[1]}
 					</Pop>
 				</Marker>
 			</Map>
