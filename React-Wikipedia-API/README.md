@@ -1,10 +1,26 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
+
+For the project to build, **these files must exist with exact filenames**:
+
+* `public/index.html` is the page template;
+* `src/index.js` is the JavaScript entry point.
+
+You can delete or rename the other files.
+
+You may create subdirectories inside `src`. For faster rebuilds, only files inside `src` are processed by Webpack.<br>
+You need to **put any JS and CSS files inside `src`**, or Webpack won’t see them.
+
+Only files inside `public` can be used from `public/index.html`.<br>
+Read instructions below for using assets from JavaScript and HTML.
+
+You can, however, create more top-level directories.<br>
+They will not be included in the production build so you can use them for things like documentation.
 
 ## Available Scripts
 
 In the project directory, you can run:
 
-### Installing a Dependency
+### `npm install`
 
 The generated project includes React and ReactDOM as dependencies. It also includes a set of scripts used by Create React App as a development dependency. 
 
@@ -21,7 +37,7 @@ You will also see any lint errors in the console.
 ### `npm test`
 
 Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+See the section about [running tests](#running-tests) for more information.
 
 ### `npm run build`
 
@@ -31,7 +47,7 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+See the section about [deployment](#deployment) for more information.
 
 ### `npm run eject`
 
