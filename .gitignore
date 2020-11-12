@@ -1,0 +1,29 @@
+# Logs
+logs
+*.log
+
+# Dependency directories
+node_modules/
+assets-src/
+
+# Production build
+www/
+
+# Code Workspaces
+*.code-Workspaces
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Misc
+.DS_Store
+Thumbs.db
+
+# Environment Variablen zulassen!
+!.env

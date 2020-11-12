@@ -4,6 +4,12 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
+### Installing a Dependency
+
+The generated project includes React and ReactDOM as dependencies. It also includes a set of scripts used by Create React App as a development dependency. 
+
+with `npm`: `npm install --save <library-name>`
+
 ### `npm start`
 
 Runs the app in the development mode.<br>
