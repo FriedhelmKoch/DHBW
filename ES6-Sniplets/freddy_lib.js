@@ -485,12 +485,15 @@ function delCookie(name) {
  * 
  * Usage:
  * 		const text = "Das ist ein zu verschlüssender Text";
- *		const key = "salt";
- *		const cipher = encrypt(key, text);
- *		console.log("Encrypt of: " + text + " = " + cipher);
- *		console.log("Decrypt of: " + cyph + " = " + decrypt(key, cipher));
+ * 		const key = "salt";		// wenn key nicht definiert, dann wird default key genutzt
+ * 		const ver = encrypt(text, key);
+ * 		const ent = decrypt(ver, key);
+ * 		console.log("Verschlüsselt: " + ver);
+ * 		console.log("Entschlüsselt: " + ent);
+ * 		console.log("Ver-/Entschlüsselt: " + encrypt(text) + ', ' + decrypt(encrypt(text)));
  */
 let Modulus = 65536;
+const salt = '${ThisIsTheSaltInMySoup}';
 function nextRandom(X, modulus) {
 /* Methode: Lineare Kongruenz =>  X[i] = (a * X[i-1] + b) mod m    */
 /* Mit den gewählten Parametern ergibt sich eine maximale Periode, */
@@ -522,7 +525,7 @@ function getKey(key) {
 		key = key * 3;
 	return (key%Modulus);
 }
-function crypt_HGC(key, EinText, encrypt) {
+function crypt_HGC(EinText, key, encrypt) {
 	let out = "";
 	let Sign, i, X = 255;
 	Modulus = 65536;
@@ -540,11 +543,13 @@ function crypt_HGC(key, EinText, encrypt) {
 	}
 	return out;
 }
-function encrypt(key, text) {
-  return escape(crypt_HGC(key, text, 1));
+function encrypt(text, key) {
+	key = typeof key === 'undefined' ? salt : key;
+  return escape(crypt_HGC(text, key, 1));
 }
-function decrypt(key, chiffre) {
-  return crypt_HGC(key, unescape(chiffre), 0);
+function decrypt(chiffre, key) {
+	key = typeof key === 'undefined' ? salt : key;
+  return crypt_HGC(unescape(chiffre), key, 0);
 }
 
 /**
