@@ -76,8 +76,6 @@ function getGeolocation(sessionKey) {
 	}
 	function StorePos(value) {
 		sessionStorage.setItem(sessionKey, value);
-		// Ggf. Location als Ort abfragen
-		// https://nominatim.openstreetmap.org/reverse.php?format=html&lat=48.490545479685416&lon=11.338329464399012&zoom=18
 	}
 }
 
@@ -102,7 +100,6 @@ function reverseGeocoding(lon, lat, sessionKey) {
 	.then(function(json) {
 		const add = json.display_name.split(', ');
 		const value = { str: add[1], strNo: add[0], zip: add[6], city: add[3], state: add[5], country: add[7] };
-		//console.log(JSON.stringify(value));
 		sessionStorage.setItem(sessionKey, JSON.stringify(value));
 	})
 }
@@ -127,9 +124,6 @@ function location2Geo(str, strNo, zip, city, sessionKey) {
 				return response.json();
 		})
 		.then(function(json) {
-			//console.log("OBJECT: " + JSON.stringify(json));
-			//console.log('LAT: ' + json[0].lat);
-			//console.log('LON: ' + json[0].lon);
 			const value = { lat: json[0].lat, lon: json[0].lon }; 
 			sessionStorage.setItem(sessionKey, JSON.stringify(value));
 		})
@@ -173,7 +167,6 @@ function getIPAddress(sessionKey) {
 	var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) { 
-				//console.log('ÌP-Address: ' + this.responseText); 
 				sessionStorage.setItem(sessionKey, this.responseText);
 			} 
     };
@@ -185,11 +178,12 @@ function getIPAddress(sessionKey) {
 // Holt aktuelles Datum und Uhrzeit und konvertiert in Zulu-Darstellung
 // Bsp.: 
 //				Wenn aktuelles Datum (MEZ, UTC+1) der 1. Jan 2020 um 21:15:10 Uhr ist
-//				let dat = getActualZulu():
+//				let dat = getActual2ZuluDat():
 //					console.log(dat); // 2020-01-01T20:15:10Z
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function getActual2Zulu() {
+function getActual2ZuluDat() {
 	const heute = new Date(); // aktuelles Datum und aktuelle Zeit
+	const timeOffset = heute.getTimezoneOffset() / -60;
 	const h_YYYY = heute.getFullYear();
 	const h_MM = ("00" + (parseInt(heute.getMonth()) + 1)).slice(-2);
 	const h_DD = ("00" + heute.getDate()).slice(-2); // führende Null erzwingen
@@ -197,7 +191,7 @@ function getActual2Zulu() {
 	const h_hh = ("00" + (heute.getHours() - timeOffset)).slice(-2);
 	const h_mm = ("00" + heute.getMinutes()).slice(-2);
 	const h_ss = ("00" + heute.getSeconds()).slice(-2);
-	return h_YYYY + "-" + h_MM + "-" + h_DD + "T" + h_hh + ":" + h_mm + ":" + h_ss + "Z";  
+	return String(h_YYYY + "-" + h_MM + "-" + h_DD + "T" + h_hh + ":" + h_mm + ":" + h_ss + "Z");  
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -205,10 +199,10 @@ function getActual2Zulu() {
 // Bsp.: 
 // 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt
 //				let dat = "2020-05-03T09:05:08Z"
-//				zulu2Local(dat) 
+//				zulu2LocalDat(dat) 
 //					console.log(dat); // 2020-05-03T11:05:08
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function zulu2Local(dat){
+function zulu2LocalDat(dat){
 	const YYYY = dat.substring(0, 4);
 	const MM = dat.substring(5, 7);
 	const DD = dat.substring(8, 10);
@@ -218,7 +212,7 @@ function zulu2Local(dat){
 	const datUTC = new Date(Date.UTC(YYYY, MM, DD, hh, mm, ss));
 	const timeOffset = datUTC.getTimezoneOffset() / -60;
 	const hhLocal = (parseInt(hh) + parseInt(timeOffset)).toString();
-	return YYYY + "-" + MM + "-" + DD + "T" + hhLocal + ":" + mm + ":" + ss;
+	return String(YYYY + "-" + MM + "-" + DD + "T" + hhLocal + ":" + mm + ":" + ss);
 }
 
 /**
@@ -308,12 +302,12 @@ function dms2dd(deg, min, sec, dir, dez) {
 
 // Umrechnung Kilometer in Nautische Meilen
 function km2nm(km, dez) {
-	return round(km / 1.852, dez);
+	return round(km / 1.851852, dez);
 }
 
 // Umrechnung Nautische Meilen in Kilometer
 function nm2km(nm, dez) {
-	return round(nm * 1.852, dez);
+	return round(nm * 1.851852, dez);
 }
 
 // Trigonometrische Funktionen in Grad statt im Radiant
@@ -393,67 +387,6 @@ Geo.parseDMS = function(dmsStr) {
 }
 
 /**
- * Convert decimal degrees to deg/min/sec format
- *  - degree, prime, double-prime symbols are added, but sign is discarded, though no compass
- *    direction is added
- *
- * @private
- * @param   {Number} deg: Degrees
- * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
- * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
- * @returns {String} deg formatted as deg/min/secs according to specified format
- * @throws  {TypeError} deg is an object, perhaps DOM object without .value?
- */
-Geo.toDMS = function(deg, format, dp) {
-  if (typeof deg == 'object') throw new TypeError('Geo.toDMS - deg is [DOM?] object');
-  if (isNaN(deg)) return null;  // give up here if we can't make a number from deg
-  
-    // default values
-  if (typeof format == 'undefined') format = 'dms';
-  if (typeof dp == 'undefined') {
-    switch (format) {
-      case 'd': dp = 4; break;
-      case 'dm': dp = 2; break;
-      case 'dms': dp = 0; break;
-      default: format = 'dms'; dp = 0;  // be forgiving on invalid format
-    }
-  }
-  
-  deg = Math.abs(deg);  // (unsigned result ready for appending compass dir'n)
-  
-  switch (format) {
-    case 'd':
-      d = deg.toFixed(dp);     // round degrees
-      if (d<100) d = '0' + d;  // pad with leading zeros
-      if (d<10) d = '0' + d;
-      dms = d + '\u00B0';      // add º symbol
-      break;
-    case 'dm':
-      var min = (deg*60).toFixed(dp);  // convert degrees to minutes & round
-      var d = Math.floor(min / 60);    // get component deg/min
-      var m = (min % 60).toFixed(dp);  // pad with trailing zeros
-      if (d<100) d = '0' + d;          // pad with leading zeros
-      if (d<10) d = '0' + d;
-      if (m<10) m = '0' + m;
-      dms = d + '\u00B0' + m + '\u2032';  // add º, ' symbols
-      break;
-    case 'dms':
-      var sec = (deg*3600).toFixed(dp);  // convert degrees to seconds & round
-      var d = Math.floor(sec / 3600);    // get component deg/min/sec
-      var m = Math.floor(sec/60) % 60;
-      var s = (sec % 60).toFixed(dp);    // pad with trailing zeros
-      if (d<100) d = '0' + d;            // pad with leading zeros
-      if (d<10) d = '0' + d;
-      if (m<10) m = '0' + m;
-      if (s<10) s = '0' + s;
-      dms = d + '\u00B0' + m + '\u2032' + s + '\u2033';  // add º, ', " symbols
-      break;
-  }
-  
-  return dms;
-}
-
-/**
  * Convert numeric degrees to deg/min/sec latitude (suffixed with N/S)
  *
  * @param   {Number} deg: Degrees
@@ -493,4 +426,147 @@ Geo.toBrng = function(deg, format, dp) {
   return brng==null ? '–' : brng.replace('360', '0');  // just in case rounding took us up to 360º!
 }
 
-export {geoDistance, getGeolocation, reverseGeocoding, location2Geo, getBrowserInfo, getIPAddress, getActual2Zulu, zulu2Local, round, roundExp, dd2dm, dd2dms, dms2dd, km2nm, nm2km, toRadians, toDegree};
+/**
+ * Cookies
+ * 
+ * Usage:
+ * 	if (cookiesEnabled()) {			// if true
+ * 
+ * 		let name = "cookie_name";	// name of cookie
+ * 		let value = "test";				// value of cookie
+ * 		let days = 7;							// expires in 7 days
+ * 		setCookie(name, value, days);
+ * 
+ * 		let cookie = getCookie(name);	// return string or null
+ * 
+ * 		delCookie(name);
+ * 
+ * 		} else {									// if false
+ * 			... error message ...
+ * 		}
+ */
+function cookiesEnabled() {
+	let cookieEnabled = (navigator.cookieEnabled) ? true : false;
+
+	if (typeof navigator.cookieEnabled == "undefined" && !cookieEnabled) { 
+		document.cookie="testcookie";
+		cookieEnabled = (document.cookie.indexOf("testcookie") != -1) ? true : false;
+	}
+	return (cookieEnabled);
+}
+function setCookie(name, value, days) {
+	let expires = "";
+	if (days) {
+		let date = new Date();
+		date.setTime(date.getTime() + (days*24*60*60*1000));
+		expires = "; expires=" + date.toUTCString();													// expires is fix in days
+	}
+	document.cookie = name + "=" + (value || "")  + expires + "; path=/";		// path is fix in "/"
+}
+function getCookie(name) {
+	let nameEQ = name + "=";
+	let ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		let c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+function delCookie(name) {   
+	document.cookie = name + '=; Max-Age=0;';  
+}
+
+/**
+ * Crypt
+ * 
+ * Funktionen für die selbsterstellten Algorithmen nach Cipher-Feedback-Modus (CFB) - Blockchiffre
+ * http://www.nord-com.net/h-g.mekelburg/krypto/glossar.htm#modus
+ * 
+ * Usage:
+ * 		const text = "Das ist ein zu verschlüssender Text";
+ *		const key = "salt";
+ *		const cipher = encrypt(key, text);
+ *		console.log("Encrypt of: " + text + " = " + cipher);
+ *		console.log("Decrypt of: " + cyph + " = " + decrypt(key, cipher));
+ */
+let Modulus = 65536;
+function nextRandom(X, modulus) {
+/* Methode: Lineare Kongruenz =>  X[i] = (a * X[i-1] + b) mod m    */
+/* Mit den gewählten Parametern ergibt sich eine maximale Periode, */
+/* welches unabhängig von gewählten Startwert ist(?).              */
+   const y = (17*X + 1) % modulus;
+   return y;
+}
+function getBlockLength(m) {
+	let i = 0;
+	while(m > 0) {
+		i++;
+		m = m>>8;
+	}
+	return i-1;
+}
+function getKey(key) {
+	if (isNaN(key)) {
+		key = key + key;
+		key = (key.charCodeAt(0)<<8) + key.charCodeAt(1);
+	} else {
+		key = parseInt(key);
+		if (isNaN(key))
+			key = 3333;
+		else if (key < 0)
+			key = key * -1;
+	}
+	key = key + 1;
+	while (key < Math.floor(Modulus/3))
+		key = key * 3;
+	return (key%Modulus);
+}
+function crypt_HGC(key, EinText, encrypt) {
+	let out = "";
+	let Sign, i, X = 255;
+	Modulus = 65536;
+	for (i=0; i < key.length; i++)
+		X = (X * key.charCodeAt(i)) % Modulus;
+	i = 0;
+	while (i < EinText.length) {
+		X = nextRandom(X, Modulus);
+		Sign = EinText.charCodeAt(i) ^ ((X>>8)&255);
+		Sign = Sign ^ key.charCodeAt(i%key.length);
+		if (encrypt) X = X ^ Sign;
+		else X = X ^ EinText.charCodeAt(i);
+		out = out + String.fromCharCode(Sign);
+		i++;
+	}
+	return out;
+}
+function encrypt(key, text) {
+  return escape(crypt_HGC(key, text, 1));
+}
+function decrypt(key, chiffre) {
+  return crypt_HGC(key, unescape(chiffre), 0);
+}
+
+/**
+ * Promise based image base64 encoder
+ * 
+ * Usage:
+ * 	getBase64("./static/img/avatar/FotoCool.jpg")
+ *		.then(res => {
+ *			console.log('base64 String: ' + res)
+ *		})
+ *		.catch(err => console.log('base64 Error: ' + err))
+ *
+ * 	console.log("base64 String: data:image/jpeg;base64,/9j/4QAYRX...")
+ * 
+ */
+const getBase64 = url => fetch(url)
+  .then(response => response.blob())
+  .then(blob => new Promise((resolve, reject) => {
+		const reader = new FileReader()
+		reader.readAsDataURL(blob)
+    reader.onloadend = () => resolve(reader.result)
+    reader.onerror = (error) => reject('Error: ', error)
+	}))
+
+export { geoDistance, getGeolocation, reverseGeocoding, location2Geo, getBrowserInfo, getIPAddress, getActual2ZuluDat, zulu2LocalDat, round, roundExp, dd2dm, dd2dms, dms2dd, km2nm, nm2km, toRadians, toDegree, cookiesEnabled, setCookie, getCookie, delCookie, encrypt, decrypt, getBase64 };
