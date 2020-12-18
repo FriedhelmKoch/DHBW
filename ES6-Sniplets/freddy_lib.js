@@ -249,21 +249,21 @@ function zulu2LocalDat(isoString) {
  *					console.log(dat); // 18. DEZ 2020
  *
  *						form:
- *							'shortDate'		// Fr 18. DEZ 2020
- *							'longDat'			// Freitag, den 18. DEZEMBER 2020
- *							'fullTime'		// 09:05:08.375Z
- *							'shortTime'		// 09:05:08
- *							'longTime'		// 9 Uhr, 5 Min., 8 Sek.
+ *							'shortDate'				// Fr 18. DEZ 2020 (default)
+ *							'longDat'					// Freitag, den 18. DEZEMBER 2020
+ *							'fullTime'				// 09:05:08.375Z
+  *							'veryShortTime'		// 09:05
+ *							'shortTime'				// 09:05:08
+ *							'longTime'				// 9 Uhr, 5 Min., 8 Sek.
  **********************************************************************/
 function utc2date(utc, form) {
-	form = typeof form === 'undefined' ? 'shortDate' : form;
+	form = typeof form === 'undefined' ? 'veryShortTime' : form;
 	
 	const dat = utc.split('T');
 	const YYYY = dat[0].substring(0, 4);
 	const MM = dat[0].substring(5, 7) - 1;
 	let partDat = dat[0].split('-');
-	let partTime = dat[1].split(':');
-
+	
 	const datum = new Date(utc);
 	const WD = datum.getDay();
 
@@ -291,10 +291,14 @@ function utc2date(utc, form) {
 		case "fullTime":
 			ret = `${dat[1]}`;
 			break;
+		case "veryShortTime":
+			ret = `${dat[1].substring(0, 5)}`;
+			break;	
 		case "shortTime":
 			ret = `${dat[1].substring(0, 8)}`;
 			break;
 		case "longTime":
+			let partTime = dat[1].split(':');
 			ret = `${parseInt(partTime[0])} Uhr, ${parseInt(partTime[1])} Min., ${parseInt(partTime[2])} Sek.`;
 			break;			
 		default:
