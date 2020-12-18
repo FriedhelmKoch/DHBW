@@ -164,7 +164,7 @@ function getBrowserInfo(sessionKey) {
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 function getIPAddress(sessionKey) {
 	sessionKey = !sessionKey ? "IPaddress" : sessionKey; 
-	var xhttp = new XMLHttpRequest();
+	const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) { 
 				sessionStorage.setItem(sessionKey, this.responseText);
@@ -175,74 +175,121 @@ function getIPAddress(sessionKey) {
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// Holt aktuelles Datum und Uhrzeit und konvertiert in Zulu-Darstellung
+// Holt aktuelles Datum und Uhrzeit und konvertiert in Zulu-Darstellung (ISO-Format: 8601)
 // Bsp.: 
-//				Wenn aktuelles Datum (MEZ, UTC+1) der 1. Jan 2020 um 21:15:10 Uhr ist
+//				Wenn aktuelles Datum Fri Dec 18 2020 13:18:52 GMT+0100 (Mitteleuropäische Normalzeit) ist
 //				let dat = getActual2ZuluDat():
-//					console.log(dat); // 2020-01-01T20:15:10Z
+//					console.log(dat); 				// 2020-12-18T12:18:52.739Z
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 function getActual2ZuluDat() {
-	const heute = new Date(); // aktuelles Datum und aktuelle Zeit
-	const timeOffset = heute.getTimezoneOffset() / -60;
-	const h_YYYY = heute.getFullYear();
-	const h_MM = ("00" + (parseInt(heute.getMonth()) + 1)).slice(-2);
-	const h_DD = ("00" + heute.getDate()).slice(-2); // führende Null erzwingen
-	const h_WT = ("00" + heute.getDay()).slice(-2);
-	const h_hh = ("00" + (heute.getHours() - timeOffset)).slice(-2);
-	const h_mm = ("00" + heute.getMinutes()).slice(-2);
-	const h_ss = ("00" + heute.getSeconds()).slice(-2);
-	return String(h_YYYY + "-" + h_MM + "-" + h_DD + "T" + h_hh + ":" + h_mm + ":" + h_ss + "Z");  
+	const heute = new Date(); 					// lokales aktuelles Datum und aktuelle Zeit
+	const iso = heute.toISOString(); 
+	return iso;
 }
 
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// Konvertiert einen Zulu-Zeit-String in Lokale-Zeit-Darstellung
-// Bsp.: 
-// 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt
-//				let dat = "2020-05-03T09:05:08Z"
-//				zulu2LocalDat(dat) 
-//					console.log(dat); // 2020-05-03T11:05:08
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function zulu2LocalDat(dat){
-	const YYYY = dat.substring(0, 4);
-	const MM = dat.substring(5, 7);
-	const DD = dat.substring(8, 10);
-	const hh = dat.substring(11, 13);
-	const mm = dat.substring(14, 16);
-	const ss = dat.substring(17, 19);
-	const datUTC = new Date(Date.UTC(YYYY, MM, DD, hh, mm, ss));
-	const timeOffset = datUTC.getTimezoneOffset() / -60;
-	const hhLocal = (parseInt(hh) + parseInt(timeOffset)).toString();
-	return String(YYYY + "-" + MM + "-" + DD + "T" + hhLocal + ":" + mm + ":" + ss);
+/**********************************************************************
+ * Konvertiert einen Zulu-Zeit-String in Lokale-Zeit-Darstellung
+ * Bsp.: 
+ * 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt => Sommerzeit
+ *				let dat = "2020-05-03T23:05:08:375Z"
+ * 				zulu2LocalDat(dat); 
+ *					console.log(zulu2LocalDat(dat)); 		// 2020-05-04T01:05:08:375
+ **********************************************************************/
+function zulu2LocalDat(isoString) {
+	let dateParts = isoString.split( /\D+/ );					// Split the string into an array based on the digit groups.
+	let returnDate = new Date();											// Set up a date object with the current time.
+	
+	// Manually parse the parts of the string and set each part for the date. 
+	// Note: Using the UTC versions of these functions is necessary because we're manually adjusting for time zones stored in the string.
+	returnDate.setUTCFullYear( parseInt( dateParts[0] ) );
+
+	// The month numbers are one "off" from what normal humans would expect because January == 0.
+	returnDate.setUTCMonth( parseInt( dateParts[1] - 1 ) );
+	returnDate.setUTCDate( parseInt( dateParts[2] ) );
+	
+	// Set the time parts of the date object.
+	returnDate.setUTCHours( parseInt( dateParts[3] ) );
+	returnDate.setUTCMinutes( parseInt( dateParts[4] ) );
+	returnDate.setUTCSeconds( parseInt( dateParts[5] ) );
+	returnDate.setUTCMilliseconds( parseInt( dateParts[6] ) );
+	
+	// Track the number of hours we need to adjust the date by base on the timezone.
+	var timezoneOffsetHours = 0;								// If there's a value for either the hours or minutes offset.
+	if ( dateParts[7] || dateParts[8] ) {				// Track the number of minutes we need to adjust the date by based on the timezone.
+		var timezoneOffsetMinutes = 0;
+		if ( dateParts[8] ) {											// If there's a value for the minutes offset.
+			timezoneOffsetMinutes = parseInt( dateParts[8] ) / 60;	// Convert the minutes value into an hours value.
+		}
+		timezoneOffsetHours = parseInt( dateParts[7] ) + timezoneOffsetMinutes;		// Add the hours and minutes values to get the total offset in hours.
+		if ( isoString.substr( -6, 1 ) == "+" ) {	// If the sign for the timezone is a plus to indicate the timezone is ahead of UTC time.
+			timezoneOffsetHours *= -1;							// Make the offset negative since the hours will need to be subtracted from the date.
+		}
+	}
+	returnDate.setHours( returnDate.getHours()) + timezoneOffsetHours;					// Get the current hours for the date and add the offset to get the correct time adjusted for timezone.
+
+	// convert returnDate form: Sun May 03 2020 11:05:08 GMT+0200 (Mitteleuropäische Sommerzeit) into iso-format 
+	const options = { year: 'numeric', month:"2-digit", day:"2-digit", hour: '2-digit', minute: '2-digit', second: '2-digit' };
+	const data = returnDate.toLocaleString('fr-ca', options).split(' ');				// yyyy-mm-dd hh h mm min ss s
+	const full = returnDate.toLocaleString('utc', options).split(' ');					// dd.mm.yyyy, hh:mm:ss
+
+	// Return the Date object calculated from the string.
+	return `${data[0]}T${full[1]}:${dateParts[6]}`;
 }
 
-/**
+/**********************************************************************
+ * Extrahiert aus einen UTC-String das Datum
+ * Bsp.: 
+ * 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt
+ *				let dat = "2020-05-03T09:05:08:375Z"
+ *				utc2date(dat) 
+ *					console.log(dat); // 2020-05-03
+ **********************************************************************/
+function utc2date(utc) {
+	const dat = utc.split('T');
+	return dat[0]; 
+}
+
+/**********************************************************************
+ * Extrahiert aus einen UTC-String die Zeit
+ * Bsp.: 
+ * 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt
+ *				let dat = "2020-05-03T09:05:08:375Z"
+ *				utc2date(dat) 
+ *					console.log(dat); // 09:05:08
+ **********************************************************************/
+function utc2time(utc) {
+	const dat = utc.split('T');
+	return dat[1].substring(0, 8);
+}
+
+/**********************************************************************
  * Rundet eine Zahl 'num' auf x Nachkommastellen: Bsp: round(4.234567, 3);  // 4.235
  *
- */
+ **********************************************************************/
 function round(num, X) {
 	X = (!X ? 2 : X);										// Default 2 Nachkommastellen
 	if (X < 1 || X > 14) return false;		// Nachkomastellen auf 14 Stellen begrenzen
-	var e = Math.pow(10, X);
-	var k = (Math.round(num * e) / e).toString();
+	let e = Math.pow(10, X);
+	let k = (Math.round(num * e) / e).toString();
 	if (k.indexOf('.') == -1) k += '.';
 	k += e.toString().substring(1);
 	return k.substring(0, k.indexOf('.') + X+1);
 }
 
-/**
+/**********************************************************************
  * Rundet eine Zahl 'x' mit vier Nachkommastellen in Exponenten-Schreibweise: zahl*e^exp, Bsp: "1.2345e4"
  *
- */
+ **********************************************************************/
 function roundExp(x) {
 	return x.toExponential(4);
 }
 
-/**
+/**********************************************************************
  * Rundet eine Zahl 'x' mit vier Nachkommastellen in Eng-Schreibweise: "zahl*10^exp", Bsp: "1.2345 * 10^6"
  *
- */
+ **********************************************************************/
 function roundEng(x) {
-	var str = roundExp(x).replace('e+0', '').replace('e+', 'e');
+	let str = roundExp(x).replace('e+0', '').replace('e+', 'e');
 	if (str.replace('e', '').length !== str.length) {
 		// exponent existing
 		str = str.replace('e', ' * 10^');
@@ -250,42 +297,48 @@ function roundEng(x) {
 	return str;
 }
 
-// Koordinaten Konvertierung - GradDezimal in Grad Minute
-// Bsp: dd2dms(40.567534, 'long');	// 40° 34.224' E
+/**********************************************************************
+ * Koordinaten Konvertierung - GradDezimal in Grad Minute
+ * Bsp: dd2dms(40.567534, 'long');	// 40° 34.224' E
+ **********************************************************************/
 function dd2dm(degree, lat_long, dez) {
-	var factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
-	var deg = Math.abs(parseInt(degree));
-	var min = round((Math.abs(degree) - deg) * 60, 5);
-	var sign = (degree < 0) ? -1 : 1;
-	var dir = (lat_long == 'lat') ? ((sign > 0) ? 'N' : 'S') : ((sign > 0) ? 'E' : 'W');
+	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
+	let deg = Math.abs(parseInt(degree));
+	let min = round((Math.abs(degree) - deg) * 60, 5);
+	let sign = (degree < 0) ? -1 : 1;
+	let dir = (lat_long == 'lat') ? ((sign > 0) ? 'N' : 'S') : ((sign > 0) ? 'E' : 'W');
 	if(!dir)
 		return (deg * sign) + '\u00b0' + min + "'";
 	else
 		return deg + '\u00b0' + min + "'" + dir;
 }
 
-// Koordinaten Konvertierung - GradDezimal in Grad Minute Sekunde
-// Bsp: dd2dms(40.567534, 'long');	// 40° 34' 3.1224" E
+/**********************************************************************
+ * Koordinaten Konvertierung - GradDezimal in Grad Minute Sekunde
+ * Bsp: dd2dms(40.567534, 'long');	// 40° 34' 3.1224" E
+ **********************************************************************/
 function dd2dms(degree, lat_long, dez) {
-	var factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
-	var deg = Math.abs(parseInt(degree));
-	var min = (Math.abs(degree) - deg) * 60;
-	var sec = min;
+	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
+	let deg = Math.abs(parseInt(degree));
+	let min = (Math.abs(degree) - deg) * 60;
+	let sec = min;
 	min = Math.abs(parseInt(min));
 	sec = round((sec - min) * 60, 5);
-	var sign = (degree < 0) ? -1 : 1;
-	var dir = (lat_long == 'lat') ? ((sign > 0) ? 'N' : 'S') : ((sign > 0) ? 'E' : 'W');
+	let sign = (degree < 0) ? -1 : 1;
+	let dir = (lat_long == 'lat') ? ((sign > 0) ? 'N' : 'S') : ((sign > 0) ? 'E' : 'W');
 	if(!dir)
 		return (deg * sign) + '\u00b0' + min + "'" + sec + '"';
 	else
 		return deg + '\u00b0' + min + "'" + sec + '"' + dir;
 }
 
-// Koordinaten Konvertierung - Grad Minute Sekunde in GradDezimal
-// Bsp: dms2dd(40, 34, 3.1224, 'E');	// 40,567534° E
+/**********************************************************************
+ * Koordinaten Konvertierung - Grad Minute Sekunde in GradDezimal
+ * Bsp: dms2dd(40, 34, 3.1224, 'E');	// 40,567534° E
+ **********************************************************************/
 function dms2dd(deg, min, sec, dir, dez) {
-	var factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
-	var sign;
+	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
+	let sign;
 	if(dir) {
 		sign = (dir.toLowerCase() == 'w' || dir.toLowercase() == 's') ? -1 : 1;
 		dir = (dir.toLowerCase() == 'w' || dir.toLowercase() == 's' || dir.toLowercase() == 'n' || dir.toLowercase() == 'e') ? dir.toUpperCase() : '';
@@ -300,47 +353,50 @@ function dms2dd(deg, min, sec, dir, dez) {
 		return dec + '\u00b0' + dir;
 }
 
-// Umrechnung Kilometer in Nautische Meilen
+/**********************************************************************
+ * Umrechnung Kilometer in Nautische Meilen
+ **********************************************************************/
 function km2nm(km, dez) {
 	return round(km / 1.851852, dez);
 }
 
-// Umrechnung Nautische Meilen in Kilometer
+/**********************************************************************
+ * Umrechnung Nautische Meilen in Kilometer
+ **********************************************************************/
 function nm2km(nm, dez) {
 	return round(nm * 1.851852, dez);
 }
 
-// Trigonometrische Funktionen in Grad statt im Radiant
-/**
+/**********************************************************************
+ * Trigonometrische Funktionen in Grad statt im Radiant
  * converts degree to radians
  * @param degree
  * @returns {number}
- */
-var toRadians = function (degree) {
+ **********************************************************************/
+let toRadians = function (degree) {
 	return degree * (Math.PI / 180);
 };
 
-/**
+/**********************************************************************
+ * Trigonometrische Funktionen in Grad statt im Radiant 
  * Converts radian to degree
  * @param radians
  * @returns {number}
- */
-var toDegree = function (radians) {
+ **********************************************************************/
+let toDegree = function (radians) {
 	return radians * (180 / Math.PI);
 }
 
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
-/*  Geodesy representation conversion functions (c) Chris Veness 2002-2012                        */
-/*   - www.movable-type.co.uk/scripts/latlong.html                                                */
-/*                                                                                                */
-/*  Sample usage:                                                                                 */
-/*    var lat = Geo.parseDMS('51° 28′ 40.12″ N');                                                 */
-/*    var lon = Geo.parseDMS('000° 00′ 05.31″ W');                                                */
-/*    var p1 = new LatLon(lat, lon);                                                              */
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
-
-var Geo = {};  // Geo namespace, representing static class
-
+/**********************************************************************
+ *  Geodesy representation conversion functions (c) Chris Veness 2002-2012 
+ *   - www.movable-type.co.uk/scripts/latlong.html
+ *  
+ *  Usage: 
+ *    var lat = Geo.parseDMS('51° 28′ 40.12″ N'); 
+ *    var lon = Geo.parseDMS('000° 00′ 05.31″ W'); 
+ *    var p1 = new LatLon(lat, lon);
+ **********************************************************************/
+let Geo = {};  // Geo namespace, representing static class
 /**
  * Parses string representing degrees/minutes/seconds into numeric degrees
  *
@@ -352,7 +408,7 @@ var Geo = {};  // Geo namespace, representing static class
  * @param   {String|Number} dmsStr: Degrees or deg/min/sec in variety of formats
  * @returns {Number} Degrees as decimal number
  * @throws  {TypeError} dmsStr is an object, perhaps DOM object without .value?
- */
+ **/
 Geo.parseDMS = function(dmsStr) {
   if (typeof deg == 'object') throw new TypeError('Geo.parseDMS - dmsStr is [DOM?] object');
   
@@ -393,7 +449,7 @@ Geo.parseDMS = function(dmsStr) {
  * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
  * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
  * @returns {String} Deg/min/seconds
- */
+ **/
 Geo.toLat = function(deg, format, dp) {
   var lat = Geo.toDMS(deg, format, dp);
   return lat==null ? '–' : lat.slice(1) + (deg<0 ? 'S' : 'N');  // knock off initial '0' for lat!
@@ -406,7 +462,7 @@ Geo.toLat = function(deg, format, dp) {
  * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
  * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
  * @returns {String} Deg/min/seconds
- */
+ **/
 Geo.toLon = function(deg, format, dp) {
   var lon = Geo.toDMS(deg, format, dp);
   return lon==null ? '–' : lon + (deg<0 ? 'W' : 'E');
@@ -419,14 +475,14 @@ Geo.toLon = function(deg, format, dp) {
  * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
  * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
  * @returns {String} Deg/min/seconds
- */
+ **/
 Geo.toBrng = function(deg, format, dp) {
   deg = (Number(deg)+360) % 360;  // normalise -ve values to 180º..360º
   var brng =  Geo.toDMS(deg, format, dp);
   return brng==null ? '–' : brng.replace('360', '0');  // just in case rounding took us up to 360º!
 }
 
-/**
+/**********************************************************************
  * Cookies
  * 
  * Usage:
@@ -444,7 +500,7 @@ Geo.toBrng = function(deg, format, dp) {
  * 		} else {									// if false
  * 			... error message ...
  * 		}
- */
+ **********************************************************************/
 function cookiesEnabled() {
 	let cookieEnabled = (navigator.cookieEnabled) ? true : false;
 
@@ -477,7 +533,7 @@ function delCookie(name) {
 	document.cookie = name + '=; Max-Age=0;';  
 }
 
-/**
+/**********************************************************************
  * Crypt
  * 
  * Funktionen für die selbsterstellten Algorithmen nach Cipher-Feedback-Modus (CFB) - Blockchiffre
@@ -491,7 +547,7 @@ function delCookie(name) {
  * 		console.log("Verschlüsselt: " + ver);
  * 		console.log("Entschlüsselt: " + ent);
  * 		console.log("Ver-/Entschlüsselt: " + encrypt(text) + ', ' + decrypt(encrypt(text)));
- */
+ **********************************************************************/
 let Modulus = 65536;
 const salt = '${ThisIsTheSaltInMySoup}';
 function nextRandom(X, modulus) {
@@ -552,7 +608,7 @@ function decrypt(chiffre, key) {
   return crypt_HGC(unescape(chiffre), key, 0);
 }
 
-/**
+/**********************************************************************
  * Promise based image base64 encoder
  * 
  * Usage:
@@ -563,8 +619,7 @@ function decrypt(chiffre, key) {
  *		.catch(err => console.log('base64 Error: ' + err))
  *
  * 	console.log("base64 String: data:image/jpeg;base64,/9j/4QAYRX...")
- * 
- */
+ **********************************************************************/
 const getBase64 = url => fetch(url)
   .then(response => response.blob())
   .then(blob => new Promise((resolve, reject) => {
@@ -574,4 +629,4 @@ const getBase64 = url => fetch(url)
     reader.onerror = (error) => reject('Error: ', error)
 	}))
 
-export { geoDistance, getGeolocation, reverseGeocoding, location2Geo, getBrowserInfo, getIPAddress, getActual2ZuluDat, zulu2LocalDat, round, roundExp, dd2dm, dd2dms, dms2dd, km2nm, nm2km, toRadians, toDegree, cookiesEnabled, setCookie, getCookie, delCookie, encrypt, decrypt, getBase64 };
+export { geoDistance, getGeolocation, reverseGeocoding, location2Geo, getBrowserInfo, getIPAddress, getActual2ZuluDat, zulu2LocalDat, utc2date, utc2time, round, roundExp, dd2dm, dd2dms, dms2dd, km2nm, nm2km, toRadians, toDegree, cookiesEnabled, setCookie, getCookie, delCookie, encrypt, decrypt, getBase64 };
