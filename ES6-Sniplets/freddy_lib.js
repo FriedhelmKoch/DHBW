@@ -191,9 +191,9 @@ function getActual2ZuluDat() {
  * Konvertiert einen Zulu-Zeit-String in Lokale-Zeit-Darstellung
  * Bsp.: 
  * 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt => Sommerzeit
- *				let dat = "2020-05-03T23:05:08:375Z"
+ *				let dat = "2020-05-03T23:05:08.375Z"
  * 				zulu2LocalDat(dat); 
- *					console.log(zulu2LocalDat(dat)); 		// 2020-05-04T01:05:08:375
+ *					console.log(zulu2LocalDat(dat)); 		// 2020-05-04T01:05:08.375
  **********************************************************************/
 function zulu2LocalDat(isoString) {
 	let dateParts = isoString.split( /\D+/ );					// Split the string into an array based on the digit groups.
@@ -233,7 +233,7 @@ function zulu2LocalDat(isoString) {
 	const full = returnDate.toLocaleString('utc', options).split(' ');					// dd.mm.yyyy, hh:mm:ss
 
 	// Return the Date object calculated from the string.
-	return `${data[0]}T${full[1]}:${dateParts[6]}`;
+	return `${data[0]}T${full[1]}.${dateParts[6]}`;
 }
 
 /**********************************************************************
