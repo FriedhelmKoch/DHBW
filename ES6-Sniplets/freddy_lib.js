@@ -15,6 +15,9 @@
 // Bsp.:
 //				let dist = geoDistance(48.490545479685416, 11.338329464399012, 48.479460, 11.317115, "K");
 //				alert("Distanz: " + dist);  // knapp 2 Kilometer
+
+import { min } from "lodash";
+
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 function geoDistance(lat1, lon1, lat2, lon2, unit) {
 	if ((lat1 == lat2) && (lon1 == lon2)) {
@@ -178,7 +181,7 @@ function getIPAddress(sessionKey) {
 // Holt aktuelles Datum und Uhrzeit und konvertiert in Zulu-Darstellung (ISO-Format: 8601)
 // Bsp.: 
 //				Wenn aktuelles Datum Fri Dec 18 2020 13:18:52 GMT+0100 (Mitteleuropäische Normalzeit) ist
-//				let dat = getActual2ZuluDat():
+//				const dat = getActual2ZuluDat():
 //					console.log(dat); 				// 2020-12-18T12:18:52.739Z
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 function getActual2ZuluDat() {
@@ -191,7 +194,7 @@ function getActual2ZuluDat() {
  * Konvertiert einen Zulu-Zeit-String in Lokale-Zeit-Darstellung
  * Bsp.: 
  * 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt => Sommerzeit
- *				let dat = "2020-05-03T23:05:08.375Z"
+ *				const dat = "2020-05-03T23:05:08.375Z";
  * 				zulu2LocalDat(dat); 
  *					console.log(zulu2LocalDat(dat)); 		// 2020-05-04T01:05:08.375
  **********************************************************************/
@@ -237,24 +240,75 @@ function zulu2LocalDat(isoString) {
 }
 
 /**********************************************************************
- * Extrahiert aus einen UTC-String das Datum
+ * Extrahiert aus einen UTC-String das Datum und Uhrzeit
  * Bsp.: 
- * 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt
- *				let dat = "2020-05-03T09:05:08:375Z"
- *				utc2date(dat) 
- *					console.log(dat); // 2020-05-03
+ * 			Wenn aktuelle Abfrage-Device in MESZ (UTC+2)
+ *				const dat = "2020-12-18T09:05:08.375Z";
+ *				const form = "veryShortDat"; 
+ *				utc2date(dat, form); 
+ *					console.log(dat); // 18. DEZ 2020
+ *
+ *						form:
+ *							'shortDate'		// Fr 18. DEZ 2020
+ *							'longDat'			// Freitag, den 18. DEZEMBER 2020
+ *							'fullTime'		// 09:05:08.375Z
+ *							'shortTime'		// 09:05:08
+ *							'longTime'		// 9 Uhr, 5 Min., 8 Sek.
  **********************************************************************/
-function utc2date(utc) {
+function utc2date(utc, form) {
+	form = typeof form === 'undefined' ? 'shortDate' : form;
+	
 	const dat = utc.split('T');
-	return dat[0]; 
+	const YYYY = dat[0].substring(0, 4);
+	const MM = dat[0].substring(5, 7) - 1;
+	let partDat = dat[0].split('-');
+	let partTime = dat[1].split(':');
+
+	const datum = new Date(utc);
+	const WD = datum.getDay();
+
+	const weekday_long = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+	const weekday_short = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+	const month_long = ['JANUAR', 'FEBRUAR', 'MÄRZ', 'APRIL', 'MAI', 'JUNI', 'JULI', 'AUGUST', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DEZEMBER'];
+	const month_short = ['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'];
+	
+	const monShort = month_short[parseInt(MM)];
+
+	let ret = "";
+	switch (form) {
+		case "veryShortDat":								
+			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
+			break;
+		case "shortDat":
+			const dayShort = weekday_short[parseInt(WD)];										
+			ret = `${dayShort} ${partDat[2]}. ${monShort} ${YYYY}`;
+			break;	
+		case "longDat":
+			const monLong = month_long[parseInt(MM)];
+			const dayLong = weekday_long[parseInt(WD)];											
+			ret = `${dayLong}, den ${partDat[2]}. ${monLong} ${YYYY}`;
+			break;	
+		case "fullTime":
+			ret = `${dat[1]}`;
+			break;
+		case "shortTime":
+			ret = `${dat[1].substring(0, 8)}`;
+			break;
+		case "longTime":
+			ret = `${parseInt(partTime[0])} Uhr, ${parseInt(partTime[1])} Min., ${parseInt(partTime[2])} Sek.`;
+			break;			
+		default:
+			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
+	}
+	return ret;
 }
 
 /**********************************************************************
  * Extrahiert aus einen UTC-String die Zeit
  * Bsp.: 
  * 				Wenn aktuelle Abfrage-Device in MESZ (UTC+2) liegt
- *				let dat = "2020-05-03T09:05:08:375Z"
- *				utc2date(dat) 
+ *				const dat = "2020-05-03T09:05:08:375Z";
+ *				utc2date(dat); 
  *					console.log(dat); // 09:05:08
  **********************************************************************/
 function utc2time(utc) {
