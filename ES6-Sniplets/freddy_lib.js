@@ -249,15 +249,18 @@ function zulu2LocalDat(isoString) {
  *					console.log(dat); // 18. DEZ 2020
  *
  *						form:
- *							'shortDate'				// Fr 18. DEZ 2020 (default)
+ *							'array'						// ["Fr", "Freitag", "18", "DEZ", "DEZEMBER", "12", "2020", "09", "05", "08"]
+ *							'simpleDat'				// 18.12.2020  (default)
+ *							'shortDate'				// Fr 18. DEZ 2020 
  *							'longDat'					// Freitag, den 18. DEZEMBER 2020
  *							'fullTime'				// 09:05:08.375Z
-  *							'veryShortTime'		// 09:05
+ *							'veryShortTime'		// 09:05
  *							'shortTime'				// 09:05:08
  *							'longTime'				// 9 Uhr, 5 Min., 8 Sek.
  **********************************************************************/
 function utc2date(utc, form) {
-	form = typeof form === 'undefined' ? 'veryShortTime' : form;
+	form = typeof form === 'undefined' ? 'simpleDat' : form;
+	form = typeof form === 'undefined' ? 'array' : form;
 	
 	const dat = utc.split('T');
 	const YYYY = dat[0].substring(0, 4);
@@ -272,20 +275,23 @@ function utc2date(utc, form) {
 	const month_long = ['JANUAR', 'FEBRUAR', 'MÄRZ', 'APRIL', 'MAI', 'JUNI', 'JULI', 'AUGUST', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DEZEMBER'];
 	const month_short = ['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'];
 	
+	const dayShort = weekday_short[parseInt(WD)];
+	const dayLong = weekday_long[parseInt(WD)];
 	const monShort = month_short[parseInt(MM)];
-
+	const monLong = month_long[parseInt(MM)];
+	
 	let ret = "";
 	switch (form) {
+		case "simpleDat":								
+			ret = `${partDat[2]}.${String(MM +1)}.${YYYY}`;
+			break;
 		case "veryShortDat":								
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
 			break;
 		case "shortDat":
-			const dayShort = weekday_short[parseInt(WD)];										
 			ret = `${dayShort} ${partDat[2]}. ${monShort} ${YYYY}`;
 			break;	
-		case "longDat":
-			const monLong = month_long[parseInt(MM)];
-			const dayLong = weekday_long[parseInt(WD)];											
+		case "longDat":					
 			ret = `${dayLong}, den ${partDat[2]}. ${monLong} ${YYYY}`;
 			break;	
 		case "fullTime":
@@ -300,7 +306,10 @@ function utc2date(utc, form) {
 		case "longTime":
 			let partTime = dat[1].split(':');
 			ret = `${parseInt(partTime[0])} Uhr, ${parseInt(partTime[1])} Min., ${parseInt(partTime[2])} Sek.`;
-			break;			
+			break;	
+		case "array":
+			ret = [dayShort, dayLong, partDat[2], monShort, monLong, String(MM +1), YYYY, dat[1].substring(0, 2), dat[1].substring(3, 5), dat[1].substring(6, 8)];
+			break;		
 		default:
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
 	}
@@ -318,6 +327,41 @@ function utc2date(utc, form) {
 function utc2time(utc) {
 	const dat = utc.split('T');
 	return dat[1].substring(0, 8);
+}
+
+/**********************************************************************
+ * Addiert Anzahl Tage zu einem bestimmten Datum in UTC
+ * Bsp.: 
+ *			1) const dat = "2020-02-15T09:05:08.375Z";
+ *			2) const dat = "2020-02-15";
+ *			const days = parseInt("21");
+ *				console.log(addDays(dat, days)); 	
+ *						1) // 2020-03-07T09:05:08.375Z
+ *						2) // 2020-03-07T00:00:00.000
+ *
+ * 			const form = "short";
+ *				console.log(addDays(dat, days, form)); 	
+ *						1) // 2020-03-07
+ *						2) // 2020-03-07
+ *			form:
+ *				"full"		// YYYY-MM-DDThh:mm:ss.ms		(default)
+ *				"short"		// YYYY-MM-DD
+ **********************************************************************/
+function addDays(utc, days, form) {
+	const dat = utc.split('T');
+	dat[1] = typeof dat[1] === 'undefined' ? '00:00:00.000' : dat[1];
+	dat[0] = new Date(utc);
+	dat[0].setDate(dat[0].getDate() + days);
+	form = typeof form === 'undefined' ? 'full' : form;
+	let ret = "";
+	switch (form) {
+		case "short":								
+			ret = `${dat[0].toLocaleDateString('fr-CA')}`;
+			break;
+		default:
+			ret = `${dat[0].toLocaleDateString('fr-CA')}T${dat[1]}`;
+	}
+	return ret;
 }
 
 /**********************************************************************
@@ -687,4 +731,4 @@ const getBase64 = url => fetch(url)
     reader.onerror = (error) => reject('Error: ', error)
 	}))
 
-export { geoDistance, getGeolocation, reverseGeocoding, location2Geo, getBrowserInfo, getIPAddress, getActual2ZuluDat, zulu2LocalDat, utc2date, utc2time, round, roundExp, dd2dm, dd2dms, dms2dd, km2nm, nm2km, toRadians, toDegree, cookiesEnabled, setCookie, getCookie, delCookie, encrypt, decrypt, getBase64 };
+export { geoDistance, getGeolocation, reverseGeocoding, location2Geo, getBrowserInfo, getIPAddress, getActual2ZuluDat, zulu2LocalDat, utc2date, utc2time, addDays, round, roundExp, dd2dm, dd2dms, dms2dd, km2nm, nm2km, toRadians, toDegree, cookiesEnabled, setCookie, getCookie, delCookie, encrypt, decrypt, getBase64 };
