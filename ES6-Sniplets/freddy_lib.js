@@ -19,7 +19,7 @@
 import { min } from "lodash";
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function geoDistance(lat1, lon1, lat2, lon2, unit) {
+export function geoDistance(lat1, lon1, lat2, lon2, unit) {
 	if ((lat1 == lat2) && (lon1 == lon2)) {
 		return 0;
 	}
@@ -39,17 +39,25 @@ function geoDistance(lat1, lon1, lat2, lon2, unit) {
 	}
 }
 
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// Speichert die geoDaten als JSON-String in den SessionStorage
-// Bsp.:
-// 				getGeolocation("geoJSON");
-//					let geoStr = sessionStorage.getItem("geoJSON");
-//					let geoObj = JSON.parse(geoStr);
-//					alert(JSON.stringify(geoObj));
-//
-// Die Geodaten liegen dann in dem Objekt "geoObj" vor.
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function getGeolocation(sessionKey) {
+/******************************************************************************
+*		Speichert die geoDaten als JSON-String promise-bsiert in den SessionStorage
+*		Bsp.:
+*			getGeolocation("geoJSON");
+*					let geoStr = sessionStorage.getItem("geoJSON");
+*					let geoObj = JSON.parse(geoStr);
+*					console.log("GeoObj: " + JSON.stringify(geoObj));
+*		Die Geodaten liegen dann in dem Objekt "geoObj" vor.
+*
+*		SessionStorage-String:
+*			// geoJSON:'{"latitude":48.4905369264108,"longitude":11.338338855454992,"altitude":469.6743469238281,"precision":65,"altprecision":10}'
+*
+*		React:
+*			this.state = {   
+*				geoLocString: JSON.parse(sessionStorage.getItem("geoJSON"))
+*			}
+*
+*******************************************************************************/
+export function getGeolocation(sessionKey) {
 	sessionKey = !sessionKey ? "geoJSON" : sessionKey; 
 	const geoOptions = {
 		enableHighAccuracy: true,     // Super-Präzisions-Modus
@@ -59,18 +67,34 @@ function getGeolocation(sessionKey) {
 	function geoSuccess(pos) {
 		const crd = pos.coords;
 		const geoValue = {
-			latitude: crd.latitude,		// Breitengrad
-			longitude: crd.longitude,	// Längengrad
-			altitude: crd.altitude,		// Höhe ü. Meeresspiegel in Meter
-			precision: crd.accuracy, 	// Genauigkeit der Koordinaten im Meter
+			latitude: crd.latitude,			// Breitengrad
+			longitude: crd.longitude,		// Längengrad
+			altitude: crd.altitude,			// Höhe ü. Meeresspiegel in Meter
+			precision: crd.accuracy, 		// Genauigkeit der Koordinaten im Meter
 			altprecision: crd.altitudeAccuracy,	// Genauigkeit der Höhenangabe
-			geotime: crd.timestamp		// Zeitstempel der Positionsangabe
+			geotime: crd.timestamp			// Zeitstempel der Positionsangabe
 		}
-		StorePos(JSON.stringify(geoValue));	// Objekt in String konvertieren
+		StorePos(JSON.stringify(geoValue));		// Objekt in String konvertieren
 	}
 	function geoError(err) {
-		console.warn(`ERROR(${err.code}): ${err.message}`);
-		alert("ACHTUNG: Ohne Deine Geolocation-Daten ist die Funktionalität von viaLinked nur eingeschränkt möglich! Um die Geolocation-Funktionalität von viaLinked besser einschätzen zu können, klicke auf das 'viaLinked-Logo' oben links und lese bitte unser Datenschutz- und Nutzungsrichtlinien nach.");
+		switch (err.code) {
+			case err.PERMISSION_DENIED:
+				alert("ACHTUNG: Ohne Deine Geolocation-Daten ist die Funktionalität von viaLinked nur eingeschränkt möglich! Um die Geolocation-Funktionalität von viaLinked besser einschätzen zu können, klicke auf das 'viaLinked-Logo' oben links und lese bitte unser Datenschutz- und Nutzungsrichtlinien nach.")
+				console.log("DEBUG - User denied the request for Geolocation.")
+				StorePos('{"latitude":52.520007, "longitude":13.404954}');	// workaround if geoPos via localhost not supported, location Berlin
+				break;
+			case err.POSITION_UNAVAILABLE:
+				console.log("DEBUG - Location information is unavailable.")
+				StorePos('{"latitude":52.520007, "longitude":13.404954}');	// workaround if geoPos via localhost not supported, location Berlin
+				break;
+			case err.TIMEOUT:
+				console.log("DEBUG - The request to get user location timed out.")
+				StorePos('{"latitude":52.520007, "longitude":13.404954}');	// workaround if geoPos via localhost not supported, location Berlin
+				break;
+			default:
+				console.log("DEBUG - An unknown error occurred.")
+				break;
+		}
 	}
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
@@ -94,7 +118,7 @@ function getGeolocation(sessionKey) {
 //				console.log(JSON.stringify(revgeoObj));
 //				// {"str":"Schulstraße","strNo":"9","zip":"85276","city":"Pfaffenhofen an der Ilm","state":"Bayern","country":"Germany"}
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function reverseGeocoding(lon, lat, sessionKey) {
+export function reverseGeocoding(lon, lat, sessionKey) {
 	sessionKey = !sessionKey ? "revgeoJSON" : sessionKey; 
 	fetch('https://nominatim.openstreetmap.org/reverse?format=json&lon=' + lon + '&lat=' + lat)
 	.then(function(response) {
@@ -120,7 +144,7 @@ function reverseGeocoding(lon, lat, sessionKey) {
 //					console.log(JSON.stringify(locationObj));
 //					// {"lat":"48.5620576","lon":"11.264430424966125"}
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function location2Geo(str, strNo, zip, city, sessionKey) {
+export function location2Geo(str, strNo, zip, city, sessionKey) {
 	sessionKey = !sessionKey ? "locationJSON" : sessionKey; 
 	fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + str + ' ' + strNo + ', ' + zip + ' ' + city)
 		.then(function(response) {
@@ -143,7 +167,7 @@ function location2Geo(str, strNo, zip, city, sessionKey) {
 //
 // Die Browserdaten liegen dann in dem Objekt "browserObj" vor.
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function getBrowserInfo(sessionKey) {
+export function getBrowserInfo(sessionKey) {
 	sessionKey = !sessionKey ? "browserJSON" : sessionKey; 
 	const browserInfo = {
 		Codename: navigator.appCodeName,
@@ -153,6 +177,16 @@ function getBrowserInfo(sessionKey) {
 		Cookies: navigator.cookieEnabled
 	}
 	sessionStorage.setItem(sessionKey, JSON.stringify(browserInfo));	// Objekt in String konvertieren
+}
+function getBrowserInf() {
+	const browserInfo = {
+		Codename: navigator.appCodeName,
+		Language: navigator.language,
+		Platform: navigator.platform,
+		UserAgent: navigator.userAgent,
+		Cookies: navigator.cookieEnabled
+	}
+	return JSON.stringify(browserInfo);	// Objekt in String konvertieren
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -165,12 +199,22 @@ function getBrowserInfo(sessionKey) {
 // Die IP-Adresse ist dann im SessionStore unter dem Key "IPaddress" abrufbar
 // WICHTIG: Die PHP-Datei "getIP.php" muss sich im selben Verzeichnis befinden, wie diese Funktion
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function getIPAddress(sessionKey) {
+export function getIPAddress(sessionKey) {
 	sessionKey = !sessionKey ? "IPaddress" : sessionKey; 
 	const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) { 
 				sessionStorage.setItem(sessionKey, this.responseText);
+			} 
+    };
+    xhttp.open("GET", "getIP.php", true);
+    xhttp.send();
+}
+function getIP() {
+	const xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) { 
+				return this.responseText
 			} 
     };
     xhttp.open("GET", "getIP.php", true);
@@ -184,7 +228,7 @@ function getIPAddress(sessionKey) {
 //				const dat = getActual2ZuluDat():
 //					console.log(dat); 				// 2020-12-18T12:18:52.739Z
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-function getActual2ZuluDat() {
+export function getActual2ZuluDat() {
 	const heute = new Date(); 					// lokales aktuelles Datum und aktuelle Zeit
 	const iso = heute.toISOString(); 
 	return iso;
@@ -198,7 +242,7 @@ function getActual2ZuluDat() {
  * 				zulu2LocalDat(dat); 
  *					console.log(zulu2LocalDat(dat)); 		// 2020-05-04T01:05:08.375
  **********************************************************************/
-function zulu2LocalDat(isoString) {
+export function zulu2LocalDat(isoString) {
 	let dateParts = isoString.split( /\D+/ );					// Split the string into an array based on the digit groups.
 	let returnDate = new Date();											// Set up a date object with the current time.
 	
@@ -240,7 +284,7 @@ function zulu2LocalDat(isoString) {
 }
 
 /**********************************************************************
- * Extrahiert aus einen UTC-String das Datum und Uhrzeit
+ * Konvertiert aus einen UTC-String entsprechend Datum und/oder Uhrzeit
  * Bsp.: 
  * 			Wenn aktuelle Abfrage-Device in MESZ (UTC+2)
  *				const dat = "2020-12-18T09:05:08.375Z";
@@ -251,14 +295,16 @@ function zulu2LocalDat(isoString) {
  *						form:
  *							'array'						// ["Fr", "Freitag", "18", "DEZ", "DEZEMBER", "12", "2020", "09", "05", "08"]
  *							'simpleDat'				// 18.12.2020  (default)
- *							'shortDate'				// Fr 18. DEZ 2020 
+ *							'shortDat'				// Fr, 18. DEZ 2020 
  *							'longDat'					// Freitag, den 18. DEZEMBER 2020
  *							'fullTime'				// 09:05:08.375Z
  *							'veryShortTime'		// 09:05
  *							'shortTime'				// 09:05:08
  *							'longTime'				// 9 Uhr, 5 Min., 8 Sek.
+ *							'IT'							// 2020-12-18
+ *							'iCal'						// 20201218T090508Z
  **********************************************************************/
-function utc2date(utc, form) {
+export function utc2date(utc, form) {
 	form = typeof form === 'undefined' ? 'simpleDat' : form;
 	form = typeof form === 'undefined' ? 'array' : form;
 	
@@ -289,7 +335,7 @@ function utc2date(utc, form) {
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
 			break;
 		case "shortDat":
-			ret = `${dayShort} ${partDat[2]}. ${monShort} ${YYYY}`;
+			ret = `${dayShort}, ${partDat[2]}. ${monShort} ${YYYY}`;
 			break;	
 		case "longDat":					
 			ret = `${dayLong}, den ${partDat[2]}. ${monLong} ${YYYY}`;
@@ -307,9 +353,18 @@ function utc2date(utc, form) {
 			let partTime = dat[1].split(':');
 			ret = `${parseInt(partTime[0])} Uhr, ${parseInt(partTime[1])} Min., ${parseInt(partTime[2])} Sek.`;
 			break;	
+			case "IT":
+				ret = `${dat[0]}`;
+				break;	
 		case "array":
 			ret = [dayShort, dayLong, partDat[2], monShort, monLong, String(MM +1), YYYY, dat[1].substring(0, 2), dat[1].substring(3, 5), dat[1].substring(6, 8)];
-			break;		
+			break;
+		case "iCal":
+			const iCalDate = dat[0].replaceAll('-', '');
+			const t = dat[1].replaceAll(':', '');
+			const iCalTime = t.substring(0, t.length -5);
+			ret = `${iCalDate}T${iCalTime}Z`;
+			break;			
 		default:
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
 	}
@@ -324,7 +379,7 @@ function utc2date(utc, form) {
  *				utc2date(dat); 
  *					console.log(dat); // 09:05:08
  **********************************************************************/
-function utc2time(utc) {
+export function utc2time(utc) {
 	const dat = utc.split('T');
 	return dat[1].substring(0, 8);
 }
@@ -347,7 +402,7 @@ function utc2time(utc) {
  *				"full"		// YYYY-MM-DDThh:mm:ss.ms		(default)
  *				"short"		// YYYY-MM-DD
  **********************************************************************/
-function addDays(utc, days, form) {
+export function addDays(utc, days, form) {
 	const dat = utc.split('T');
 	dat[1] = typeof dat[1] === 'undefined' ? '00:00:00.000' : dat[1];
 	dat[0] = new Date(utc);
@@ -368,7 +423,7 @@ function addDays(utc, days, form) {
  * Rundet eine Zahl 'num' auf x Nachkommastellen: Bsp: round(4.234567, 3);  // 4.235
  *
  **********************************************************************/
-function round(num, X) {
+export function round(num, X) {
 	X = (!X ? 2 : X);										// Default 2 Nachkommastellen
 	if (X < 1 || X > 14) return false;		// Nachkomastellen auf 14 Stellen begrenzen
 	let e = Math.pow(10, X);
@@ -382,7 +437,7 @@ function round(num, X) {
  * Rundet eine Zahl 'x' mit vier Nachkommastellen in Exponenten-Schreibweise: zahl*e^exp, Bsp: "1.2345e4"
  *
  **********************************************************************/
-function roundExp(x) {
+export function roundExp(x) {
 	return x.toExponential(4);
 }
 
@@ -390,7 +445,7 @@ function roundExp(x) {
  * Rundet eine Zahl 'x' mit vier Nachkommastellen in Eng-Schreibweise: "zahl*10^exp", Bsp: "1.2345 * 10^6"
  *
  **********************************************************************/
-function roundEng(x) {
+export function roundEng(x) {
 	let str = roundExp(x).replace('e+0', '').replace('e+', 'e');
 	if (str.replace('e', '').length !== str.length) {
 		// exponent existing
@@ -400,10 +455,49 @@ function roundEng(x) {
 }
 
 /**********************************************************************
+ * Der reguläre Ausdruck entspricht einer einzelnen Ziffer \d, gefolgt von einer dreistelligen 
+ * Menge (? = (\D {3}) + (?!\D)). Die übereinstimmende Ziffer wird dann durch $1 ersetzt. 
+ * $1 ist ein spezielles Ersetzungsmuster, das einen Wert der ersten in Klammern gesetzten Unter/
+ * übereinstimmungszeichenfolge enthält (in unserem Fall ist es die übereinstimmende Ziffer). 
+ * Das Komma ist das Trennzeichen. 
+ * Um eine Zahl in dem folgenden Format zu erhalten, z.B. XXX.XXX.XXX. 
+ * Es gilt zu beachten, dass einige Länder (USA etc.) den (Punkt) als Tausendertrennzeichen benutzen.
+ **********************************************************************/
+export function formCurrency(num, form) {
+	form = typeof form === 'undefined' ? '€' : form;
+	let ret = "";
+	switch (form) {
+		case "DE-Sym":								
+			ret = num
+			.toFixed(2) // always two decimal digits
+			.replace('.', ',') // replace decimal point character with ,
+			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' €'
+			break;
+		case "DE":								
+			ret = num
+			.toFixed(2)
+			.replace('.', ',')
+			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+			break;
+		case "US-Sym":								
+			ret = '$' + num
+			.toFixed(2)
+			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+			break;
+		default:
+			ret = num
+			.toFixed(2)
+			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' ' + form
+			break;
+	}
+  return ret;
+}
+
+/**********************************************************************
  * Koordinaten Konvertierung - GradDezimal in Grad Minute
  * Bsp: dd2dms(40.567534, 'long');	// 40° 34.224' E
  **********************************************************************/
-function dd2dm(degree, lat_long, dez) {
+export function dd2dm(degree, lat_long, dez) {
 	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
 	let deg = Math.abs(parseInt(degree));
 	let min = round((Math.abs(degree) - deg) * 60, 5);
@@ -419,7 +513,7 @@ function dd2dm(degree, lat_long, dez) {
  * Koordinaten Konvertierung - GradDezimal in Grad Minute Sekunde
  * Bsp: dd2dms(40.567534, 'long');	// 40° 34' 3.1224" E
  **********************************************************************/
-function dd2dms(degree, lat_long, dez) {
+export function dd2dms(degree, lat_long, dez) {
 	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
 	let deg = Math.abs(parseInt(degree));
 	let min = (Math.abs(degree) - deg) * 60;
@@ -438,7 +532,7 @@ function dd2dms(degree, lat_long, dez) {
  * Koordinaten Konvertierung - Grad Minute Sekunde in GradDezimal
  * Bsp: dms2dd(40, 34, 3.1224, 'E');	// 40,567534° E
  **********************************************************************/
-function dms2dd(deg, min, sec, dir, dez) {
+export function dms2dd(deg, min, sec, dir, dez) {
 	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
 	let sign;
 	if(dir) {
@@ -458,14 +552,14 @@ function dms2dd(deg, min, sec, dir, dez) {
 /**********************************************************************
  * Umrechnung Kilometer in Nautische Meilen
  **********************************************************************/
-function km2nm(km, dez) {
+export function km2nm(km, dez) {
 	return round(km / 1.851852, dez);
 }
 
 /**********************************************************************
  * Umrechnung Nautische Meilen in Kilometer
  **********************************************************************/
-function nm2km(nm, dez) {
+export function nm2km(nm, dez) {
 	return round(nm * 1.851852, dez);
 }
 
@@ -475,7 +569,7 @@ function nm2km(nm, dez) {
  * @param degree
  * @returns {number}
  **********************************************************************/
-let toRadians = function (degree) {
+let toRadians = function toRadians(degree) {
 	return degree * (Math.PI / 180);
 };
 
@@ -603,7 +697,7 @@ Geo.toBrng = function(deg, format, dp) {
  * 			... error message ...
  * 		}
  **********************************************************************/
-function cookiesEnabled() {
+export function cookiesEnabled() {
 	let cookieEnabled = (navigator.cookieEnabled) ? true : false;
 
 	if (typeof navigator.cookieEnabled == "undefined" && !cookieEnabled) { 
@@ -612,7 +706,7 @@ function cookiesEnabled() {
 	}
 	return (cookieEnabled);
 }
-function setCookie(name, value, days) {
+export function setCookie(name, value, days) {
 	let expires = "";
 	if (days) {
 		let date = new Date();
@@ -621,7 +715,7 @@ function setCookie(name, value, days) {
 	}
 	document.cookie = name + "=" + (value || "")  + expires + "; path=/";		// path is fix in "/"
 }
-function getCookie(name) {
+export function getCookie(name) {
 	let nameEQ = name + "=";
 	let ca = document.cookie.split(';');
 	for(var i=0;i < ca.length;i++) {
@@ -631,7 +725,7 @@ function getCookie(name) {
 	}
 	return null;
 }
-function delCookie(name) {   
+export function delCookie(name) {   
 	document.cookie = name + '=; Max-Age=0;';  
 }
 
@@ -701,11 +795,11 @@ function crypt_HGC(EinText, key, encrypt) {
 	}
 	return out;
 }
-function encrypt(text, key) {
+export function encrypt(text, key) {
 	key = typeof key === 'undefined' ? salt : key;
   return escape(crypt_HGC(text, key, 1));
 }
-function decrypt(chiffre, key) {
+export function decrypt(chiffre, key) {
 	key = typeof key === 'undefined' ? salt : key;
   return crypt_HGC(unescape(chiffre), key, 0);
 }
@@ -731,4 +825,56 @@ const getBase64 = url => fetch(url)
     reader.onerror = (error) => reject('Error: ', error)
 	}))
 
-export { geoDistance, getGeolocation, reverseGeocoding, location2Geo, getBrowserInfo, getIPAddress, getActual2ZuluDat, zulu2LocalDat, utc2date, utc2time, addDays, round, roundExp, dd2dm, dd2dms, dms2dd, km2nm, nm2km, toRadians, toDegree, cookiesEnabled, setCookie, getCookie, delCookie, encrypt, decrypt, getBase64 };
+/**********************************************************************
+ * use this to make a Base64 encoded string URL friendly, 
+ * i.e. '+' and '/' are replaced with '-' and '_' also any trailing '=' 
+ * characters are removed
+ *
+ * @param {String} str the encoded string
+ * @returns {String} the URL friendly encoded String
+ **********************************************************************/
+export function Base64EncodeUrl(str){
+	str = typeof str === 'undefined' ? String(str) : str;
+	return encodeURI(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/\=+$/, '');
+}
+
+/**********************************************************************
+ * Use this to recreate a Base64 encoded string that was made URL friendly 
+ * using Base64EncodeurlFriendly.
+ * '-' and '_' are replaced with '+' and '/' and also it is padded with '+'
+ *
+ * @param {String} str the encoded string
+ * @returns {String} the URL friendly encoded String
+ **********************************************************************/
+export function Base64DecodeUrl(str){
+	str = typeof str === 'undefined' ? String(str) : str;
+	//str = (str + '===').slice(0, str.length + (str.length % 4));
+	str = str.slice(0, str.length + (str.length % 4));
+	return decodeURI(str).replace(/-/g, '+').replace(/_/g, '/');
+}
+
+/**********************************************************************
+ * The searchParams readonly property of the URL interface returns a 
+ * URLSearchParams object allowing access to the GET decoded query 
+ * arguments contained in the URL.
+ * Bsp.:
+ *		https://example.com/?name=Jonathan%20Smith&age=18
+ *
+ * @param {String} para unique url-parameter
+ * @returns {String} the ? and/or & parameter of URL
+ **********************************************************************/
+export function getUrlPara(para) {
+	para = typeof para === 'undefined' ? false : String(para);
+	const params = (new URL(document.location)).searchParams;
+	if (!para) {										// return of all url-parameters as whole string:
+		return decodeURI(params).replace(/_/g, '/').replace(/\+/g, ' ');	// "name=Jonathan Smith&age=18"
+	} else {												// question of unique parameter
+		if (params.has(para)) {		// check if parameter exists
+			return params.get(para);		// if para=name, returns "Jonathan Smith"
+		} else {											// parameter does not exists
+			return false	// error string
+		}
+	}
+}
+
+export { toRadians, toDegree, getBase64 };
