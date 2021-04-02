@@ -234,6 +234,18 @@ export function getActual2ZuluDat() {
 	return iso;
 }
 
+
+/**********************************************************************
+ * Konvertiert lokales UTC-Datum in Zulu-Zeit (GMT)
+ * Bsp.:
+ * 		console.log(utc2Zulu('2020-12-18T09:05:08.375');
+ * 		// 2020-12-18T07:05:08.375Z
+ **********************************************************************/
+export function utc2Zulu(utc) {
+	const dat = new Date(utc);
+	return dat.toISOString(); 
+}
+
 /**********************************************************************
  * Konvertiert einen Zulu-Zeit-String in Lokale-Zeit-Darstellung
  * Bsp.: 
@@ -283,17 +295,42 @@ export function zulu2LocalDat(isoString) {
 	return `${data[0]}T${full[1]}.${dateParts[6]}`;
 }
 
+
 /**********************************************************************
- * Konvertiert aus einen UTC-String entsprechend Datum und/oder Uhrzeit
+ * Konvertiert eine Zahl oder String in einen String mit führenden Nullen
+ * @param {Number|String} num
+ * @param {Number} digit
+ * @returns {String}
+ * Bsp.: 
+ * 		const num = 22;
+ * 		const digit = 3;
+ * 		console.log("ZeroFill: " + zeroFill(num, digit));
+ * 		// "ZeroFill: 022"
+ * 		console.log("ZeroFill: " + zeroFill('Test', 6));
+ * 		// "ZeroFill: 00Test"
+ **********************************************************************/
+export function zeroFill(number, digits) {
+	number = typeof number === 'undefined' ? "" : number + "";	// always a string
+  digits -= number.length;
+  if (digits > 0) {
+    return new Array(digits + (/\./.test(number) ? 2 : 1)).join('0') + number;
+  }
+  return number;
+}
+
+/**********************************************************************
+ * Konvertiert aus einen UTC-String entsprechend Datum und/oder Uhrzeit.
+ * Wenn Monat, Tag, Stunde, Minute, Sekunde nur einstellig übergeben werden, 
+ * dann werden führende Nullen ergänzt. 
  * Bsp.: 
  * 			Wenn aktuelle Abfrage-Device in MESZ (UTC+2)
- *				const dat = "2020-12-18T09:05:08.375Z";
+ *				const dat = "2020-12-18T9:5:8.375";
  *				const form = "veryShortDat"; 
  *				utc2date(dat, form); 
  *					console.log(dat); // 18. DEZ 2020
  *
  *						form:
- *							'array'						// ["Fr", "Freitag", "18", "DEZ", "DEZEMBER", "12", "2020", "09", "05", "08"]
+ *							'array'						// ["Fr", "Freitag", "18", "DEZ", "DEZEMBER", "12", "2020", "09", "05", "08", "375"]
  *							'simpleDat'				// 18.12.2020  (default)
  *							'shortDat'				// Fr, 18. DEZ 2020 
  *							'longDat'					// Freitag, den 18. DEZEMBER 2020
@@ -301,19 +338,32 @@ export function zulu2LocalDat(isoString) {
  *							'veryShortTime'		// 09:05
  *							'shortTime'				// 09:05:08
  *							'longTime'				// 9 Uhr, 5 Min., 8 Sek.
+ *							'datTime'					// 18. DEZ 2020, 09:05
  *							'IT'							// 2020-12-18
  *							'iCal'						// 20201218T090508Z
+ *							'UTCZ'						// 2020-12-18T09:03:08.375Z
  **********************************************************************/
 export function utc2date(utc, form) {
 	form = typeof form === 'undefined' ? 'simpleDat' : form;
-	form = typeof form === 'undefined' ? 'array' : form;
 	
 	const dat = utc.split('T');
+
+	const date = dat[0].split('-');
+	dat[0] = `${date[0]}-${zeroFill(date[1], 2)}-${zeroFill(date[2], 2)}`;
+
+	const t = dat[1].split('.');
+	const	hms = t[0].split(':');
+	const time = `${zeroFill(hms[0], 2)}:${zeroFill(hms[1], 2)}:${zeroFill(hms[2], 2)}`;
+	const dS = t[1].substr(0, t[1].length - 1);			// delete last char: Z
+	const decSec = zeroFill(dS, 3);
+	dat[1] = `${time}.${decSec}`;
+
 	const YYYY = dat[0].substring(0, 4);
-	const MM = dat[0].substring(5, 7) - 1;
+	const MM = parseInt(dat[0].substring(5, 7)) - 1;
 	let partDat = dat[0].split('-');
 	
-	const datum = new Date(utc);
+	const utcForm = `${dat[0]}T${dat[1]}Z`;
+	const datum = new Date(utcForm);
 	const WD = datum.getDay();
 
 	const weekday_long = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -329,7 +379,7 @@ export function utc2date(utc, form) {
 	let ret = "";
 	switch (form) {
 		case "simpleDat":								
-			ret = `${partDat[2]}.${String(MM +1)}.${YYYY}`;
+			ret = `${partDat[2]}.${zeroFill(String(MM +1), 2)}.${YYYY}`;
 			break;
 		case "veryShortDat":								
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
@@ -353,19 +403,26 @@ export function utc2date(utc, form) {
 			let partTime = dat[1].split(':');
 			ret = `${parseInt(partTime[0])} Uhr, ${parseInt(partTime[1])} Min., ${parseInt(partTime[2])} Sek.`;
 			break;	
-			case "IT":
+		case "datTime":
+				ret = `${partDat[2]}. ${monShort} ${YYYY}, ${dat[1].substring(0, 5)}`;
+				break;
+		case "IT":
 				ret = `${dat[0]}`;
 				break;	
 		case "array":
-			ret = [dayShort, dayLong, partDat[2], monShort, monLong, String(MM +1), YYYY, dat[1].substring(0, 2), dat[1].substring(3, 5), dat[1].substring(6, 8)];
+			ret = [dayShort, dayLong, partDat[2], monShort, monLong, zeroFill(String(MM +1), 2), YYYY, dat[1].substring(0, 2), dat[1].substring(3, 5), dat[1].substring(6, 8), dat[1].substring(9, 12)];
 			break;
 		case "iCal":
 			const iCalDate = dat[0].replaceAll('-', '');
 			const t = dat[1].replaceAll(':', '');
 			const iCalTime = t.substring(0, t.length -5);
 			ret = `${iCalDate}T${iCalTime}Z`;
-			break;			
-		default:
+			break;		
+		case "UTCZ":
+			const utc = `${dat[0]}T${dat[1]}`;
+			ret = `${utc2Zulu(utc)}`;
+			break;
+		default:at
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
 	}
 	return ret;
@@ -464,14 +521,14 @@ export function roundEng(x) {
  * Es gilt zu beachten, dass einige Länder (USA etc.) den (Punkt) als Tausendertrennzeichen benutzen.
  **********************************************************************/
 export function formCurrency(num, form) {
-	form = typeof form === 'undefined' ? '€' : form;
+	form = typeof form === 'undefined' ? 'EUR' : form;
 	let ret = "";
 	switch (form) {
 		case "DE-Sym":								
 			ret = num
 			.toFixed(2) // always two decimal digits
 			.replace('.', ',') // replace decimal point character with ,
-			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' €'
+			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' EUR'
 			break;
 		case "DE":								
 			ret = num
@@ -687,6 +744,7 @@ Geo.toBrng = function(deg, format, dp) {
  * 		let name = "cookie_name";	// name of cookie
  * 		let value = "test";				// value of cookie
  * 		let days = 7;							// expires in 7 days
+ * 
  * 		setCookie(name, value, days);
  * 
  * 		let cookie = getCookie(name);	// return string or null
@@ -875,6 +933,136 @@ export function getUrlPara(para) {
 			return false	// error string
 		}
 	}
+}
+
+/********************************************************************** 
+ * OBJEKT NACH EIGENSCHAFT GRUPPIEREN
+ * Bsp.: 
+ *	const people = [ 
+ *		{ name: 'Alice', age: 21 }, 
+ *		{ name: 'Max', age: 20 }, 
+ *		{ name: 'Jane', age: 20 } 
+ *	];
+ *	let groupedPeople = groupBy(people, 'age');
+ * 	{
+ *   20: [
+ *     { name: 'Max', age: 20 },
+ *     { name: 'Jane', age: 20 }
+ *   ],
+ *   21: [{ name: 'Alice', age:21 }]
+ * 	}
+ **********************************************************************/
+export function groupObjArr(objectArray, property) {
+  return objectArray.reduce(function (acc, obj) {
+    let key = obj[property];
+    if(!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(obj);
+    return acc;
+  }, {});
+}
+
+/********************************************************************** 
+ * In einem Objekt-Array ein Objekt-Property löschen  
+ * Bsp.: 
+ *	const people = [ 
+ *		{ name: 'Alice', age: 21 }, 
+ *		{ name: 'Max', age: 20 }, 
+ *		{ name: 'Jane', age: 20 } 
+ *	];
+ *	const property = "name";
+ *	const value = "Max";
+ *	let obj = delObjArr(people, property, value);
+ *	[
+ *    { name: 'Alice', age: 21 },
+ *    { name: 'Jane', age: 20 }
+ *   ]
+ **********************************************************************/
+export function delObjArr(objArr, property, value) {
+	// Delete array item from sorted object
+	let index = objArr.map(item => item[property]).indexOf(value);
+	if (index > -1) {
+		objArr.splice(index, 1);
+	}
+	return objArr;		// returned the new reduced array object
+}
+
+/********************************************************************** 
+ * In einem Objekt-Array ein Objekt-Property hinzufügen
+ * Bsp.: 
+ *	const people = [ 
+ *		{ name: 'Alice', age: 21 }, 
+ *		{ name: 'Max', age: 20 }, 
+ *	];
+ *	const newObj = { name: 'Jane', age: 20 };
+ *	let obj = delObjArr(people, newObj);
+ *	[ 
+ *		{ name: 'Alice', age: 21 }, 
+ *		{ name: 'Max', age: 20 }, 
+ *		{ name: 'Jane', age: 20 } 
+ *	]
+ *********************************************************************/
+export function addObjArr(objArr, newObj, pos) {
+	pos = typeof pos === 'undefined' ? "last" : pos;
+	if (pos == "last") {
+		objArr.push(newObj);
+	} else {
+		objArr.unshift(newObj);
+	}
+	return objArr;	// returned the new added array object
+}
+
+/********************************************************************** 
+ * In einem Objekt-Array ein Objekt-Property finden
+ * Bsp.: 
+ * Get first matching property:
+ * 	const people = [{...}];
+ * 	const property = "name";
+ *	const value = "Max";
+ *	const para = "first" or omitting
+ * 	let obj = findObjArr(people, property, value, para);
+ * 		{ name: 'Max', age: 20 }, 
+ * 
+ * Get multiple matching properties
+ * 	const property = "ager";
+ *	const value = "20";
+ *	const para = "first" or omitting
+ * 	let obj = findObjArr(people, property, value, para);
+ * 		[ 
+ *			{ name: 'Max', age: 20 }, 
+ *			{ name: 'Jane', age: 20 } 
+ *		]
+ **********************************************************************/
+export function findObjArr(objArr, property, value, para) {
+	para = typeof para === 'undefined' ? "first" : para;
+	if(para === "first") {
+		return objArr.find(obj => obj[property] === value)
+	} else {
+		return objArr.filter(obj => obj[property] === value)
+	}
+}
+
+/********************************************************************** 
+ * Sortiert ein Objekt-Array nach einem Objekt-Property
+ * Bsp.: 
+ * 	const objArr = [{...}];
+ * 	const sortProp = "age";
+ * 	const oder = "asc";
+ * 	let obj = sortObjArr(objArr, sortProp, order);
+ *	[ 
+ *		{ name: 'Max', age: 20 }, 
+ *		{ name: 'Jane', age: 20 }, 
+ *		{ name: 'Alice', age: 21 } 
+ *	]
+ **********************************************************************/ 
+export function sortObjArr(objArr, sortProp, order) {
+	oder = typeof order === 'undefined' ? "asc" : "des";		// -1: ascending; 1: descending
+	if(order === "des") {
+		return objArr.sort((c1, c2) => (c1[sortProp] < c2[sortProp]) ? -1 : (c1[sortProp] > c2[sortProp]) ? 1 : 0)
+	} else {
+		return objArr.sort((c1, c2) => (c1[sortProp] < c2[sortProp]) ? 1 : (c1[sortProp] > c2[sortProp]) ? -1 : 0)
+	}	
 }
 
 export { toRadians, toDegree, getBase64 };
