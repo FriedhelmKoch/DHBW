@@ -131,31 +131,31 @@ export function reverseGeocoding(lon, lat, sessionKey) {
 	})
 }
 
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// Location mit Straße, Nr, PLZ und Ort in Geo-Koordinaten umgewandeln.
-// Bsp.:
-//				let str = 'Lenbachstraße';
-//				let strNo = '22';
-//				let zip = '86529';
-//				let city = 'Schrobenhausen';
-//				location2Geo(str, strNo, zip, city, "locationJSON");
-//					let locationStr = sessionStorage.getItem("locationJSON");
-//					let locationObj = JSON.parse(locationStr);
-//					console.log(JSON.stringify(locationObj));
-//					// {"lat":"48.5620576","lon":"11.264430424966125"}
-//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-export function location2Geo(str, strNo, zip, city, sessionKey) {
-	sessionKey = !sessionKey ? "locationJSON" : sessionKey; 
-	fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + str + ' ' + strNo + ', ' + zip + ' ' + city)
-		.then(function(response) {
-				return response.json();
-		})
-		.then(function(json) {
-			const value = { lat: json[0].lat, lon: json[0].lon }; 
-			sessionStorage.setItem(sessionKey, JSON.stringify(value));
-		})
+/**********************************************************************
+ * Location mit Straße Nr, PLZ und Ort in Geo-Koordinaten umgewandeln.
+ * Bsp.:
+ *		let strNo = 'Riesstr. 25';
+ *		let zip = '80992';
+ *		let city = 'München';
+ *		const geoLoc = await location2Geo(strNo, zip, city);
+ *		console.log(JSON.stringify(geoLoc));
+ *			// { "lat":"48.5620576", "lon":"11.26443042" }
+ **********************************************************************/
+export async function location2Geo(strNo, zip, city) {
+	const response = await fetch(
+		"https://nominatim.openstreetmap.org/search?format=json&q=" + strNo + ", " + zip + " " + city
+	).catch(err => {
+		console.log("DEBUG - nominatim service error: " + err);
+	});
+	if (response !== undefined) {
+		const json = await response.json();
+		if(json.length !== 0) {
+			return { lat: json[0].lat, lon: json[0].lon };
+		} else {
+			console.log("DEBUG - no response from nominatim service!");
+		}
+	}
 }
-
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // Browserparameter abfragen und in SessionStore speichern
@@ -354,7 +354,7 @@ export function utc2date(utc, form) {
 	const t = dat[1].split('.');
 	const	hms = t[0].split(':');
 	const time = `${zeroFill(hms[0], 2)}:${zeroFill(hms[1], 2)}:${zeroFill(hms[2], 2)}`;
-	const dS = t[1].substr(0, t[1].length - 1);			// delete last char: Z
+	const dS = t[1].substr(0, t[1].length - 1);				// delete last char: Z
 	const decSec = zeroFill(dS, 3);
 	dat[1] = `${time}.${decSec}`;
 
@@ -363,23 +363,23 @@ export function utc2date(utc, form) {
 	let partDat = dat[0].split('-');
 	
 	const utcForm = `${dat[0]}T${dat[1]}Z`;
-	const datum = new Date(utcForm);
-	const WD = datum.getDay();
+	const datum = new Date(utcForm.replace(",", ""));	// needs to delete comma, because combining two array-items
+	const WD = parseInt(datum.getDay());
 
 	const weekday_long = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 	const weekday_short = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 	const month_long = ['JANUAR', 'FEBRUAR', 'MÄRZ', 'APRIL', 'MAI', 'JUNI', 'JULI', 'AUGUST', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DEZEMBER'];
 	const month_short = ['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'];
-	
-	const dayShort = weekday_short[parseInt(WD)];
-	const dayLong = weekday_long[parseInt(WD)];
-	const monShort = month_short[parseInt(MM)];
-	const monLong = month_long[parseInt(MM)];
+
+	const dayShort = weekday_short[WD];
+	const dayLong = weekday_long[WD];
+	const monShort = month_short[MM];
+	const monLong = month_long[MM];
 	
 	let ret = "";
 	switch (form) {
 		case "simpleDat":								
-			ret = `${partDat[2]}.${zeroFill(String(MM +1), 2)}.${YYYY}`;
+			ret = `${partDat[2]}.${zeroFill(String(MM + 1), 2)}.${YYYY}`;
 			break;
 		case "veryShortDat":								
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
@@ -410,12 +410,12 @@ export function utc2date(utc, form) {
 				ret = `${dat[0]}`;
 				break;	
 		case "array":
-			ret = [dayShort, dayLong, partDat[2], monShort, monLong, zeroFill(String(MM +1), 2), YYYY, dat[1].substring(0, 2), dat[1].substring(3, 5), dat[1].substring(6, 8), dat[1].substring(9, 12)];
+			ret = [dayShort, dayLong, partDat[2], monShort, monLong, zeroFill(String(MM + 1), 2), YYYY, dat[1].substring(0, 2), dat[1].substring(3, 5), dat[1].substring(6, 8), dat[1].substring(9, 12)];
 			break;
 		case "iCal":
 			const iCalDate = dat[0].replaceAll('-', '');
 			const t = dat[1].replaceAll(':', '');
-			const iCalTime = t.substring(0, t.length -5);
+			const iCalTime = t.substring(0, t.length - 5);
 			ret = `${iCalDate}T${iCalTime}Z`;
 			break;		
 		case "UTCZ":
@@ -526,25 +526,29 @@ export function formCurrency(num, form) {
 	switch (form) {
 		case "DE-Sym":								
 			ret = num
-			.toFixed(2) // always two decimal digits
-			.replace('.', ',') // replace decimal point character with ,
-			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' EUR'
+				.toFixed(2) // always two decimal digits
+				.replace('.', ',') // replace decimal point character with ,
+				.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' EUR'
 			break;
 		case "DE":								
 			ret = num
-			.toFixed(2)
-			.replace('.', ',')
-			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+				.toFixed(2)
+				.replace('.', ',')
+				.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
 			break;
 		case "US-Sym":								
 			ret = '$' + num
-			.toFixed(2)
-			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+				.toFixed(2)
+				.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
 			break;
+		case "IT":								
+			ret = num
+				.toFixed(2)
+			break;	
 		default:
 			ret = num
-			.toFixed(2)
-			.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' ' + form
+				.toFixed(2)
+				.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' ' + form
 			break;
 	}
   return ret;
@@ -952,7 +956,7 @@ export function getUrlPara(para) {
  *   21: [{ name: 'Alice', age:21 }]
  * 	}
  **********************************************************************/
-export function groupObjArr(objectArray, property) {
+export function groupBy(objectArray, property) {
   return objectArray.reduce(function (acc, obj) {
     let key = obj[property];
     if(!acc[key]) {

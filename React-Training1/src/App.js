@@ -2,7 +2,7 @@ import React from 'react';
 import { GetActualZulu, ZuluToLocal } from './dateUTC';
 import './App.css';
 
-/* JSX Variablen und Destructuring */
+// JSX Variablen und Destructuring
 
 const datum = "2020-11-05T11:34:00Z";
 console.log("Aktuelle Zeit in Zulu-Datum: " + GetActualZulu());
@@ -23,7 +23,7 @@ function getTitle() {
   const tit2 = "DHBW";
   return "03: <h1>" + tit1 + " " + tit2 + "!</h1>";
 }
-console.log(getTitle());
+console.log("Überschrift: " + getTitle());
 
 const contact = {
   person: {
@@ -40,10 +40,10 @@ const contact = {
 
 const {person} = contact;
 const {adresse} = person;
-console.log(`${adresse.plz}    ${adresse.ort}`);
+console.log(`PLZ: ${adresse.plz}, Ort: ${adresse.ort}`);
 
 const {vorName: name} = person;     //umbennen
-console.log(`Vorname=${name}`);
+console.log(`Vorname = ${name}`);
 
 function combineName(name) {
   return name.vorName + ' ' + name.nachName;
@@ -52,19 +52,19 @@ const gruss = 'Ich heiße: ' + combineName(contact.person);
 console.log(gruss);
 
 function schreibe({email: mailAdresse}) {;
-  console.log(`Email-Contact=${mailAdresse}`);
+  console.log(`Email-Contact = ${mailAdresse}`);
 }
 schreibe(contact);
 
 const {person: {adresse: {plz, ort: origin}}} = contact;  // extrahieren und umbennen
-console.log(`Type of Adresse=${typeof adresse}`);
+console.log(`Type of Adresse = ${typeof adresse}`);
 
 console.log(`plz=${plz}`); 
 console.log(`ort=${origin}`);
 
 const [firstName, lastName] = ['Max', 'Mustermann'];
-console.log(`Vorname=${firstName}`);  // Vorname=Max
-console.log(`Nachname=${lastName}`);  // Nachname=Mustermann
+console.log(`Vorname = ${firstName}`);  // Vorname=Max
+console.log(`Nachname = ${lastName}`);  // Nachname=Mustermann
 
 console.log(`${firstName} kann ${759 * 0.30} EUR Fahrtkosten 
   steuerlich absetzen!`);
@@ -83,5 +83,46 @@ function App() {
     </div>
   );
 }
+
+// Async/Await Beispiele von Promises und deren Async-/Synchronitäten
+//
+async function hello() {
+  await Promise.resolve("Hello") //resolved - ist erfüllt!
+  .then (res => console.log("Ich sage " + res))
+};
+hello();
+
+function albert() {
+  const url=`https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=Albert Einstein`;
+  fetch (url)
+    .then (response => response.json())
+    .then (json => console.log("======= Albert Einstein - 1. Wiki Abfrage: /n" + JSON.stringify(json)))
+    .catch (response => response.json());
+} 
+
+// Wikipedia Abfrage -> JSON Objekt
+async function searchWikipedia(searchQuery) {
+  const url=`https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=${searchQuery}`;
+  await fetch (url)
+    .then (response => response.json())
+    .then (json => console.log("======= Isaac Newton: /n" + JSON.stringify(json)))
+    .catch (response => response.json())
+}
+
+async function should_sequentiell() {
+  console.log("======= START Async/Await Beispiel");
+
+  albert();                                               // erst die Wiki-Abfrage
+  console.log("Ausgabe synchron nach Albert Einstein");   // dann die console.log Ausgabe
+
+  await searchWikipedia('Isaac Newton');                  // erst die Wiki-Abfrage
+  console.log("======= Ausgabe synchron nach Isaac Newton");      // dann die console.log Ausgabe
+
+  console.log("======= ENDE");
+}
+should_sequentiell();
+
+
+
 
 export default App;
