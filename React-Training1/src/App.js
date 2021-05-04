@@ -84,6 +84,34 @@ function App() {
   );
 }
 
+
+// Map/Reduce Beispiel
+//
+const objArr = [
+	{text: "Prod-1", preis: "11.50", anzahl: 20}, 
+	{text: "Prod-2", preis: "12.00", anzahl: 30}, 
+	{text: "Prod-3", preis: "13.50", anzahl: 10}
+];
+
+let umsatzProd = [0.00, 0.00, 0.00];
+objArr.map((item, index) => {
+	umsatzProd[index] = parseFloat(item.preis) * parseInt(item.anzahl);
+})
+console.log("Umsatz-Array: " + JSON.stringify(umsatzProd));
+
+// Aufaddieren aller Umsätze im Array
+let totalUmsatz = umsatzProd.reduce((prev, current) => prev + current);
+console.log("Umsatz über alle Produkte: " + totalUmsatz);
+
+// Max-Wert über Array - Best Product
+let maxArr = umsatzProd.reduce((prev, current) => prev > current ? prev : current);
+console.log(`Max. Preis im Array: ${maxArr}`);
+
+// Min-Wert über Array
+let minArr = umsatzProd.reduce((prev, current) => prev < current ? prev : current);
+console.log(`Min. Preis im Array: ${minArr}`);
+
+
 // Async/Await Beispiele von Promises und deren Async-/Synchronitäten
 //
 async function hello() {
@@ -96,7 +124,7 @@ function albert() {
   const url=`https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=Albert Einstein`;
   fetch (url)
     .then (response => response.json())
-    .then (json => console.log("======= Albert Einstein - 1. Wiki Abfrage: /n" + JSON.stringify(json)))
+    .then (json => console.log("======= Albert Einstein - 1. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 200) + "..."))
     .catch (response => response.json());
 } 
 
@@ -105,7 +133,7 @@ async function searchWikipedia(searchQuery) {
   const url=`https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=${searchQuery}`;
   await fetch (url)
     .then (response => response.json())
-    .then (json => console.log("======= Isaac Newton: /n" + JSON.stringify(json)))
+    .then (json => console.log("======= Isaac Newton: /n" + JSON.stringify(json).substring(0, 200) + "..."))
     .catch (response => response.json())
 }
 
