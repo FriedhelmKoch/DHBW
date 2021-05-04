@@ -1,12 +1,16 @@
 import React from 'react';
-import { GetActualZulu, ZuluToLocal } from './dateUTC';
 import './App.css';
+
+// Datum und Zeit
+
+const iso = new Date().toISOString(); 
+let dat = new Date(iso);
+dat.toISOString(); 
 
 // JSX Variablen und Destructuring
 
-const datum = "2020-11-05T11:34:00Z";
-console.log("Aktuelle Zeit in Zulu-Datum: " + GetActualZulu());
-console.log("Zulu-Datum (2020-11-05T11:34:00Z) in lokales Datum: " + ZuluToLocal(datum));
+console.log("Aktuelle Zeit in Zulu-Datum: " + iso);     // ISO Format: 2020-11-05T11:34:12.000Z
+console.log(`Zulu-Datum: (${iso}) in lokales Datum: ${dat}`);
 
 const tit1 = "Hello";          // string
 const tit2 = "DHBW";
@@ -87,15 +91,17 @@ function App() {
 
 // Map/Reduce Beispiel
 //
+console.log("------- map / reduce -------");
 const objArr = [
-	{text: "Prod-1", preis: "11.50", anzahl: 20}, 
-	{text: "Prod-2", preis: "12.00", anzahl: 30}, 
-	{text: "Prod-3", preis: "13.50", anzahl: 10}
+	{dat: iso, text: "Prod-1", preis: "11.50", anzahl: 20}, 
+	{dat: iso, text: "Prod-2", preis: "12.00", anzahl: 30}, 
+	{dat: iso, text: "Prod-3", preis: "13.50", anzahl: 10}
 ];
 
 let umsatzProd = [0.00, 0.00, 0.00];
 objArr.map((item, index) => {
 	umsatzProd[index] = parseFloat(item.preis) * parseInt(item.anzahl);
+  console.log(`Anlage-Datum (${index}) - Prod-${index + 1}: ${item.dat}`);
 })
 console.log("Umsatz-Array: " + JSON.stringify(umsatzProd));
 
@@ -114,9 +120,10 @@ console.log(`Min. Preis im Array: ${minArr}`);
 
 // Async/Await Beispiele von Promises und deren Async-/Synchronitäten
 //
+console.log("------- async / await -------");
 async function hello() {
   await Promise.resolve("Hello") //resolved - ist erfüllt!
-  .then (res => console.log("Ich sage " + res))
+  .then (res => console.log("== 1. Ich starte vor Einstein und Newton"))
 };
 hello();
 
@@ -124,7 +131,7 @@ function albert() {
   const url=`https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=Albert Einstein`;
   fetch (url)
     .then (response => response.json())
-    .then (json => console.log("======= Albert Einstein - 1. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 200) + "..."))
+    .then (json => console.log("== 3. Albert Einstein - 1. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 200) + "..."))
     .catch (response => response.json());
 } 
 
@@ -133,24 +140,22 @@ async function searchWikipedia(searchQuery) {
   const url=`https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=${searchQuery}`;
   await fetch (url)
     .then (response => response.json())
-    .then (json => console.log("======= Isaac Newton: /n" + JSON.stringify(json).substring(0, 200) + "..."))
+    .then (json => console.log("== 5. Isaac Newton - 2. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 200) + "..."))
     .catch (response => response.json())
 }
 
 async function should_sequentiell() {
-  console.log("======= START Async/Await Beispiel");
+  console.log("== 2. START Async/Await Beispiel");
 
   albert();                                               // erst die Wiki-Abfrage
-  console.log("Ausgabe synchron nach Albert Einstein");   // dann die console.log Ausgabe
+  console.log("== 4. Ausgabe synchron nach Albert Einstein");   // dann die console.log Ausgabe
 
   await searchWikipedia('Isaac Newton');                  // erst die Wiki-Abfrage
-  console.log("======= Ausgabe synchron nach Isaac Newton");      // dann die console.log Ausgabe
+  console.log("== 6. Ausgabe synchron nach Isaac Newton");      // dann die console.log Ausgabe
 
-  console.log("======= ENDE");
+  console.log("== 7. ENDE");
 }
 should_sequentiell();
-
-
 
 
 export default App;
