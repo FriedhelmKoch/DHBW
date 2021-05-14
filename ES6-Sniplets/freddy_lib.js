@@ -234,7 +234,6 @@ export function getActual2ZuluDat() {
 	return iso;
 }
 
-
 /**********************************************************************
  * Konvertiert lokales UTC-Datum in Zulu-Zeit (GMT)
  * Bsp.:
@@ -295,7 +294,6 @@ export function zulu2LocalDat(isoString) {
 	return `${data[0]}T${full[1]}.${dateParts[6]}`;
 }
 
-
 /**********************************************************************
  * Konvertiert eine Zahl oder String in einen String mit führenden Nullen
  * @param {Number|String} num
@@ -344,8 +342,10 @@ export function zeroFill(number, digits) {
  *							'UTCZ'						// 2020-12-18T09:03:08.375Z
  **********************************************************************/
 export function utc2date(utc, form) {
-	form = typeof form === 'undefined' ? 'simpleDat' : form;
-	
+	form = typeof form === 'undefined' ? 'simpleDat' : form;		// check if form undefined
+	utc = typeof utc === 'undefined' ? "1970-01-01T01:01:01.000Z" : utc;
+	if(utc.indexOf("T") < 0 ) {return "utc format incorrect"};	// check if utc string correct
+
 	const dat = utc.split('T');
 
 	const date = dat[0].split('-');
@@ -422,7 +422,7 @@ export function utc2date(utc, form) {
 			const utc = `${dat[0]}T${dat[1]}`;
 			ret = `${utc2Zulu(utc)}`;
 			break;
-		default:at
+		default:
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
 	}
 	return ret;
