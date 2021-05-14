@@ -34,7 +34,7 @@ const contact = {
     vorName: 'Max',
     nachName: 'Mustermann',
     adresse: {
-      plz: '22357',
+      plz: '22888',
       ort: 'Hamburg',
     }
   },
@@ -49,8 +49,8 @@ console.log(`PLZ: ${adresse.plz}, Ort: ${adresse.ort}`);
 const {vorName: name} = person;     //umbennen
 console.log(`Vorname = ${name}`);
 
-function combineName(name) {
-  return name.vorName + ' ' + name.nachName;
+function combineName(item) {
+  return item.vorName + ' ' + item.nachName;
 }
 const gruss = 'Ich heiße: ' + combineName(contact.person);
 console.log(gruss);
@@ -62,6 +62,7 @@ schreibe(contact);
 
 const {person: {adresse: {plz, ort: origin}}} = contact;  // extrahieren und umbennen
 console.log(`Type of Adresse = ${typeof adresse}`);
+console.log("Obj: " + JSON.stringify(adresse.plz));
 
 console.log(`plz=${plz}`); 
 console.log(`ort=${origin}`);
@@ -69,6 +70,8 @@ console.log(`ort=${origin}`);
 const [firstName, lastName] = ['Max', 'Mustermann'];
 console.log(`Vorname = ${firstName}`);  // Vorname=Max
 console.log(`Nachname = ${lastName}`);  // Nachname=Mustermann
+const arr = [0,1,2,3];
+console.log("Arr: " + arr[2]);
 
 console.log(`${firstName} kann ${759 * 0.30} EUR Fahrtkosten 
   steuerlich absetzen!`);
@@ -101,7 +104,9 @@ const objArr = [
 let umsatzProd = [0.00, 0.00, 0.00];
 objArr.map((item, index) => {
 	umsatzProd[index] = parseFloat(item.preis) * parseInt(item.anzahl);
-  console.log(`Anlage-Datum (${index}) - Prod-${index + 1}: ${item.dat}`);
+  return (
+    console.log(`Anlage-Datum (${index}) - Prod-${index + 1}: ${item.dat}`)
+  );
 })
 console.log("Umsatz-Array: " + JSON.stringify(umsatzProd));
 
@@ -121,9 +126,11 @@ console.log(`Min. Preis im Array: ${minArr}`);
 // Async/Await Beispiele von Promises und deren Async-/Synchronitäten
 //
 console.log("------- async / await -------");
+console.log("== 1. START Async/Await Beispiel");
+
 async function hello() {
   await Promise.resolve("Hello") //resolved - ist erfüllt!
-  .then (res => console.log("== 1. Ich starte vor Einstein und Newton"))
+  .then (res => console.log("== 2. Ich starte vor Einstein und Newton"))
 };
 hello();
 
@@ -145,15 +152,17 @@ async function searchWikipedia(searchQuery) {
 }
 
 async function should_sequentiell() {
-  console.log("== 2. START Async/Await Beispiel");
+  console.time("timer");
+  hello();
 
-  albert();                                               // erst die Wiki-Abfrage
-  console.log("== 4. Ausgabe synchron nach Albert Einstein");   // dann die console.log Ausgabe
+  albert();                                              // erst die Wiki-Abfrage
+  console.log(`== 4. Ausgabe synchron nach Albert Einstein`);   // dann die console.log Ausgabe
 
   await searchWikipedia('Isaac Newton');                  // erst die Wiki-Abfrage
   console.log("== 6. Ausgabe synchron nach Isaac Newton");      // dann die console.log Ausgabe
 
   console.log("== 7. ENDE");
+  console.timeEnd("timer");
 }
 should_sequentiell();
 
