@@ -1,5 +1,7 @@
 import React from 'react';
 import './App.css';
+// IndexedDB
+import { set, get, del, keys, createStore } from 'idb-keyval';
 
 // Datum und Zeit
 
@@ -165,6 +167,26 @@ async function should_sequentiell() {
   console.timeEnd("timer");
 }
 should_sequentiell();
+
+
+// IndexedDB
+//
+/*
+console.log("------- indexedDB -------");
+set('hello', 'DHBW');
+get('hello').then((val) => console.log('value: ' + val));   // DHBW
+keys().then((keys) => console.log('keys: ' + keys));        // logs: hello
+
+// Benutzerspezifizierter Datenbank und Store name
+const custom_db_name = 'Hochschule';
+const custom_store_name = 'DHBW';
+const customStore = createStore(custom_db_name, custom_store_name);
+set('hello', 'DHBW', customStore);
+
+// Löscht alle values im entsprechenden store
+//del('hello');
+//del('hello', customStore);
+*/
 
 
 export default App;
