@@ -8,6 +8,7 @@ import { set, get, del, keys, createStore } from 'idb-keyval';
 const iso = new Date().toISOString(); 
 let dat = new Date(iso);
 dat.toISOString(); 
+const locDat = `Zulu-Datum: (${iso}) in lokales Datum: ${dat}`;
 
 // JSX Variablen und Destructuring
 
@@ -31,6 +32,18 @@ function getTitle() {
 }
 console.log("Überschrift: " + getTitle());
 
+function App() {
+  return (
+    <div className="App">
+      <header>
+        (UTC: {iso})
+        {combination}
+        <h2>Weitere Beispiele... Ausgabe unter console.log()</h2>
+      </header>
+    </div>
+  );
+}
+
 const contact = {
   person: {
     vorName: 'Max',
@@ -41,6 +54,10 @@ const contact = {
     }
   },
   email: 'max@domain.ext',
+  test: {
+    t1: 't1',
+    t2: 't2'
+  }
 };
 
 
@@ -64,7 +81,9 @@ schreibe(contact);
 
 const {person: {adresse: {plz, ort: origin}}} = contact;  // extrahieren und umbennen
 console.log(`Type of Adresse = ${typeof adresse}`);
-console.log("Obj: " + JSON.stringify(adresse.plz));
+console.log("Obj: " + adresse);
+console.log("Obj: " + JSON.stringify(adresse));
+console.log("Obj: " + adresse.plz);
 
 console.log(`plz=${plz}`); 
 console.log(`ort=${origin}`);
@@ -72,6 +91,7 @@ console.log(`ort=${origin}`);
 const [firstName, lastName] = ['Max', 'Mustermann'];
 console.log(`Vorname = ${firstName}`);  // Vorname=Max
 console.log(`Nachname = ${lastName}`);  // Nachname=Mustermann
+
 const arr = [0,1,2,3];
 console.log("Arr: " + arr[2]);
 
@@ -81,17 +101,6 @@ console.log(`${firstName} kann ${759 * 0.30} EUR Fahrtkosten
 const {person: pers, ...rest} = contact;
 console.log(pers); 
 console.log(rest);
-
-function App() {
-  return (
-    <div className="App">
-      <header>
-        {combination}
-        <h2>Weitere Beispiele... Ausgabe unter console.log()</h2>
-      </header>
-    </div>
-  );
-}
 
 
 // Map/Reduce Beispiel
