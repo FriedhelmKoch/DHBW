@@ -7,6 +7,8 @@
 	- einfache Code Beispiele für Components, Klickzähler, Cards, Listen (Key), OpenStreetMap etc.
 - React-Hooks
 	- einfache Code Beispiele für Hooks mit useState, useEffect, useContext, useReducer, useCallback, useRef and Custom Hooks.
+- Redux-Training
+	- einfaches Code Beispiel von Listenelementen unter Einbeziehung von Redux	
 - React-Wikipedia-Api
 	- Wikipedia Abfrage als React Component
 	- Demo: https://simonjsuh.github.io/reactjs-wikipedia-search-api-app/
