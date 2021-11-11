@@ -5,15 +5,15 @@ import { set, get, del, keys, createStore } from 'idb-keyval';
 
 // Datum und Zeit
 
-const iso = new Date().toISOString(); 
+const iso = new Date().toISOString();
 let dat = new Date(iso);
-dat.toISOString(); 
+dat.toISOString();
 const locDat = `Zulu-Datum: (${iso}) in lokales Datum: ${dat}`;
 
 // JSX Variablen und Destructuring
 
 console.log("Aktuelle Zeit in Zulu-Datum: " + iso);     // ISO Format: 2020-11-05T11:34:12.000Z
-console.log(`Zulu-Datum: (${iso}) in lokales Datum: ${dat}`);
+console.log(locDat);
 
 const tit1 = "Hello";          // string
 const tit2 = "DHBW";
@@ -25,7 +25,7 @@ console.log(title1);
 const title2 = "02: <h1>" + tit1 + " " + tit2 + "!</h1>";
 console.log(title2);
 
-function getTitle() { 
+function getTitle() {
   const tit1 = "Hello";          // string
   const tit2 = "DHBW";
   return "03: <h1>" + tit1 + " " + tit2 + "!</h1>";
@@ -33,12 +33,17 @@ function getTitle() {
 console.log("Überschrift: " + getTitle());
 
 function App() {
+
   return (
     <div className="App">
       <header>
+
         (UTC: {iso})
+        <hr />
+
         {combination}
         <h2>Weitere Beispiele... Ausgabe unter console.log()</h2>
+
       </header>
     </div>
   );
@@ -58,11 +63,11 @@ const contact = {
 };
 
 
-const {person} = contact;
-const {adresse} = person;
+const { person } = contact;
+const { adresse } = person;
 console.log(`PLZ: ${adresse.plz}, Ort: ${adresse.ort}`);
 
-const {vorName: name} = person;     //umbennen
+const { vorName: name } = person;     //umbennen
 console.log(`Vorname = ${name}`);
 
 function combineName(item) {
@@ -71,32 +76,33 @@ function combineName(item) {
 const gruss = 'Ich heiße: ' + combineName(contact.person);
 console.log(gruss);
 
-function schreibe({email: mailAdresse}) {;
+function schreibe({ email: mailAdresse }) {
+  ;
   console.log(`Email-Contact = ${mailAdresse}`);
 }
 schreibe(contact);
 
-const {person: {adresse: {plz, ort: origin}}} = contact;  // extrahieren und umbennen
+const { person: { adresse: { plz, ort: origin } } } = contact;  // extrahieren und umbennen
 console.log(`Type of Adresse = ${typeof adresse}`);
 console.log("Obj: " + adresse);
 console.log("Obj: " + JSON.stringify(adresse));
 console.log("Obj: " + adresse.plz);
 
-console.log(`plz=${plz}`); 
+console.log(`plz=${plz}`);
 console.log(`ort=${origin}`);
 
 const [firstName, lastName] = ['Max', 'Mustermann'];
 console.log(`Vorname = ${firstName}`);  // Vorname=Max
 console.log(`Nachname = ${lastName}`);  // Nachname=Mustermann
 
-const arr = [0,1,2,3];
+const arr = [0, 1, 2, 3];
 console.log("Arr: " + arr[2]);
 
 console.log(`${firstName} kann ${759 * 0.30} EUR Fahrtkosten 
   steuerlich absetzen!`);
 
-const {person: pers, ...rest} = contact;
-console.log(pers); 
+const { person: pers, ...rest } = contact;
+console.log(pers);
 console.log(rest);
 
 
@@ -104,14 +110,16 @@ console.log(rest);
 //
 console.log("------- map / reduce -------");
 const objArr = [
-	{dat: iso, text: "Prod-1", preis: "11.50", anzahl: 20}, 
-	{dat: iso, text: "Prod-2", preis: "12.00", anzahl: 30}, 
-	{dat: iso, text: "Prod-3", preis: "13.50", anzahl: 10}
+  { dat: iso, 
+    text: "Prod-1", 
+    preis: "11.50", anzahl: 20 },
+  { dat: iso, text: "Prod-2", preis: "12.00", anzahl: 30 },
+  { dat: iso, text: "Prod-3", preis: "13.50", anzahl: 10 }
 ];
 
 let umsatzProd = [0.00, 0.00, 0.00];
 objArr.map((item, index) => {
-	umsatzProd[index] = parseFloat(item.preis) * parseInt(item.anzahl);
+  umsatzProd[index] = parseFloat(item.preis) * parseInt(item.anzahl);
   return (
     console.log(`Anlage-Datum (${index}) - Prod-${index + 1}: ${item.dat}`)
   );
@@ -138,25 +146,25 @@ console.log("== 1. START Async/Await Beispiel");
 
 async function hello() {
   await Promise.resolve("Hello") //resolved - ist erfüllt!
-  .then (res => console.log("== 2. Ich starte vor Einstein und Newton"))
+    .then(res => console.log("== 2. Ich starte vor Einstein und Newton"))
 };
 hello();
 
 function albert() {
-  const url=`https://de.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=Albert Einstein`;
-  fetch (url)
-    .then (response => response.json())
-    .then (json => console.log("== 3. Albert Einstein - 1. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 200) + "..."))
-    .catch (response => response.json());
-} 
+  const url = `https://de.wikipedia.org/w/api.php?action=query&list=search&pageimages|extracts&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=Albert Einstein`;
+  fetch(url)
+    .then(response => response.json())
+    .then(json => console.log("== 3. Albert Einstein - 1. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 200) + "..."))
+    .catch(response => response.json());
+}
 
 // Wikipedia Abfrage -> JSON Objekt
 async function searchWikipedia(searchQuery) {
-  const url=`https://de.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=${searchQuery}`;
-  await fetch (url)
-    .then (response => response.json())
-    .then (json => console.log("== 5. Isaac Newton - 2. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 200) + "..."))
-    .catch (response => response.json())
+  const url = `https://de.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=${searchQuery}`;
+  await fetch(url)
+    .then(response => response.json())
+    .then(json => console.log("== 5. Isaac Newton - 2. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 200) + "..."))
+    .catch(response => response.json())
 }
 
 async function should_sequentiell() {
@@ -197,17 +205,15 @@ set('hello', 'DHBW', customStore);
 
 export default App;
 
-
 /*
  * JSON-Objecte am Beispiel von "Albert Einstein" und "Friedrichshafen" aus Wikipedia
  *
  * siehe auch JSON to JavaScript Konvertierung mittels: https://www.convertsimple.com/convert-json-to-javascript/
- * 
- 
+ *
+
 *** Albert Einstein:
-* 
-{
-  batchcomplete: "",
+*
+{batchcomplete: "",
   continue: {
     sroffset: 20,
     continue: "-||info"
@@ -404,7 +410,7 @@ export default App;
 }
 
 *** Friedrichshafen:
-* 
+*
 {
   batchcomplete: "",
   continue: {
