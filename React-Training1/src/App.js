@@ -54,10 +54,7 @@ const contact = {
     }
   },
   email: 'max@domain.ext',
-  test: {
-    t1: 't1',
-    t2: 't2'
-  }
+  geoLoc: [48.4641081, 11.3950058]  // lat, lon
 };
 
 

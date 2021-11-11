@@ -15,9 +15,6 @@
 // Bsp.:
 //				let dist = geoDistance(48.490545479685416, 11.338329464399012, 48.479460, 11.317115, "K");
 //				alert("Distanz: " + dist);  // knapp 2 Kilometer
-
-import { min } from "lodash";
-
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 export function geoDistance(lat1, lon1, lat2, lon2, unit) {
 	if ((lat1 == lat2) && (lon1 == lon2)) {
@@ -57,16 +54,18 @@ export function geoDistance(lat1, lon1, lat2, lon2, unit) {
 *			}
 *
 *******************************************************************************/
-export function getGeolocation(sessionKey) {
+export async function getGeolocation(sessionKey) {
 	sessionKey = !sessionKey ? "geoJSON" : sessionKey; 
 	const geoOptions = {
 		enableHighAccuracy: true,     // Super-Präzisions-Modus
-		timeout: 1000,                // Maximum Wartezeit
+		timeout: 10000,               // Maximum Wartezeit
 		maximumAge: 0                 // Maximum Cache-Alter
 	}
 	function geoSuccess(pos) {
 		const crd = pos.coords;
 		const geoValue = {
+			detected: true,							// Flag og GPS Position Ermittlung erfolgreich war
+			message: `GPS Position detected and stored in SessionStorage: ${sessionKey}`, 
 			latitude: crd.latitude,			// Breitengrad
 			longitude: crd.longitude,		// Längengrad
 			altitude: crd.altitude,			// Höhe ü. Meeresspiegel in Meter
@@ -74,27 +73,27 @@ export function getGeolocation(sessionKey) {
 			altprecision: crd.altitudeAccuracy,	// Genauigkeit der Höhenangabe
 			geotime: crd.timestamp			// Zeitstempel der Positionsangabe
 		}
-		StorePos(JSON.stringify(geoValue));		// Objekt in String konvertieren
+		const geoStr = `detected:${geoValue.detected},message:${geoValue.message},latitude:${geoValue.latitude},longitude:${geoValue.longitude}`;
+		StorePos(geoStr);		// Objekt in String konvertieren
 	}
 	function geoError(err) {
+		let msg = '';
 		switch (err.code) {
 			case err.PERMISSION_DENIED:
-				alert("ACHTUNG: Ohne Deine Geolocation-Daten ist die Funktionalität von viaLinked nur eingeschränkt möglich! Um die Geolocation-Funktionalität von viaLinked besser einschätzen zu können, klicke auf das 'viaLinked-Logo' oben links und lese bitte unser Datenschutz- und Nutzungsrichtlinien nach.")
-				console.log("DEBUG - User denied the request for Geolocation.")
-				StorePos('{"latitude":52.520007, "longitude":13.404954}');	// workaround if geoPos via localhost not supported, location Berlin
+				msg = 'User denied the request for Geolocation.'
 				break;
 			case err.POSITION_UNAVAILABLE:
-				console.log("DEBUG - Location information is unavailable.")
-				StorePos('{"latitude":52.520007, "longitude":13.404954}');	// workaround if geoPos via localhost not supported, location Berlin
+				msg = 'Location information is unavailable.';
 				break;
 			case err.TIMEOUT:
-				console.log("DEBUG - The request to get user location timed out.")
-				StorePos('{"latitude":52.520007, "longitude":13.404954}');	// workaround if geoPos via localhost not supported, location Berlin
+				msg = 'The request to get user location timed out.';
 				break;
 			default:
-				console.log("DEBUG - An unknown error occurred.")
+				msg = 'An unknown error occurred.';
 				break;
 		}
+		const geoStr = `detected:false,message:${msg},latitude:0.000000,longitude:0.000000`;
+		StorePos(geoStr);
 	}
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
@@ -104,6 +103,7 @@ export function getGeolocation(sessionKey) {
 	function StorePos(value) {
 		sessionStorage.setItem(sessionKey, value);
 	}
+
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -146,6 +146,7 @@ export async function location2Geo(strNo, zip, city) {
 		"https://nominatim.openstreetmap.org/search?format=json&q=" + strNo + ", " + zip + " " + city
 	).catch(err => {
 		console.log("DEBUG - nominatim service error: " + err);
+		return false;
 	});
 	if (response !== undefined) {
 		const json = await response.json();
@@ -154,8 +155,196 @@ export async function location2Geo(strNo, zip, city) {
 		} else {
 			console.log("DEBUG - no response from nominatim service!");
 		}
+	} else {
+		return false;
 	}
 }
+
+/**********************************************************************
+ * Koordinaten Konvertierung - GradDezimal in Grad Minute
+ * Bsp: dd2dms(40.567534, 'long');	// 40° 34.224' E
+ **********************************************************************/
+ export function dd2dm(degree, lat_long, dez) {
+	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
+	let deg = Math.abs(parseInt(degree));
+	let min = round((Math.abs(degree) - deg) * 60, 5);
+	let sign = (degree < 0) ? -1 : 1;
+	let dir = (lat_long == 'lat') ? ((sign > 0) ? 'N' : 'S') : ((sign > 0) ? 'E' : 'W');
+	if(!dir)
+		return (deg * sign) + '\u00b0' + min + "'";
+	else
+		return deg + '\u00b0' + min + "'" + dir;
+}
+
+/**********************************************************************
+ * Koordinaten Konvertierung - GradDezimal in Grad Minute Sekunde
+ * Bsp: dd2dms(40.567534, 'long');	// 40° 34' 3.1224" E
+ **********************************************************************/
+export function dd2dms(degree, lat_long, dez) {
+	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
+	let deg = Math.abs(parseInt(degree));
+	let min = (Math.abs(degree) - deg) * 60;
+	let sec = min;
+	min = Math.abs(parseInt(min));
+	sec = round((sec - min) * 60, 5);
+	let sign = (degree < 0) ? -1 : 1;
+	let dir = (lat_long == 'lat') ? ((sign > 0) ? 'N' : 'S') : ((sign > 0) ? 'E' : 'W');
+	if(!dir)
+		return (deg * sign) + '\u00b0' + min + "'" + sec + '"';
+	else
+		return deg + '\u00b0' + min + "'" + sec + '"' + dir;
+}
+
+/**********************************************************************
+ * Koordinaten Konvertierung - Grad Minute Sekunde in GradDezimal
+ * Bsp: dms2dd(40, 34, 3.1224, 'E');	// 40,567534° E
+ **********************************************************************/
+export function dms2dd(deg, min, sec, dir, dez) {
+	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
+	let sign;
+	if(dir) {
+		sign = (dir.toLowerCase() == 'w' || dir.toLowercase() == 's') ? -1 : 1;
+		dir = (dir.toLowerCase() == 'w' || dir.toLowercase() == 's' || dir.toLowercase() == 'n' || dir.toLowercase() == 'e') ? dir.toUpperCase() : '';
+	} else {
+		sign = (deg < 0) ? -1 : 1;
+		dir = '';
+	}
+	var dec = round((Matg.abs(deg) + ((min * 60) + sec) / 3600), 5);
+	if(!dir || dir == '')
+		return (dec * sign) + '\u00b0';
+	else
+		return dec + '\u00b0' + dir;
+}
+
+/**********************************************************************
+ * Umrechnung Kilometer in Nautische Meilen
+ **********************************************************************/
+export function km2nm(km, dez) {
+	return round(km / 1.851852, dez);
+}
+
+/**********************************************************************
+ * Umrechnung Nautische Meilen in Kilometer
+ **********************************************************************/
+export function nm2km(nm, dez) {
+	return round(nm * 1.851852, dez);
+}
+
+/**********************************************************************
+ * Trigonometrische Funktionen in Grad statt im Radiant
+ * converts degree to radians
+ * @param degree
+ * @returns {number}
+ **********************************************************************/
+let toRadians = function toRadians(degree) {
+	return degree * (Math.PI / 180);
+};
+
+/**********************************************************************
+ * Trigonometrische Funktionen in Grad statt im Radiant 
+ * Converts radian to degree
+ * @param radians
+ * @returns {number}
+ **********************************************************************/
+let toDegree = function (radians) {
+	return radians * (180 / Math.PI);
+}
+
+/**********************************************************************
+ *  Geodesy representation conversion functions (c) Chris Veness 2002-2012 
+ *   - www.movable-type.co.uk/scripts/latlong.html
+ *  
+ *  Usage: 
+ *    var lat = Geo.parseDMS('51° 28′ 40.12″ N'); 
+ *    var lon = Geo.parseDMS('000° 00′ 05.31″ W'); 
+ *    var p1 = new LatLon(lat, lon);
+ **********************************************************************/
+let Geo = {};  // Geo namespace, representing static class
+/**
+ * Parses string representing degrees/minutes/seconds into numeric degrees
+ *
+ * This is very flexible on formats, allowing signed decimal degrees, or deg-min-sec optionally
+ * suffixed by compass direction (NSEW). A variety of separators are accepted (eg 3º 37' 09"W) 
+ * or fixed-width format without separators (eg 0033709W). Seconds and minutes may be omitted. 
+ * (Note minimal validation is done).
+ *
+ * @param   {String|Number} dmsStr: Degrees or deg/min/sec in variety of formats
+ * @returns {Number} Degrees as decimal number
+ * @throws  {TypeError} dmsStr is an object, perhaps DOM object without .value?
+ **/
+Geo.parseDMS = function(dmsStr) {
+  if (typeof deg == 'object') throw new TypeError('Geo.parseDMS - dmsStr is [DOM?] object');
+  
+  // check for signed decimal degrees without NSEW, if so return it directly
+  if (typeof dmsStr === 'number' && isFinite(dmsStr)) return Number(dmsStr);
+  
+  // strip off any sign or compass dir'n & split out separate d/m/s
+  var dms = String(dmsStr).trim().replace(/^-/,'').replace(/[NSEW]$/i,'').split(/[^0-9.,]+/);
+  if (dms[dms.length-1]=='') dms.splice(dms.length-1);  // from trailing symbol
+  
+  if (dms == '') return NaN;
+  
+  // and convert to decimal degrees...
+  switch (dms.length) {
+    case 3:  // interpret 3-part result as d/m/s
+      var deg = dms[0]/1 + dms[1]/60 + dms[2]/3600; 
+      break;
+    case 2:  // interpret 2-part result as d/m
+      var deg = dms[0]/1 + dms[1]/60; 
+      break;
+    case 1:  // just d (possibly decimal) or non-separated dddmmss
+      var deg = dms[0];
+      // check for fixed-width unseparated format eg 0033709W
+      //if (/[NS]/i.test(dmsStr)) deg = '0' + deg;  // - normalise N/S to 3-digit degrees
+      //if (/[0-9]{7}/.test(deg)) deg = deg.slice(0,3)/1 + deg.slice(3,5)/60 + deg.slice(5)/3600; 
+      break;
+    default:
+      return NaN;
+  }
+  if (/^-|[WS]$/i.test(dmsStr.trim())) deg = -deg; // take '-', west and south as -ve
+  return Number(deg);
+}
+
+/**
+ * Convert numeric degrees to deg/min/sec latitude (suffixed with N/S)
+ *
+ * @param   {Number} deg: Degrees
+ * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
+ * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
+ * @returns {String} Deg/min/seconds
+ **/
+Geo.toLat = function(deg, format, dp) {
+  var lat = Geo.toDMS(deg, format, dp);
+  return lat==null ? '–' : lat.slice(1) + (deg<0 ? 'S' : 'N');  // knock off initial '0' for lat!
+}
+
+/**
+ * Convert numeric degrees to deg/min/sec longitude (suffixed with E/W)
+ *
+ * @param   {Number} deg: Degrees
+ * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
+ * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
+ * @returns {String} Deg/min/seconds
+ **/
+Geo.toLon = function(deg, format, dp) {
+  var lon = Geo.toDMS(deg, format, dp);
+  return lon==null ? '–' : lon + (deg<0 ? 'W' : 'E');
+}
+
+/**
+ * Convert numeric degrees to deg/min/sec as a bearing (0º..360º)
+ *
+ * @param   {Number} deg: Degrees
+ * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
+ * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
+ * @returns {String} Deg/min/seconds
+ **/
+Geo.toBrng = function(deg, format, dp) {
+  deg = (Number(deg)+360) % 360;  // normalise -ve values to 180º..360º
+  var brng =  Geo.toDMS(deg, format, dp);
+  return brng==null ? '–' : brng.replace('360', '0');  // just in case rounding took us up to 360º!
+}
+
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // Browserparameter abfragen und in SessionStore speichern
@@ -554,190 +743,6 @@ export function formCurrency(num, form) {
   return ret;
 }
 
-/**********************************************************************
- * Koordinaten Konvertierung - GradDezimal in Grad Minute
- * Bsp: dd2dms(40.567534, 'long');	// 40° 34.224' E
- **********************************************************************/
-export function dd2dm(degree, lat_long, dez) {
-	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
-	let deg = Math.abs(parseInt(degree));
-	let min = round((Math.abs(degree) - deg) * 60, 5);
-	let sign = (degree < 0) ? -1 : 1;
-	let dir = (lat_long == 'lat') ? ((sign > 0) ? 'N' : 'S') : ((sign > 0) ? 'E' : 'W');
-	if(!dir)
-		return (deg * sign) + '\u00b0' + min + "'";
-	else
-		return deg + '\u00b0' + min + "'" + dir;
-}
-
-/**********************************************************************
- * Koordinaten Konvertierung - GradDezimal in Grad Minute Sekunde
- * Bsp: dd2dms(40.567534, 'long');	// 40° 34' 3.1224" E
- **********************************************************************/
-export function dd2dms(degree, lat_long, dez) {
-	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
-	let deg = Math.abs(parseInt(degree));
-	let min = (Math.abs(degree) - deg) * 60;
-	let sec = min;
-	min = Math.abs(parseInt(min));
-	sec = round((sec - min) * 60, 5);
-	let sign = (degree < 0) ? -1 : 1;
-	let dir = (lat_long == 'lat') ? ((sign > 0) ? 'N' : 'S') : ((sign > 0) ? 'E' : 'W');
-	if(!dir)
-		return (deg * sign) + '\u00b0' + min + "'" + sec + '"';
-	else
-		return deg + '\u00b0' + min + "'" + sec + '"' + dir;
-}
-
-/**********************************************************************
- * Koordinaten Konvertierung - Grad Minute Sekunde in GradDezimal
- * Bsp: dms2dd(40, 34, 3.1224, 'E');	// 40,567534° E
- **********************************************************************/
-export function dms2dd(deg, min, sec, dir, dez) {
-	let factor = (!dez) ? 1000 : Math.pow(10, parseInt(dez));
-	let sign;
-	if(dir) {
-		sign = (dir.toLowerCase() == 'w' || dir.toLowercase() == 's') ? -1 : 1;
-		dir = (dir.toLowerCase() == 'w' || dir.toLowercase() == 's' || dir.toLowercase() == 'n' || dir.toLowercase() == 'e') ? dir.toUpperCase() : '';
-	} else {
-		sign = (deg < 0) ? -1 : 1;
-		dir = '';
-	}
-	var dec = round((Matg.abs(deg) + ((min * 60) + sec) / 3600), 5);
-	if(!dir || dir == '')
-		return (dec * sign) + '\u00b0';
-	else
-		return dec + '\u00b0' + dir;
-}
-
-/**********************************************************************
- * Umrechnung Kilometer in Nautische Meilen
- **********************************************************************/
-export function km2nm(km, dez) {
-	return round(km / 1.851852, dez);
-}
-
-/**********************************************************************
- * Umrechnung Nautische Meilen in Kilometer
- **********************************************************************/
-export function nm2km(nm, dez) {
-	return round(nm * 1.851852, dez);
-}
-
-/**********************************************************************
- * Trigonometrische Funktionen in Grad statt im Radiant
- * converts degree to radians
- * @param degree
- * @returns {number}
- **********************************************************************/
-let toRadians = function toRadians(degree) {
-	return degree * (Math.PI / 180);
-};
-
-/**********************************************************************
- * Trigonometrische Funktionen in Grad statt im Radiant 
- * Converts radian to degree
- * @param radians
- * @returns {number}
- **********************************************************************/
-let toDegree = function (radians) {
-	return radians * (180 / Math.PI);
-}
-
-/**********************************************************************
- *  Geodesy representation conversion functions (c) Chris Veness 2002-2012 
- *   - www.movable-type.co.uk/scripts/latlong.html
- *  
- *  Usage: 
- *    var lat = Geo.parseDMS('51° 28′ 40.12″ N'); 
- *    var lon = Geo.parseDMS('000° 00′ 05.31″ W'); 
- *    var p1 = new LatLon(lat, lon);
- **********************************************************************/
-let Geo = {};  // Geo namespace, representing static class
-/**
- * Parses string representing degrees/minutes/seconds into numeric degrees
- *
- * This is very flexible on formats, allowing signed decimal degrees, or deg-min-sec optionally
- * suffixed by compass direction (NSEW). A variety of separators are accepted (eg 3º 37' 09"W) 
- * or fixed-width format without separators (eg 0033709W). Seconds and minutes may be omitted. 
- * (Note minimal validation is done).
- *
- * @param   {String|Number} dmsStr: Degrees or deg/min/sec in variety of formats
- * @returns {Number} Degrees as decimal number
- * @throws  {TypeError} dmsStr is an object, perhaps DOM object without .value?
- **/
-Geo.parseDMS = function(dmsStr) {
-  if (typeof deg == 'object') throw new TypeError('Geo.parseDMS - dmsStr is [DOM?] object');
-  
-  // check for signed decimal degrees without NSEW, if so return it directly
-  if (typeof dmsStr === 'number' && isFinite(dmsStr)) return Number(dmsStr);
-  
-  // strip off any sign or compass dir'n & split out separate d/m/s
-  var dms = String(dmsStr).trim().replace(/^-/,'').replace(/[NSEW]$/i,'').split(/[^0-9.,]+/);
-  if (dms[dms.length-1]=='') dms.splice(dms.length-1);  // from trailing symbol
-  
-  if (dms == '') return NaN;
-  
-  // and convert to decimal degrees...
-  switch (dms.length) {
-    case 3:  // interpret 3-part result as d/m/s
-      var deg = dms[0]/1 + dms[1]/60 + dms[2]/3600; 
-      break;
-    case 2:  // interpret 2-part result as d/m
-      var deg = dms[0]/1 + dms[1]/60; 
-      break;
-    case 1:  // just d (possibly decimal) or non-separated dddmmss
-      var deg = dms[0];
-      // check for fixed-width unseparated format eg 0033709W
-      //if (/[NS]/i.test(dmsStr)) deg = '0' + deg;  // - normalise N/S to 3-digit degrees
-      //if (/[0-9]{7}/.test(deg)) deg = deg.slice(0,3)/1 + deg.slice(3,5)/60 + deg.slice(5)/3600; 
-      break;
-    default:
-      return NaN;
-  }
-  if (/^-|[WS]$/i.test(dmsStr.trim())) deg = -deg; // take '-', west and south as -ve
-  return Number(deg);
-}
-
-/**
- * Convert numeric degrees to deg/min/sec latitude (suffixed with N/S)
- *
- * @param   {Number} deg: Degrees
- * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
- * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
- * @returns {String} Deg/min/seconds
- **/
-Geo.toLat = function(deg, format, dp) {
-  var lat = Geo.toDMS(deg, format, dp);
-  return lat==null ? '–' : lat.slice(1) + (deg<0 ? 'S' : 'N');  // knock off initial '0' for lat!
-}
-
-/**
- * Convert numeric degrees to deg/min/sec longitude (suffixed with E/W)
- *
- * @param   {Number} deg: Degrees
- * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
- * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
- * @returns {String} Deg/min/seconds
- **/
-Geo.toLon = function(deg, format, dp) {
-  var lon = Geo.toDMS(deg, format, dp);
-  return lon==null ? '–' : lon + (deg<0 ? 'W' : 'E');
-}
-
-/**
- * Convert numeric degrees to deg/min/sec as a bearing (0º..360º)
- *
- * @param   {Number} deg: Degrees
- * @param   {String} [format=dms]: Return value as 'd', 'dm', 'dms'
- * @param   {Number} [dp=0|2|4]: No of decimal places to use - default 0 for dms, 2 for dm, 4 for d
- * @returns {String} Deg/min/seconds
- **/
-Geo.toBrng = function(deg, format, dp) {
-  deg = (Number(deg)+360) % 360;  // normalise -ve values to 180º..360º
-  var brng =  Geo.toDMS(deg, format, dp);
-  return brng==null ? '–' : brng.replace('360', '0');  // just in case rounding took us up to 360º!
-}
 
 /**********************************************************************
  * Cookies
@@ -968,7 +973,7 @@ export function groupBy(objectArray, property) {
 }
 
 /********************************************************************** 
- * In einem Objekt-Array ein Objekt-Property löschen  
+ * In einem Objekt-Array ein Item über ein Objekt-Property löschen  
  * Bsp.: 
  *	const people = [ 
  *		{ name: 'Alice', age: 21 }, 
