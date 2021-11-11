@@ -40,7 +40,6 @@ function App() {
 
         (UTC: {iso})
         <hr />
-
         {combination}
         <h2>Weitere Beispiele... Ausgabe unter console.log()</h2>
 
