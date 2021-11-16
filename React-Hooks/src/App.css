@@ -1,16 +1,28 @@
 .App {
   text-align: center;
+  font-size: 12px;
 }
 
 .App-header {
   background-color: #ffffff;
   align-items: center;
+  font-weight: 500;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: calc(12px + 2vmin);
   color: rgb(0, 0, 0);
 }
 
 .App-link {
-  color: #61dafb;
+  color: #0b07ffab;
 }
 
+.listContainer{
+  text-align: center;
+}
+
+.listItem {
+  display: inline;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+}
