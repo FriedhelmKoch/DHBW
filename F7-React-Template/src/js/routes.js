@@ -2,9 +2,7 @@
 import HomePage from '../pages/home.jsx';
 import AboutPage from '../pages/about.jsx';
 import FormPage from '../pages/form.jsx';
-import CatalogPage from '../pages/catalog.jsx';
-import ProductPage from '../pages/product.jsx';
-import LBSPage from '../pages/lbs.jsx';
+
 
 import DynamicRoutePage from '../pages/dynamic-route.jsx';
 import RequestAndLoad from '../pages/request-and-load.jsx';
@@ -23,18 +21,7 @@ var routes = [
     path: '/form/',
     component: FormPage,
   },
-  {
-    path: '/catalog/',
-    component: CatalogPage,
-  },
-  {
-    path: '/product/:id/',
-    component: ProductPage,
-  },
-  {
-    path: '/lbs/',
-    component: LBSPage,
-  },
+
 
   {
     path: '/dynamic-route/blog/:blogId/post/:postId/',
@@ -42,10 +29,7 @@ var routes = [
   },
   {
     path: '/request-and-load/user/:userId/',
-    async: function (routeTo, routeFrom, resolve, reject) {
-      // Router instance
-      var router = this;
-
+    async: function ({ router, to, resolve }) {
       // App instance
       var app = router.app;
 
@@ -53,7 +37,7 @@ var routes = [
       app.preloader.show();
 
       // User ID from request
-      var userId = routeTo.params.userId;
+      var userId = to.params.userId;
 
       // Simulate Ajax Request
       setTimeout(function () {
@@ -82,7 +66,7 @@ var routes = [
             component: RequestAndLoad,
           },
           {
-            context: {
+            props: {
               user: user,
             }
           }

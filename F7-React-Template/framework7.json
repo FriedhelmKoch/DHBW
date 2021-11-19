@@ -1,0 +1,20 @@
+{
+  "cwd": "/Users/freddy/Documents/Web-Build-Server/test",
+  "type": [
+    "web",
+    "pwa"
+  ],
+  "name": "myApp",
+  "framework": "react",
+  "template": "single-view",
+  "cssPreProcessor": false,
+  "bundler": "vite",
+  "theming": {
+    "customColor": false,
+    "color": "#007aff",
+    "darkTheme": false,
+    "iconFonts": true,
+    "fillBars": false
+  },
+  "customBuild": false
+}

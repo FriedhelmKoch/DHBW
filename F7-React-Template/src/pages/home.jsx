@@ -17,27 +17,28 @@ import {
   Button
 } from 'framework7-react';
 
-export default () => (
+const HomePage = () => (
   <Page name="home">
     {/* Top Navbar */}
-    <Navbar sliding={false} large>
+    <Navbar large sliding={false}>
       <NavLeft>
         <Link iconIos="f7:menu" iconAurora="f7:menu" iconMd="material:menu" panelOpen="left" />
       </NavLeft>
-      <NavTitle sliding>React-Example</NavTitle>
+      <NavTitle sliding>myApp</NavTitle>
       <NavRight>
         <Link iconIos="f7:menu" iconAurora="f7:menu" iconMd="material:menu" panelOpen="right" />
       </NavRight>
-      <NavTitleLarge>React-Example</NavTitleLarge>
+      <NavTitleLarge>myApp</NavTitleLarge>
     </Navbar>
-
+    {/* Toolbar */}
+    <Toolbar bottom>
+      <Link>Left Link</Link>
+      <Link>Right Link</Link>
+    </Toolbar>
     {/* Page content */}
     <Block strong>
-      <p>This is an example of tabs-layout application. The main point of such tabbed layout is that each tab contains independent view with its own routing and navigation.</p>
-
-      <p>Each tab/view may have different layout, different navbar type (dynamic, fixed or static) or without navbar like this tab.</p>
+      <p>Here is your blank Framework7 app. Let's see what we have here.</p>
     </Block>
-
     <BlockTitle>Navigation</BlockTitle>
     <List>
       <ListItem link="/about/" title="About"/>
@@ -82,6 +83,6 @@ export default () => (
         link="/request-and-load/user/123456/"
       />
     </List>
-
   </Page>
 );
+export default HomePage;
