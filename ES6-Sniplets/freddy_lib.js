@@ -378,6 +378,37 @@ function getBrowserInf() {
 	return JSON.stringify(browserInfo);	// Objekt in String konvertieren
 }
 
+// Get Browser Name
+export async function getBrowserName() {
+	let ret = "";
+	if (!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
+		// Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
+		ret = "Opera";
+	} else if (typeof InstallTrigger !== 'undefined') {
+	// Firefox 1.0+
+		ret = "Firefox";
+	} else if (/constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || safari.pushNotification)) {
+		// Safari 3.0+
+		ret = "Safari";
+	} else if (/*@cc_on!@*/false || !!document.documentMode) {
+		// Internet Explorer 6-11
+		ret = "IE";
+	} else if (!isIE && !!window.StyleMedia) {
+		// Edge 20+
+		ret = "Edge";
+	} else if (!!window.chrome && !!window.chrome.webstore) {
+		// Chrome 1+
+		ret = "Chrome";
+	} else if ((isChrome || isOpera) && !!window.CSS) {
+		// Blink engine detection
+		ret = "Blink";
+	} else {
+		// Not detected
+		ret = "not detected";
+	}
+	return ret;
+}
+
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // IP-Adresse abfragen und in SessionStore speichern
 // Bsp.:
@@ -410,6 +441,29 @@ function getIP() {
     xhttp.send();
 }
 
+
+/**********************************************************************
+ * Konvertiert eine Zahl oder String in einen String mit führenden Nullen
+ * @param {Number|String} num
+ * @param {Number} digit
+ * @returns {String}
+ * Bsp.: 
+ * 		const num = 22;
+ * 		const digit = 3;
+ * 		console.log("ZeroFill: " + zeroFill(num, digit));
+ * 		// "ZeroFill: 022"
+ * 		console.log("ZeroFill: " + zeroFill('Test', 6));
+ * 		// "ZeroFill: 00Test"
+ **********************************************************************/
+ export function zeroFill(number, digits) {
+	number = typeof number === 'undefined' ? "" : number + "";	// always a string
+  digits -= number.length;
+  if (digits > 0) {
+    return new Array(digits + (/\./.test(number) ? 2 : 1)).join('0') + number;
+  }
+  return number;
+}
+
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // Holt aktuelles Datum und Uhrzeit und konvertiert in Zulu-Darstellung (ISO-Format: 8601)
 // Bsp.: 
@@ -424,6 +478,16 @@ export function getActual2ZuluDat() {
 }
 
 /**********************************************************************
+* Holt aktuelles lokales UTC-Datum und konvertier in UTC-Zulu
+**********************************************************************/
+export function getActualUTCDat() {
+	const heute = new Date();        // lokales aktuelles Datum und aktuelle Zeit
+	const iso = heute.toISOString(); 
+	const utc = zulu2LocalDat(iso);  // convert to utc-z
+	return utc;
+}
+
+/**********************************************************************
  * Konvertiert lokales UTC-Datum in Zulu-Zeit (GMT)
  * Bsp.:
  * 		console.log(utc2Zulu('2020-12-18T09:05:08.375');
@@ -431,7 +495,14 @@ export function getActual2ZuluDat() {
  **********************************************************************/
 export function utc2Zulu(utc) {
 	const dat = new Date(utc);
-	return dat.toISOString(); 
+	const zulu = dat.toISOString();
+	return zulu; 
+}
+
+export function eur2iso(dat) {
+	const eur = dat.split('.');  // [0]: dd; [1]: mm; [2]: yyyy; 
+	const iso = `${eur[2]}-${eur[1]}-${eur[0]}`;  // yyyy-mm-dd - iso format
+	return iso;
 }
 
 /**********************************************************************
@@ -443,8 +514,9 @@ export function utc2Zulu(utc) {
  *					console.log(zulu2LocalDat(dat)); 		// 2020-05-04T01:05:08.375
  **********************************************************************/
 export function zulu2LocalDat(isoString) {
-	let dateParts = isoString.split( /\D+/ );					// Split the string into an array based on the digit groups.
-	let returnDate = new Date();											// Set up a date object with the current time.
+	//let dateParts = typeof isoString === 'undefined' ? "" : isoString.split( /\D+/ );	// // Split the string into an array based on the digit groups
+	let dateParts = isoString.split( /\D+/ );					// Split the string into an array based on the digit groups
+	let returnDate = new Date();											// Set up a date object with the current time
 	
 	// Manually parse the parts of the string and set each part for the date. 
 	// Note: Using the UTC versions of these functions is necessary because we're manually adjusting for time zones stored in the string.
@@ -476,34 +548,15 @@ export function zulu2LocalDat(isoString) {
 
 	// convert returnDate form: Sun May 03 2020 11:05:08 GMT+0200 (Mitteleuropäische Sommerzeit) into iso-format 
 	const options = { year: 'numeric', month:"2-digit", day:"2-digit", hour: '2-digit', minute: '2-digit', second: '2-digit' };
-	const data = returnDate.toLocaleString('fr-ca', options).split(' ');				// yyyy-mm-dd hh h mm min ss s
+	let data = returnDate.toLocaleString('fr-CA', options).split(' ');					// yyyy-mm-dd hh h mm min ss s
+	data[0] = data[0].substring(0, data[0].length - 1);													// bug eleminiert, da yyyy-mm-dd mit abschliessendem Komma ausgegeben wird: yyyy-mm-dd,
 	const full = returnDate.toLocaleString('utc', options).split(' ');					// dd.mm.yyyy, hh:mm:ss
 
 	// Return the Date object calculated from the string.
 	return `${data[0]}T${full[1]}.${dateParts[6]}`;
 }
 
-/**********************************************************************
- * Konvertiert eine Zahl oder String in einen String mit führenden Nullen
- * @param {Number|String} num
- * @param {Number} digit
- * @returns {String}
- * Bsp.: 
- * 		const num = 22;
- * 		const digit = 3;
- * 		console.log("ZeroFill: " + zeroFill(num, digit));
- * 		// "ZeroFill: 022"
- * 		console.log("ZeroFill: " + zeroFill('Test', 6));
- * 		// "ZeroFill: 00Test"
- **********************************************************************/
-export function zeroFill(number, digits) {
-	number = typeof number === 'undefined' ? "" : number + "";	// always a string
-  digits -= number.length;
-  if (digits > 0) {
-    return new Array(digits + (/\./.test(number) ? 2 : 1)).join('0') + number;
-  }
-  return number;
-}
+
 
 /**********************************************************************
  * Konvertiert aus einen UTC-String entsprechend Datum und/oder Uhrzeit.
@@ -529,6 +582,7 @@ export function zeroFill(number, digits) {
  *							'IT'							// 2020-12-18
  *							'iCal'						// 20201218T090508Z
  *							'UTCZ'						// 2020-12-18T09:03:08.375Z
+ *              'UTChhmm'         // 2020-12-18T09:03
  **********************************************************************/
 export function utc2date(utc, form) {
 	form = typeof form === 'undefined' ? 'simpleDat' : form;		// check if form undefined
@@ -571,6 +625,7 @@ export function utc2date(utc, form) {
 			ret = `${partDat[2]}.${zeroFill(String(MM + 1), 2)}.${YYYY}`;
 			break;
 		case "veryShortDat":								
+			//ret = `${dat[0]}`;
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
 			break;
 		case "shortDat":
@@ -611,6 +666,10 @@ export function utc2date(utc, form) {
 			const utc = `${dat[0]}T${dat[1]}`;
 			ret = `${utc2Zulu(utc)}`;
 			break;
+		case "UTChhmm":
+			const utchhmm = `${dat[0]}T${dat[1].substring(0, 5)}`;
+			ret = `${utchhmm}`;
+			break;	
 		default:
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
 	}
@@ -663,6 +722,45 @@ export function addDays(utc, days, form) {
 			ret = `${dat[0].toLocaleDateString('fr-CA')}T${dat[1]}`;
 	}
 	return ret;
+}
+
+/**********************************************************************
+ * Addiert Anzahl Stunden zu einem bestimmten Datum in UTC
+ * Bsp.:
+ *        const dat = "2020-02-15T09:05:08.375";
+ *        const hours = parseInt("3");	// hours <= 24
+ *           console.log(addHours(dat, hours));
+ *              // 2020-02-15T12:05:08.375
+ * 
+ *        const hours = parseInt("22");
+ *           console.log(addHours(dat, hours));
+ *              // 2020-02-16T07:05:08.375
+ */
+export function addHours(utc, hours) {
+	const dat = utc.split('T');
+	dat[0] = typeof dat[0] === 'undefined' ? "2000-01-01" : dat[0];
+	dat[1] = typeof dat[1] === 'undefined' ? '00:00:00.000' : dat[1];
+	dat[0] = new Date(utc);
+
+	const date = new Date(utc);
+	const hh = date.getHours();
+	const mm = zeroFill(date.getMinutes(), 2);
+	const ss = zeroFill(date.getSeconds(), 2);
+	const ms = zeroFill(date.getMilliseconds(), 3);
+
+	//const hhAdd = parseInt(hh + hours);
+	const hhAdd = date.setHours( date.getHours() + hours );
+
+	console.log(`DEBUG - addHour - date: ${date}, hhAdd: ${hhAdd}`);
+
+	if (hhAdd > 24) {
+		dat[0].setDate(dat[0].getDate() + 1);
+		const diff = hhAdd - 24;
+		dat[1] = `${zeroFill(diff, 2)}:${mm}:${ss}.${ms}`;
+	} else {
+		dat[1] = `${zeroFill(hhAdd, 2)}:${mm}:${ss}.${ms}`;
+	}
+	return `${dat[0].toLocaleDateString('fr-CA')}T${dat[1]}`;
 }
 
 /**********************************************************************
