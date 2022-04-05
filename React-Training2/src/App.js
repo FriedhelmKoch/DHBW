@@ -6,7 +6,7 @@ import Button from "./Button";
 import Card from "./Card";
 import TaskList from "./TaskList";
 import TaskAdd from "./TaskAdd";
-import Maps from "./Maps";
+import Map from "./Maps";
 // Styles
 import './App.css';
 
@@ -16,17 +16,15 @@ class App extends Component {
     super(props);
 
     this.state = {   
-      name: "Erde",
+      name: "Mars",
       counter: 0,
-      geoLoc: {
-        pos: [48.130064, 11.583815],  // [Latitude (Breitengrad), Longitude (Längengrad)]
-        ort: "München Museumsinsel"
-      },
       todos: [
         {id: uuidv4(), title: "2020-04-08T08.30.00Z Uhr: Teil 1 - Web-Engineering II"},
         {id: uuidv4(), title: "2020-04-22T11.45.00Z Uhr: Nachbereitung Kurs"},
         {id: uuidv4(), title: "2020-04-24T09.00.00Z Uhr: Teil 2 - Web-Enineering II"}
-      ]
+      ],
+      startGeoData: [52.520007,13.404954],  // [lat,lng]
+      resultGeoData: []
     }
 
     this.changeName = this.changeName.bind(this);
@@ -55,7 +53,7 @@ class App extends Component {
     */
   }
 
-  addTodo(title) {
+  _addTodo(title) {
     let todos = this.state.todos;
     
     /* Wenn nicht "uuid" genutzt wird, dann eigene aufsteigende ID berechnen
@@ -73,16 +71,25 @@ class App extends Component {
     })
   }
 
-  /* Alternative zu addTodo, jedoch mit Spread-Operator
+  /* Alternative zu addTodo, jedoch mit Spread-Operator */
   addTodo(title) {
     this.setState({
       todos: [{id: uuidv4(), title: title}, ...this.state.todos]
     })
-  } */
-  
+  }
+
+  geoDataCallback(geoData) {
+    console.log(`DEBUG - Datas from child: ${JSON.stringify(geoData)}`);
+    //
+    //this.setState({...this.state, resultGeoData: childData})
+  };
+
   render() {
 
     /* let output = (   // für Debugging */
+
+    console.log(`DEBUG - Return Pos: ${JSON.stringify(this.state.resultGeoData)}`);
+
     return(
 
       <div className="App">
@@ -117,7 +124,10 @@ class App extends Component {
 
         <br />
         <Card title="Straßenkarte">
-          <Maps geoLoc={this.state.geoLoc} />  {/* State geoLoc an Maps.js component übergeben */}
+          <Map 
+            startGeoData={this.state.startGeoData}
+            resultGeoData = {this.geoDataCallback} 
+          />
         </Card>
 
         <p></p>

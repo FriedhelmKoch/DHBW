@@ -1,61 +1,76 @@
-import React, { Component } from 'react';
-// Leaflet Maps
-import { MapContainer as Map, TileLayer, Marker, Popup as Pop } from 'react-leaflet';
-import L from 'leaflet';
-import './Leaflet.css';
-import icon from './marker-icon.png';
-import iconShadow from './marker-shadow.png';
+import React from "react";
+import { MapContainer, TileLayer, MapConsumer} from "react-leaflet";
+import "./leaflet.css";
+import L from "leaflet";
+// Own Icons
+import marker from "./marker-icon.png";
+import markerShadow from "./marker-shadow.png";
 
-class Maps extends Component {
-	constructor(props) {
-		super(props)
+export default function Map(props) {
+
+	console.log(`GeoData from App: ${JSON.stringify(props.startGeoData)}`);
+
+	const customIcon = L.icon({
+		iconSize: [25, 41],
+		iconAnchor: [10, 41],
+		popupAnchor: [2, -40],
+		iconUrl: marker,
+		shadowUrl: markerShadow
+	});
+
+	// Options for the marker
+	const markerOptions = {
+		clickable: true,
+		draggable: false,
+		icon: customIcon,
+		opacity: .7
 	}
 
-	// Leaflet Map Marker
-	openPopup(marker) {
-		if (marker && marker.leafletElement) {
-			window.setTimeout(() => {
-				marker.leafletElement.openPopup()
-			})
-		}
-	}
+	let markArr = [];
 
-	render() {
+  return (
+    <MapContainer
+      center={props.startGeoData}  // Berlin as startpoint 
+      zoom={13}
+      style={{ height: "300px" }}
+    >
+      <TileLayer
+        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <MapConsumer>
+        {(map) => {
+          console.log("map center:", map.getCenter());
 
-		// Location Ort-String aufteilen
-		const ort = this.props.geoLoc.ort.split(' ');
+					map.locate().on("locationfound", function (e) {
+						map.flyTo(e.latlng, map.getZoom());
+						//const radius = e.accuracy;
+						//console.log(`DEBUG - Position Accuracy: ${e.accuracy}`)
+						const radius = 300;
+						const circle = L.circle(e.latlng, radius, {color: 'red', weight: 3, opacity:.7});
+						circle.addTo(map);
+					});
 
-		// Leaflet Customs Marker-Icons (Bug in React, therefore defining indiv. icons!)
-		let DefaultIcon = L.icon({
-			iconUrl: icon,
-			shadowUrl: iconShadow
-		});
-		L.Marker.prototype.options.icon = DefaultIcon;
+          map.on("click", function (e) {
+            const { lat, lng } = e.latlng;
+						console.log(`DEBUG - latlng: ${lat},${lng}`);
 
-		return (
+						props.resultGeoData([lat,lng]);
 
-			/* GeoLocation State wird als 'this.props.geoLoc' aus App.js übernommen */				
-			<Map 
-				center={this.props.geoLoc.pos} // [Latitude, Longitude]
-				zoom='13' 
-				style={{width: 'auto', height: '400px'}} 
-				scrollWheelZoom={false} 
-				attributionControl={false}	// Copyrightvermerk für 'Leaflet/OpenStreetMap' wird ausgeblendet
-			>
-				<TileLayer 
-					attribution='&amp;copy OpenStreetMap' 
-					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
-				/>
-				<Marker position={this.props.geoLoc.pos} ref={this.openPopup}>
-					<Pop>
-						{ort[0]}<br />
-						{ort[1]}
-					</Pop>
-				</Marker>
-			</Map>
+            let mark = L.marker([lat, lng], markerOptions).addTo(map).bindPopup(`Pos: ${JSON.stringify(e.latlng)}`).openPopup();
 
-		)
-	}
+						markArr.push(mark);
+						if (markArr.length > 1) {  // always only one marker
+              map.removeLayer(markArr[0]);
+							markArr.shift();
+        		};
+						const position = mark.getLatLng();
+						console.log(`DEBUG - Pos: ${JSON.stringify(position)}`);
+          });
+					
+          return null;
+        }}
+      </MapConsumer>
+    </MapContainer>
+  );
 }
-
-export default Maps;
