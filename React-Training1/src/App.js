@@ -8,7 +8,7 @@ import { set, get, del, keys, createStore } from 'idb-keyval';
 const iso = new Date().toISOString();
 let dat = new Date(iso);
 dat.toISOString();
-const locDat = `Zulu-Datum: (${iso}) in lokales Datum: ${dat}`;
+const locDat = `Zulu-Datum: (${iso}) in lokales Datum: ${dat}`; 
 
 // JSX Variablen und Destructuring
 
@@ -19,7 +19,7 @@ const tit1 = "Hello";          // string
 const tit2 = "DHBW";
 const combination = <h1>Hello {tit2}!</h1>;
 
-const title1 = `01: <h1>${tit1} ${tit2}!</h1>`;
+const title1 = `01: <h1>${tit1} ${tit2}!</h1>`;  // Template String, ACHTUNG: eingeschlossen mit Backticks
 console.log(title1);
 
 const title2 = "02: <h1>" + tit1 + " " + tit2 + "!</h1>";
@@ -40,6 +40,7 @@ function App() {
 
         (UTC: {iso})
         <hr />
+
         {combination}
         <h2>Weitere Beispiele... Ausgabe unter console.log()</h2>
 
@@ -48,7 +49,11 @@ function App() {
   );
 }
 
+const test = {};
+
 const contact = {
+  email: 'max@domain.ext',
+  geoLoc: [48.4641081, 11.3950058],  // lat, lon
   person: {
     vorName: 'Max',
     nachName: 'Mustermann',
@@ -57,10 +62,8 @@ const contact = {
       ort: 'Hamburg',
     }
   },
-  email: 'max@domain.ext',
-  geoLoc: [48.4641081, 11.3950058]  // lat, lon
+ 
 };
-
 
 const { person } = contact;
 const { adresse } = person;
@@ -90,22 +93,25 @@ console.log("Obj: " + adresse.plz);
 console.log(`plz=${plz}`);
 console.log(`ort=${origin}`);
 
-const [firstName, lastName] = ['Max', 'Mustermann'];
-console.log(`Vorname = ${firstName}`);  // Vorname=Max
-console.log(`Nachname = ${lastName}`);  // Nachname=Mustermann
+const [fName, lName] = ['Max', 'Mustermann'];
+console.log(`Vorname = ${fName}`);  // Vorname=Max
+console.log(`Nachname = ${lName}`);  // Nachname=Mustermann
 
-const arr = [0, 1, 2, 3];
+const arr = [0, 5, 10, 13];
 console.log("Arr: " + arr[2]);
 
-console.log(`${firstName} kann ${759 * 0.30} EUR Fahrtkosten 
+console.log(`${fName} kann ${759 * 0.30} EUR Fahrtkosten 
   steuerlich absetzen!`);
 
-const { person: pers, ...rest } = contact;
+const { person: pers, ...rest } = contact;  // Spread Operator (...rest) nimmt alle restlichen Items eines Objektes mit, ohne sie direkt anzusprechen
 console.log(pers);
 console.log(rest);
 
 
 // Map/Reduce Beispiel
+//
+// map: erstellen eines neuen Arrays aus einem vorhandenen Array (ggf. Array von Objekten)
+// reduce: reduziert ein Array von Werten auf nur einen Wert
 //
 console.log("------- map / reduce -------");
 const objArr = [
@@ -179,12 +185,12 @@ async function should_sequentiell() {
   console.log("== 7. ENDE");
   console.timeEnd("timer");
 }
-should_sequentiell();
+//should_sequentiell();
 
 
 // IndexedDB
 //
-/*
+
 console.log("------- indexedDB -------");
 set('hello', 'DHBW');
 get('hello').then((val) => console.log('value: ' + val));   // DHBW
@@ -197,9 +203,9 @@ const customStore = createStore(custom_db_name, custom_store_name);
 set('hello', 'DHBW', customStore);
 
 // Löscht alle values im entsprechenden store
-//del('hello');
-//del('hello', customStore);
-*/
+del('hello');
+del('hello', customStore);
+
 
 
 export default App;
