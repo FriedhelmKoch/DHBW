@@ -142,20 +142,24 @@ export function reverseGeocoding(lon, lat, sessionKey) {
  *			// { "lat":"48.5620576", "lon":"11.26443042" }
  **********************************************************************/
 export async function location2Geo(strNo, zip, city) {
-	const response = await fetch(
-		"https://nominatim.openstreetmap.org/search?format=json&q=" + strNo + ", " + zip + " " + city
-	).catch(err => {
-		console.log("DEBUG - nominatim service error: " + err);
-		return false;
-	});
+	let ret = true;
+	const response = await fetch("https://nominatim.openstreetmap.org/search?format=json&q=" + strNo + ", " + zip + " " + city)
+		.catch(err => {
+			console.log(`DEBUG - nominatim service error: ${err}`);
+			return false;
+		});
+
 	if (response !== undefined) {
 		const json = await response.json();
 		if(json.length !== 0) {
+			//console.log(`DEBUG - location2Geo - lat: ${json[0].lat}, lon: ${json[0].lon}`);
 			return { lat: json[0].lat, lon: json[0].lon };
 		} else {
-			console.log("DEBUG - no response from nominatim service!");
+			console.log("DEBUG - nominatim response undefined!");
+			return false;
 		}
 	} else {
+		console.log("DEBUG - no response from nominatim service!");
 		return false;
 	}
 }
@@ -540,7 +544,8 @@ export function zulu2LocalDat(isoString) {
 			timezoneOffsetMinutes = parseInt( dateParts[8] ) / 60;	// Convert the minutes value into an hours value.
 		}
 		timezoneOffsetHours = parseInt( dateParts[7] ) + timezoneOffsetMinutes;		// Add the hours and minutes values to get the total offset in hours.
-		if ( isoString.substr( -6, 1 ) == "+" ) {	// If the sign for the timezone is a plus to indicate the timezone is ahead of UTC time.
+		console.log(`DEBUG - isoString vorher: ${isoString}`);
+		if ( isoString.substring(isoString.length-6, isoString.length-5) ) {  // if the sign for the timezone is a plus to indicate the timezone is ahead of UTC time.
 			timezoneOffsetHours *= -1;							// Make the offset negative since the hours will need to be subtracted from the date.
 		}
 	}
@@ -549,14 +554,16 @@ export function zulu2LocalDat(isoString) {
 	// convert returnDate form: Sun May 03 2020 11:05:08 GMT+0200 (Mitteleuropäische Sommerzeit) into iso-format 
 	const options = { year: 'numeric', month:"2-digit", day:"2-digit", hour: '2-digit', minute: '2-digit', second: '2-digit' };
 	let data = returnDate.toLocaleString('fr-CA', options).split(' ');					// yyyy-mm-dd hh h mm min ss s
-	data[0] = data[0].substring(0, data[0].length - 1);													// bug eleminiert, da yyyy-mm-dd mit abschliessendem Komma ausgegeben wird: yyyy-mm-dd,
+
+	// Firefox etc. bug in toLocaleString eleminieren, da yyyy-mm-dd mit abschliessendem Komma ausgegeben wird: "yyyy-mm-dd,"
+	// ACHTUNG: Bei Safari gibt es diesen Bug nicht!!!
+	data[0] = (data[0].substring(data[0].length-1, data[0].length) == ',') ? data[0].substring(0, data[0].length - 1) : data[0];
+
 	const full = returnDate.toLocaleString('utc', options).split(' ');					// dd.mm.yyyy, hh:mm:ss
 
 	// Return the Date object calculated from the string.
 	return `${data[0]}T${full[1]}.${dateParts[6]}`;
 }
-
-
 
 /**********************************************************************
  * Konvertiert aus einen UTC-String entsprechend Datum und/oder Uhrzeit.
@@ -579,15 +586,17 @@ export function zulu2LocalDat(isoString) {
  *							'shortTime'				// 09:05:08
  *							'longTime'				// 9 Uhr, 5 Min., 8 Sek.
  *							'datTime'					// 18. DEZ 2020, 09:05
+ *              'shortDatTime'    // 18.12.2020, 10:05
  *							'IT'							// 2020-12-18
  *							'iCal'						// 20201218T090508Z
- *							'UTCZ'						// 2020-12-18T09:03:08.375Z
- *              'UTChhmm'         // 2020-12-18T09:03
+ *							'UTCZ'						// 2020-12-18T07:05:08.375Z
+ *              'UTChhmm'         // 2020-12-18T09:05
+
  **********************************************************************/
 export function utc2date(utc, form) {
-	form = typeof form === 'undefined' ? 'simpleDat' : form;		// check if form undefined
+	form = typeof form === 'undefined' ? 'simpleDat' : form;  // check if form undefined
 	utc = typeof utc === 'undefined' ? "1970-01-01T01:01:01.000Z" : utc;
-	if(utc.indexOf("T") < 0 ) {return "utc format incorrect"};	// check if utc string correct
+	if(utc.indexOf("T") < 0 ) {return "utc parameter in utc2date - format incorrect"};  // check if utc string correct
 
 	const dat = utc.split('T');
 
@@ -597,7 +606,9 @@ export function utc2date(utc, form) {
 	const t = dat[1].split('.');
 	const	hms = t[0].split(':');
 	const time = `${zeroFill(hms[0], 2)}:${zeroFill(hms[1], 2)}:${zeroFill(hms[2], 2)}`;
-	const dS = t[1].substr(0, t[1].length - 1);				// delete last char: Z
+
+	//if last char = Z delete
+	const dS = (t[1].substring(t[1].length-1, t[1].length) == 'Z') ? t[1].substring(0, t[1].length - 1) : t[1];
 	const decSec = zeroFill(dS, 3);
 	dat[1] = `${time}.${decSec}`;
 
@@ -625,7 +636,6 @@ export function utc2date(utc, form) {
 			ret = `${partDat[2]}.${zeroFill(String(MM + 1), 2)}.${YYYY}`;
 			break;
 		case "veryShortDat":								
-			//ret = `${dat[0]}`;
 			ret = `${partDat[2]}. ${monShort} ${YYYY}`;
 			break;
 		case "shortDat":
@@ -648,11 +658,14 @@ export function utc2date(utc, form) {
 			ret = `${parseInt(partTime[0])} Uhr, ${parseInt(partTime[1])} Min., ${parseInt(partTime[2])} Sek.`;
 			break;	
 		case "datTime":
-				ret = `${partDat[2]}. ${monShort} ${YYYY}, ${dat[1].substring(0, 5)}`;
-				break;
+			ret = `${partDat[2]}. ${monShort} ${YYYY}, ${dat[1].substring(0, 5)}`;
+			break;
+		case "shortDatTime":
+			ret = `${partDat[2]}.${zeroFill(String(MM + 1), 2)}.${YYYY}, ${dat[1].substring(0, 5)}`;
+			break;		
 		case "IT":
-				ret = `${dat[0]}`;
-				break;	
+			ret = `${dat[0]}`;
+			break;	
 		case "array":
 			ret = [dayShort, dayLong, partDat[2], monShort, monLong, zeroFill(String(MM + 1), 2), YYYY, dat[1].substring(0, 2), dat[1].substring(3, 5), dat[1].substring(6, 8), dat[1].substring(9, 12)];
 			break;

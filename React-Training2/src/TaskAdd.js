@@ -20,8 +20,8 @@ class TaskAdd extends Component {
 	}
 
 	/**  
-	Funktion muss den state aktualisieren! 
-	Änderungen im Input-Feld werden aus "event.target.value" abgeholt 
+		Funktion muss den state aktualisieren! 
+		Änderungen im Input-Feld werden aus "event.target.value" abgeholt 
 	**/
 	onTodoInputChange(event) {
 		console.log(event.target.value);
@@ -32,6 +32,7 @@ class TaskAdd extends Component {
 
 	render() {
 		console.log(this);  // Debugging nach TodoAdd
+		
 		let buttonStyles = {
 			backgroundColor: (this.state.newTodo.length < 5 ? "yellow" : "green")
 		}

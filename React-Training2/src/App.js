@@ -119,6 +119,7 @@ class App extends Component {
         <h1>Task Liste</h1>
         {/*hier muss der state als props der anderen Komponente übergeben werden!*/}
         <TaskList todos={this.state.todos} />  
+        
         <br />
         <TaskAdd onAdd={this.addTodo.bind(this)} /> {/* Funktion übergeben */}
 
@@ -130,7 +131,7 @@ class App extends Component {
           />
         </Card>
 
-        <p></p>
+        <p>&nbsp;</p>
 
       </div>
 
