@@ -126,7 +126,7 @@ export function reverseGeocoding(lon, lat, sessionKey) {
 	})
 	.then(function(json) {
 		const add = json.display_name.split(', ');
-		const value = { str: add[1], strNo: add[0], zip: add[6], city: add[3], state: add[5], country: add[7] };
+		const value = { strNo: add[0], str: add[1], suburb: add[2], town: add[3], city: add[4], district: add[5], federalState: add[6], zipCode: add[7], country: add[8] };
 		sessionStorage.setItem(sessionKey, JSON.stringify(value));
 	})
 }
@@ -382,35 +382,59 @@ function getBrowserInf() {
 	return JSON.stringify(browserInfo);	// Objekt in String konvertieren
 }
 
-// Get Browser Name
-export async function getBrowserName() {
-	let ret = "";
-	if (!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
-		// Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
-		ret = "Opera";
-	} else if (typeof InstallTrigger !== 'undefined') {
-	// Firefox 1.0+
-		ret = "Firefox";
-	} else if (/constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || safari.pushNotification)) {
-		// Safari 3.0+
-		ret = "Safari";
-	} else if (/*@cc_on!@*/false || !!document.documentMode) {
-		// Internet Explorer 6-11
-		ret = "IE";
-	} else if (!isIE && !!window.StyleMedia) {
-		// Edge 20+
-		ret = "Edge";
-	} else if (!!window.chrome && !!window.chrome.webstore) {
-		// Chrome 1+
-		ret = "Chrome";
-	} else if ((isChrome || isOpera) && !!window.CSS) {
-		// Blink engine detection
-		ret = "Blink";
-	} else {
-		// Not detected
-		ret = "not detected";
+// Get Client Browser Name
+export function getBrowserName() {    
+	let browser = ""; 
+	if ( navigator.userAgent.indexOf("Edge") > -1 && navigator.appVersion.indexOf('Edge') > -1 ) {
+		browser = 'Edge'	
+	} else if( navigator.userAgent.indexOf("Opera") != -1 || navigator.userAgent.indexOf('OPR') != -1 ) {
+		browser = 'Opera'
+	} else if( navigator.userAgent.indexOf("Chrome") != -1 ) {
+		browser = 'Chrome' 
+	} else if( navigator.userAgent.indexOf("Safari") != -1) {
+		browser = 'Safari'
+	} else if( navigator.userAgent.indexOf("Firefox") != -1 ) {
+		browser = 'Firefox'
+	} else if( ( navigator.userAgent.indexOf("MSIE") != -1 ) || (!!document.documentMode == true ) ) {	//IF IE > 10
+		browser = 'IE'
+	} else { 
+		browser = 'unknown'
 	}
-	return ret;
+	//console.log(`DEBUG - Client Browser is: ${browser}, from navigator.userAgent: ${navigator.userAgent}`)
+	return browser;
+};
+
+// Get Client Operation System
+export function getOS() {    
+	let os = "";    
+	if ( navigator.userAgent.indexOf("Android") != -1)  {
+		os = 'Android'
+	} else if( navigator.userAgent.indexOf("Mac OS X") != -1)  {
+		os = 'Mac OS X'	
+	} else if( navigator.userAgent.indexOf("iPhone OS") != -1)  {
+		os = 'iPhone OS'		
+	} else if( navigator.userAgent.indexOf("Windows") != -1)  {
+		os = 'Windows'
+	} else if( navigator.userAgent.indexOf("Windows Phone") != -1)  {
+		os = 'Windows Phone'		
+	} else if( navigator.userAgent.indexOf("Linux") != -1)  {
+		os = 'Linux'
+	} else if( navigator.userAgent.indexOf("Nexus") != -1)  {
+		os = 'Nexus'
+	} else { 
+		os = 'unknown';
+	}
+	return os		
+};
+
+// Höhe des Anzeigebereichs eines Browser-Fensters (HöhexBreite)
+export function getWindowSize() {
+	return `${window.innerHeight}x${window.innerWidth}`
+}
+
+// Browser Sprache
+export function getBrowserLanguage() {
+	return `${navigator.language}`
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -482,12 +506,12 @@ export function getActual2ZuluDat() {
 }
 
 /**********************************************************************
-* Holt aktuelles lokales UTC-Datum und konvertier in UTC-Zulu
+* Holt aktuelles lokales UTC-Datum
 **********************************************************************/
 export function getActualUTCDat() {
-	const heute = new Date();        // lokales aktuelles Datum und aktuelle Zeit
-	const iso = heute.toISOString(); 
-	const utc = zulu2LocalDat(iso);  // convert to utc-z
+	const heute = new Date();         // lokales aktuelles Datum und aktuelle Zeit
+	const iso = heute.toISOString();  // convert to utc-z
+	const utc = zulu2LocalDat(iso);   // convert to local date
 	return utc;
 }
 
@@ -502,6 +526,7 @@ export function utc2Zulu(utc) {
 	const zulu = dat.toISOString();
 	return zulu; 
 }
+
 
 export function eur2iso(dat) {
 	const eur = dat.split('.');  // [0]: dd; [1]: mm; [2]: yyyy; 
@@ -738,42 +763,24 @@ export function addDays(utc, days, form) {
 }
 
 /**********************************************************************
- * Addiert Anzahl Stunden zu einem bestimmten Datum in UTC
+ * Addiert Anzahl Minuten zu einem bestimmten Datum in UTC(Z)
  * Bsp.:
- *        const dat = "2020-02-15T09:05:08.375";
- *        const hours = parseInt("3");	// hours <= 24
- *           console.log(addHours(dat, hours));
- *              // 2020-02-15T12:05:08.375
+ *        const dat = "2020-02-15T22:05:08.375";  // Zeit in UTC+1, keine Sommerzeit!
+ *        const min = parseInt("120");	// hours = 3
+ *           console.log(addMinutes(dat, min));
+ *              // 2020-02-15T23:05:08.375Z
  * 
- *        const hours = parseInt("22");
- *           console.log(addHours(dat, hours));
- *              // 2020-02-16T07:05:08.375
+ *        const dat = "2020-02-15T22:05:08.375Z";  // Zeit in UTC/GMT, keine Sommerzeit
+ *        const min = parseInt("180");	// hours = 4
+ *           console.log(addMinutes(dat, min));
+ *              // 2020-02-16T01:05:08.375Z
  */
-export function addHours(utc, hours) {
-	const dat = utc.split('T');
-	dat[0] = typeof dat[0] === 'undefined' ? "2000-01-01" : dat[0];
-	dat[1] = typeof dat[1] === 'undefined' ? '00:00:00.000' : dat[1];
-	dat[0] = new Date(utc);
-
-	const date = new Date(utc);
-	const hh = date.getHours();
-	const mm = zeroFill(date.getMinutes(), 2);
-	const ss = zeroFill(date.getSeconds(), 2);
-	const ms = zeroFill(date.getMilliseconds(), 3);
-
-	//const hhAdd = parseInt(hh + hours);
-	const hhAdd = date.setHours( date.getHours() + hours );
-
-	console.log(`DEBUG - addHour - date: ${date}, hhAdd: ${hhAdd}`);
-
-	if (hhAdd > 24) {
-		dat[0].setDate(dat[0].getDate() + 1);
-		const diff = hhAdd - 24;
-		dat[1] = `${zeroFill(diff, 2)}:${mm}:${ss}.${ms}`;
-	} else {
-		dat[1] = `${zeroFill(hhAdd, 2)}:${mm}:${ss}.${ms}`;
-	}
-	return `${dat[0].toLocaleDateString('fr-CA')}T${dat[1]}`;
+export function addMinutes(utc, min) {
+	let d = new Date(utc);
+	let ms = d.getTime();
+	ms = ms + min * 60 * 1000;  // Minuten addieren
+	d.setTime(ms);
+	return `${d.toISOString()}`  // in UTC-Zulu
 }
 
 /**********************************************************************

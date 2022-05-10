@@ -80,6 +80,9 @@
 				//document.getElementById('location').innerHTML = json.display_name;
 
 				const add = json.display_name.split(', ');
+
+				//console.log(JSON.stringify(json.display_name));
+
 				const pos = {streetNo: add[0], street: add[1], suburb: add[2], town: add[3], city: add[4], district: add[5], federalState: add[6], zip: add[7], country: add[8] };
 
 				document.writeln("<h2>Reverse Geocoding</h2>");
