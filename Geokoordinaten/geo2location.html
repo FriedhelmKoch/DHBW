@@ -64,6 +64,25 @@
       console.warn(`ERROR(${err.code}): ${err.message}`);
       alert("ACHTUNG: Ohne Deine Geolocation-Daten ist die Funktionalität von viaLinked nur eingeschränkt möglich! Um die Geolocation-Funktionalität von viaLinked besser einschätzen zu können, klicke auf das 'viaLinked-Logo' oben links und lese bitte unser Datenschutz- und Nutzungsrichtlinien nach.");
     }
+
+		function geoError(err) {
+			console.warn(`ERROR(${err.code}): ${err.message}`);
+			switch (err.code) {
+				case err.PERMISSION_DENIED:
+					alert('PERMISSION_DENIED: Ohne Deine Positionsdaten können Aktivitäten Dir nicht oder nur ungenau zugeordnet werden.');
+					break;
+				case err.POSITION_UNAVAILABLE:
+					alert('POSITION_UNAVAILABLE: Deine Positionsdaten können nicht ermittelt werden und Aktivitäten Dir nicht oder nur ungenau zugeordnet werden.');
+					break;
+				case err.TIMEOUT:
+					alert('TIMEOUT: Deine Positionsdaten können aus technischen Gründen nicht ermittelt werden und Aktivitäten Dir nicht oder nur ungenau zugeordnet werden.');
+					break;
+				default:
+					alert('UNKNOWN ERROR: Deine Positionsdaten können aus technischen Gründen nicht ermittelt werden.');
+					break;
+			}		
+		}
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
     } else {
@@ -71,41 +90,104 @@
 		}
 
 		function reverseGeocoding(lon, lat) {
-			fetch('https://nominatim.openstreetmap.org/reverse?format=json&lon=' + lon + '&lat=' + lat).
-			then(function(response) {
+			fetch('https://nominatim.openstreetmap.org/reverse?format=json&lon=' + lon + '&lat=' + lat)
+				.then(function(response) {
 					return response.json();
-			}).
-			then(function(json) {
-				console.log(json.display_name);
-				//document.getElementById('location').innerHTML = json.display_name;
+				})
+				.then(function(json) {
+					console.log(json);
+					//document.getElementById('location').innerHTML = json.display_name;
 
-				const add = json.display_name.split(', ');
+					const pos = json.address;
+					const dorf = (pos.hamlet != null) ? pos.hamlet : "not defined";
 
-				//console.log(JSON.stringify(json.display_name));
+					let city = "";
+					if (pos.city != null) {
+						city = pos.city
+					} else if (pos.town != null) {
+						city = pos.town
+					} else if (pos.village != null) {
+						city = pos.village
+					} else if (municipality != null) {
+						city = pos.municipality
+					} else {
+						city = "not defined"
+					}
 
-				const pos = {streetNo: add[0], street: add[1], suburb: add[2], town: add[3], city: add[4], district: add[5], federalState: add[6], zip: add[7], country: add[8] };
+					let houseNumber = "";
+					if (pos.house_number != null) {
+						houseNumber = pos.house_number
+					} else if (pos.house_name != null) {
+						houseNumber = "(" + pos.house_name + ")"
+					} else {
+						houseNumber = "not defined"
+					}
 
-				document.writeln("<h2>Reverse Geocoding</h2>");
-				document.writeln("<table cellspacing=2 cellpadding=5 width='400px' bgcolor='#ccffff'>");
-					document.writeln("<tr>"); 
-						document.writeln("<td width='70px'>Strasse Nr.:</td>");
-						document.writeln("<td width='330px'>" + pos.street + " " + pos.streetNo + "</td>");
-					document.writeln("</tr><tr>");
-						document.writeln("<td width='70px'>Plz Ort: </td>");
-						document.writeln("<td width='330px'>" + pos.zip + " " + pos.city + " (" + pos.town + ")</td>");
-					document.writeln("</tr><tr>");	
-						document.writeln("<td width='70px'>Landkreis: </td>");
-						document.writeln("<td width='330px'>" + pos.district + "</td>");
-					document.writeln("</tr><tr>");
-						document.writeln("<td width='70px'>Bundesland: </td>");
-						document.writeln("<td width='330px'>" + pos.federalState + "</td>");
-					document.writeln("</tr><tr>");		
-						document.writeln("<td width='70px'>Land: </td>");
-						document.writeln("<td width='330px'>" + pos.country + "</td>");	
-					document.writeln("</tr>");
-				document.writeln("</table>");
-				
-			})
+					let history = "";
+					if (pos.historic != null) {
+						history = pos.historic
+					} else if (pos.tourism != null) {
+						history = pos.tourism
+					} else {
+						history = "not defined"
+					}
+
+					let place = "";
+					if (pos.footway != null) {
+						place = pos.footway
+					} else {
+						place = "not defined"
+					}
+
+					// osm_type = node, way, realation
+
+					document.writeln("<h2>Reverse Geocoding</h2>");
+					document.writeln("<table cellspacing=2 cellpadding=5 width='400px' bgcolor='#ccffff'>");
+						document.writeln("<tr>"); 
+							document.writeln("<td width='70px'>Categorie/Type:</td>");
+							document.writeln("<td width='330px'>" + json.osm_type + "</td>");
+						document.writeln("</tr><tr>");
+							if (history != "not defined") {
+									document.writeln("<td width='70px'>Attraktion:</td>");
+									document.writeln("<td width='330px'>" + history + "</td>");
+								document.writeln("</tr><tr>");
+							}
+							if (pos.shop != null) {
+									document.writeln("<td width='70px'>Shop:</td>");
+									document.writeln("<td width='330px'>" + pos.shop + "</td>");
+								document.writeln("</tr><tr>");
+							}
+							if (place != "not defined") {
+									document.writeln("<td width='70px'>Platz:</td>");
+									document.writeln("<td width='330px'>" + place + "</td>");
+								document.writeln("</tr><tr>");
+							}
+							document.writeln("<td width='70px'>Strasse Nr.:</td>");
+							document.writeln("<td width='330px'>" + pos.road + " " + houseNumber + "</td>");
+						document.writeln("</tr><tr>");
+							document.writeln("<td width='70px'>Plz Ort: </td>");
+							document.writeln("<td width='330px'>" + pos.postcode + " " + city + "</td>");
+						document.writeln("</tr><tr>");
+							if (pos.suburb != null) {
+									document.writeln("<td width='70px'>Vorort:</td>");
+									document.writeln("<td width='330px'>" + pos.suburb + "</td>");
+								document.writeln("</tr><tr>");
+							}	
+							document.writeln("<td width='70px'>Landkreis: </td>");
+							document.writeln("<td width='330px'>" + pos.county + "</td>");
+						document.writeln("</tr><tr>");
+							document.writeln("<td width='70px'>Bundesland: </td>");
+							document.writeln("<td width='330px'>" + pos.state + "</td>");
+						document.writeln("</tr><tr>");		
+							document.writeln("<td width='70px'>Land: </td>");
+							document.writeln("<td width='330px'>" + pos.country + " (" + pos.country_code + ")</td>");	
+						document.writeln("</tr>");
+					document.writeln("</table>");
+
+					document.writeln("<h2>Reverse Geocoding - Objekt</h2>");
+					document.writeln("JSON-Objekt: " + JSON.stringify(json));
+
+				})
 		}
 		</script>
 

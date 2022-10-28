@@ -1,0 +1,23 @@
+{
+  "name": "react-leaflet-map-with-marker-forked",
+  "version": "0.0.0",
+  "description": "Thaman",
+  "keywords": [],
+  "homepage": "https://codesandbox.io/s/m4k3x1ynl8",
+  "main": "index.js",
+  "dependencies": {
+    "leaflet": "latest",
+    "leaflet-routing-machine": "3.2.12",
+    "react": "16.0.0",
+    "react-dom": "16.0.0"
+  },
+  "devDependencies": {
+    "react-scripts": "1.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}

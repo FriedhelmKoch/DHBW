@@ -32,25 +32,27 @@
 
 	<script language="JavaScript">
 
-		let str = 'Lenbachstraße';
-		let strNo = '22';
-		let zip = '86529';
-		let city = 'Schrobenhausen';
+		const str = 'Lenbachstraße';
+		const strNo = '22';
+		const zip = '86529';
+		const city = 'Schrobenhausen';
+		const country = 'Germany';
+		const country_code = 'de'; 
 		
-		fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + str + ' ' + strNo + ', ' + zip + ' ' + city)
-		.then(function(response) {
-				return response.json();
-		})
-		.then(function(json) {
-			//console.log("OBJECT: " + JSON.stringify(json));
-			//console.log('LAT: ' + json[0].lat);
+		fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + str + ' ' + strNo + ', ' + zip + ' ' + city + ' ' + country)
+			.then(function(response) {
+					return response.json();
+			})
+			.then(function(json) {
+				//console.log("OBJECT: " + JSON.stringify(json));
+				//console.log('LAT: ' + json[0].lat);
 
-			document.writeln("<h2>Geo-Koordinaten - Ort zu Koordinaten</h2>");
-			document.writeln("Die Koordinaten der Adresse: " + str + " " + strNo + ", " + zip + " " + city + " sind:");
+				document.writeln("<h2>Geo-Koordinaten - Ort zu Koordinaten</h2>");
+				document.writeln("Die Koordinaten der Adresse: " + str + " " + strNo + ", " + zip + " " + city + " " + country + " sind:");
 
-			document.writeln("<p>Latitude/Breitengrad: " + json[0].lat + "<br />");
-			document.writeln("Longitude/Längengrad: " + json[0].lon + "</p>");
-		})
+				document.writeln("<p>Latitude/Breitengrad: " + json[0].lat + "<br />");
+				document.writeln("Longitude/Längengrad: " + json[0].lon + "</p>");
+			})
 
 	</script>
 

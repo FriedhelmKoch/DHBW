@@ -1,0 +1,12 @@
+{
+  "name": "react-leaflet-map-with-marker",
+  "version": "1.0.0",
+  "description": "GeoRouting",
+  "main": "index.js",
+  "dependencies": {
+    "leaflet": "latest",
+    "leaflet-routing-machine": "3.2.12",
+    "react": "16.0.0",
+    "react-dom": "16.0.0"
+  }
+}
