@@ -1,5 +1,6 @@
 import React from 'react';
 import './App.css';
+import { geoDistance } from "./geoDistance.js";
 // IndexedDB
 import { set, get, del, keys, createStore } from 'idb-keyval';
 
@@ -49,7 +50,7 @@ function App() {
   );
 }
 
-const test = {};
+//const test = {};
 
 const contact = {
   email: 'max@domain.ext',
@@ -65,9 +66,13 @@ const contact = {
  
 };
 
+// ****** Destructuring ********
+
+// Referenzschreibweise
 const { person } = contact;
 const { adresse } = person;
 console.log(`PLZ: ${adresse.plz}, Ort: ${adresse.ort}`);
+//console.log("PLZ:" + adresse.plz);
 
 const { vorName: name } = person;     //umbennen
 console.log(`Vorname = ${name}`);
@@ -97,6 +102,11 @@ const [fName, lName] = ['Max', 'Mustermann'];
 console.log(`Vorname = ${fName}`);  // Vorname=Max
 console.log(`Nachname = ${lName}`);  // Nachname=Mustermann
 
+// Punktschreibweise
+console.log(`Adresse: ${contact.person.adresse.plz} ${contact.person.adresse.ort}`);
+
+
+// ********* Arrays **********
 const arr = [0, 5, 10, 13];
 console.log("Arr: " + arr[2]);
 
@@ -143,6 +153,18 @@ console.log(`Max. Preis im Array: ${maxArr}`);
 let minArr = umsatzProd.reduce((prev, current) => prev < current ? prev : current);
 console.log(`Min. Preis im Array: ${minArr}`);
 
+console.log("------- Externes JS -------");
+// Berechnung Distanz zwischen zwei Geo-Koordinaten
+const coord1 = "Friedrichshafen";
+const coord2 = "Ravensburg";
+const lat1 = 47.656733;
+const lon1 = 9.464954;
+const lat2 = 47.785436;
+const lon2 = 9.610386;
+const dist = geoDistance(lat1, lon1, lat2, lon2, "K");
+console.log(`Distanz zwischen ${coord1} und ${coord2}: 
+     [${lon1},${lat1}] und [${lon2},${lat2}] 
+     = ${dist} [km]`);
 
 // Async/Await Beispiele von Promises und deren Async-/Synchronitäten
 //
@@ -155,11 +177,11 @@ async function hello() {
 };
 hello();
 
-function albert() {
-  const url = `https://de.wikipedia.org/w/api.php?action=query&list=search&pageimages|extracts&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=Albert Einstein`;
-  fetch(url)
+async function albert() {
+  const url = `https://de.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=Albert Einstein`;
+  await fetch(url)
     .then(response => response.json())
-    .then(json => console.log("== 3. Albert Einstein - 1. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 200) + "..."))
+    .then(json => console.log("== 3. Albert Einstein - 1. Wiki Abfrage: /n" + JSON.stringify(json).substring(0, 400) + "..."))
     .catch(response => response.json());
 }
 
@@ -174,9 +196,9 @@ async function searchWikipedia(searchQuery) {
 
 async function should_sequentiell() {
   console.time("timer");
-  hello();
+  await hello();
 
-  albert();                                              // erst die Wiki-Abfrage
+  await albert();                                              // erst die Wiki-Abfrage
   console.log(`== 4. Ausgabe synchron nach Albert Einstein`);   // dann die console.log Ausgabe
 
   await searchWikipedia('Isaac Newton');                  // erst die Wiki-Abfrage
@@ -185,12 +207,12 @@ async function should_sequentiell() {
   console.log("== 7. ENDE");
   console.timeEnd("timer");
 }
-//should_sequentiell();
+should_sequentiell();
 
 
 // IndexedDB
+//     https://www.w3.org/TR/IndexedDB/
 //
-
 console.log("------- indexedDB -------");
 set('hello', 'DHBW');
 get('hello').then((val) => console.log('value: ' + val));   // DHBW

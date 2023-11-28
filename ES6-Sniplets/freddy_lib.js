@@ -15,6 +15,7 @@
 // Bsp.:
 //				let dist = geoDistance(48.490545479685416, 11.338329464399012, 48.479460, 11.317115, "K");
 //				alert("Distanz: " + dist);  // knapp 2 Kilometer
+
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 export function geoDistance(lat1, lon1, lat2, lon2, unit) {
 	if ((lat1 == lat2) && (lon1 == lon2)) {
@@ -437,6 +438,26 @@ export function getBrowserLanguage() {
 	return `${navigator.language}`
 }
 
+// Screen Orientation
+export function getScreenOrientation() {
+  if (window.matchMedia("(orientation: portrait)").matches) {
+		return "portrait";
+	} else {
+		return "landscape";
+	}
+}
+
+// Returns the online status of the browser
+export function getNetworkStatus() {
+	if (navigator.onLine) {
+		//console.log('DEBUG - Network online');
+		return "online"
+	} else {
+		//console.log('DEBUG - Network offline');
+		return "offline"
+	}
+}
+
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // IP-Adresse abfragen und in SessionStore speichern
 // Bsp.:
@@ -527,7 +548,22 @@ export function utc2Zulu(utc) {
 	return zulu; 
 }
 
+/* 
+ * console.log(iso2eur('2020-12-18'));   // 18.12.2020
+ * console.log(iso2eur('2020-12-18T20:10:05.099'));   // 18.12.2020
+ */
+export function iso2eur(dat) {
+	const eur = (dat.indexOf("T") != -1) ? dat.split('T')[0].split('-') : dat.split('-');
 
+	//const eur = newDat.split('-');  // [0]: yyyy; [1]: mm; [2]: dd; 
+	const iso = `${eur[2]}.${eur[1]}.${eur[0]}`;  // dd.mm.yyyy - eur format
+	return iso;
+}
+
+/* 
+ * console.log(eur2iso('18.12.2020'));
+ *   // 2022-12-18
+ */
 export function eur2iso(dat) {
 	const eur = dat.split('.');  // [0]: dd; [1]: mm; [2]: yyyy; 
 	const iso = `${eur[2]}-${eur[1]}-${eur[0]}`;  // yyyy-mm-dd - iso format
@@ -543,8 +579,9 @@ export function eur2iso(dat) {
  *					console.log(zulu2LocalDat(dat)); 		// 2020-05-04T01:05:08.375
  **********************************************************************/
 export function zulu2LocalDat(isoString) {
-	//let dateParts = typeof isoString === 'undefined' ? "" : isoString.split( /\D+/ );	// // Split the string into an array based on the digit groups
-	let dateParts = isoString.split( /\D+/ );					// Split the string into an array based on the digit groups
+	//console.log(`DEBUG - isoString: ${isoString}`);
+	let dateParts = isoString == null ? "1990-01-01T01:00:00.000Z".split( /\D+/ ) : isoString.split( /\D+/ );	// // Split the string into an array based on the digit groups
+	//let dateParts = isoString.split( /\D+/ );					// Split the string into an array based on the digit groups
 	let returnDate = new Date();											// Set up a date object with the current time
 	
 	// Manually parse the parts of the string and set each part for the date. 
@@ -569,7 +606,7 @@ export function zulu2LocalDat(isoString) {
 			timezoneOffsetMinutes = parseInt( dateParts[8] ) / 60;	// Convert the minutes value into an hours value.
 		}
 		timezoneOffsetHours = parseInt( dateParts[7] ) + timezoneOffsetMinutes;		// Add the hours and minutes values to get the total offset in hours.
-		console.log(`DEBUG - isoString vorher: ${isoString}`);
+		//console.log(`DEBUG - isoString vorher: ${isoString}`);
 		if ( isoString.substring(isoString.length-6, isoString.length-5) ) {  // if the sign for the timezone is a plus to indicate the timezone is ahead of UTC time.
 			timezoneOffsetHours *= -1;							// Make the offset negative since the hours will need to be subtracted from the date.
 		}
@@ -604,6 +641,7 @@ export function zulu2LocalDat(isoString) {
  *						form:
  *							'array'						// ["Fr", "Freitag", "18", "DEZ", "DEZEMBER", "12", "2020", "09", "05", "08", "375"]
  *							'simpleDat'				// 18.12.2020  (default)
+ *              'veryShortDat'    // 18. DEZ 2020
  *							'shortDat'				// Fr, 18. DEZ 2020 
  *							'longDat'					// Freitag, den 18. DEZEMBER 2020
  *							'fullTime'				// 09:05:08.375Z
@@ -619,8 +657,12 @@ export function zulu2LocalDat(isoString) {
 
  **********************************************************************/
 export function utc2date(utc, form) {
+	//console.log(`DEBUG - utc: ${utc}`);
 	form = typeof form === 'undefined' ? 'simpleDat' : form;  // check if form undefined
-	utc = typeof utc === 'undefined' ? "1970-01-01T01:01:01.000Z" : utc;
+	utc = utc == null ? "1970-01-01T01:01:01.000" : utc;
+	if (typeof utc === 'undefined') {
+		return ""
+	};
 	if(utc.indexOf("T") < 0 ) {return "utc parameter in utc2date - format incorrect"};  // check if utc string correct
 
 	const dat = utc.split('T');
@@ -728,17 +770,20 @@ export function utc2time(utc) {
 }
 
 /**********************************************************************
- * Addiert Anzahl Tage zu einem bestimmten Datum in UTC
+ * Addiert/Subtrahiert Anzahl Tage zu einem bestimmten Datum in UTC
  * Bsp.: 
  *			1) const dat = "2020-02-15T09:05:08.375Z";
  *			2) const dat = "2020-02-15";
- *			const days = parseInt("21");
- *				console.log(addDays(dat, days)); 	
+ *			   const days = parseInt("21");
+ *			   console.log(addDays(dat, days)); 	
  *						1) // 2020-03-07T09:05:08.375Z
  *						2) // 2020-03-07T00:00:00.000
  *
- * 			const form = "short";
- *				console.log(addDays(dat, days, form)); 	
+ *			   console.log(addDays(dat, -1)); 	
+ *						1) // 2020-02-14T09:05:08.375Z
+ *
+ * 			   const form = "short";
+ *			   console.log(addDays(dat, days, form)); 	
  *						1) // 2020-03-07
  *						2) // 2020-03-07
  *			form:
@@ -763,22 +808,32 @@ export function addDays(utc, days, form) {
 }
 
 /**********************************************************************
- * Addiert Anzahl Minuten zu einem bestimmten Datum in UTC(Z)
+ * Addiert/Subtrahiert Anzahl Minuten zu einem bestimmten Datum in UTC(Z)
  * Bsp.:
  *        const dat = "2020-02-15T22:05:08.375";  // Zeit in UTC+1, keine Sommerzeit!
  *        const min = parseInt("120");	// hours = 3
  *           console.log(addMinutes(dat, min));
  *              // 2020-02-15T23:05:08.375Z
  * 
- *        const dat = "2020-02-15T22:05:08.375Z";  // Zeit in UTC/GMT, keine Sommerzeit
+ *        const dat = "2020-02-15T22:05:08.375Z";  // Zeit in UTC-Zulu, keine Sommerzeit!
  *        const min = parseInt("180");	// hours = 4
  *           console.log(addMinutes(dat, min));
  *              // 2020-02-16T01:05:08.375Z
+ * 
+ *        const dat = "2020-02-15T22:05:08.375Z";  // Zeit in UTC-Zulu, keine Sommerzeit!
+ *        const min = -120;	// hours = -2
+ *           console.log(addMinutes(dat, min));
+ *              // 2020-02-15T20:05:08.375Z
+ * 
+ *        const dat = "2020-02-15T22:05:08.375Z";  // Zeit in UTC-Zulu, keine Sommerzeit!
+ *        const min = -120;	// hours = -24
+ *           console.log(addMinutes(dat, min));
+ *              // 2020-02-14T22:05:08.375Z
  */
 export function addMinutes(utc, min) {
 	let d = new Date(utc);
 	let ms = d.getTime();
-	ms = ms + min * 60 * 1000;  // Minuten addieren
+	ms = ms + min * 60 * 1000;  // Minuten addieren, ggf. auch subtrahieren
 	d.setTime(ms);
 	return `${d.toISOString()}`  // in UTC-Zulu
 }
@@ -788,13 +843,39 @@ export function addMinutes(utc, min) {
  *
  **********************************************************************/
 export function round(num, X) {
-	X = (!X ? 2 : X);										// Default 2 Nachkommastellen
-	if (X < 1 || X > 14) return false;		// Nachkomastellen auf 14 Stellen begrenzen
+	X = (!X ? 2 : X);  // Default 2 Nachkommastellen
+	if (X < 1 || X > 14) return false;  // Nachkomastellen auf 14 Stellen begrenzen
 	let e = Math.pow(10, X);
 	let k = (Math.round(num * e) / e).toString();
 	if (k.indexOf('.') == -1) k += '.';
 	k += e.toString().substring(1);
 	return k.substring(0, k.indexOf('.') + X+1);
+}
+
+/**********************************************************************
+ * Konvertiert einen String mit hex codes in strings
+ * Bsp:
+ * const test = "http:&#x2F;&#x2F;test.test.com&#x2F;test&#x2F;?test=test&#x5C;"
+ * console.log(`${this.htmlDecode(test)}`);  
+ *   // http://test.test.com/test/?test=test\
+ **********************************************************************/
+export function htmlDecodeLink(str) {
+	const wordsToReplace = {
+		'&#x2F;': '/',
+		'&#x5C;': '\\',
+		'%5C': '\\',
+		'&#x40;': '@',
+		'&#xA7;': '§',
+		'%C2%A7': '§',
+		'&#xA0;': ' ',
+		'%20': ' ',
+		'&amp;': '&',
+	}
+ return Object.keys(wordsToReplace).reduce(
+		(f, s, i) =>
+			`${f}`.replace(new RegExp(s, 'ig'), wordsToReplace[s]),
+			str
+	)
 }
 
 /**********************************************************************
@@ -828,7 +909,7 @@ export function roundEng(x) {
  * Es gilt zu beachten, dass einige Länder (USA etc.) den (Punkt) als Tausendertrennzeichen benutzen.
  **********************************************************************/
 export function formCurrency(num, form) {
-	form = typeof form === 'undefined' ? 'EUR' : form;
+	form = (typeof form === 'undefined' || form == '') ? 'EUR' : form;  // if not defined, then last case
 	let ret = "";
 	switch (form) {
 		case "DE-Sym":								
@@ -855,12 +936,25 @@ export function formCurrency(num, form) {
 		default:
 			ret = num
 				.toFixed(2)
-				.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' ' + form
+				.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' ' + form  // same format as case DE-Sym
 			break;
 	}
   return ret;
 }
 
+/**********************************************************************
+ * const url = "http://en.wikipedia.org/wiki/London";
+ * console.log(isValidURL(url)); // true
+ * 
+ * console.log(isValidURL("https://sdfasd")); // false
+ * console.log(isValidURL("d838j4bd789snmk0")); // false
+ * console.log(isValidURL("alpha:?xt=urn:btih:123")); // false
+ * console.log(isValidURL("https://stackoverflow.com/")); // true
+ **********************************************************************/
+export function isValidURL(url) {
+	var res = url.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+	return (res !== null)
+};
 
 /**********************************************************************
  * Cookies
@@ -921,16 +1015,17 @@ export function delCookie(name) {
  * http://www.nord-com.net/h-g.mekelburg/krypto/glossar.htm#modus
  * 
  * Usage:
- * 		const text = "Das ist ein zu verschlüssender Text";
+ * 		const text = "Das ist ein zu verschlüsselnder Text";
  * 		const key = "salt";		// wenn key nicht definiert, dann wird default key genutzt
  * 		const ver = encrypt(text, key);
  * 		const ent = decrypt(ver, key);
  * 		console.log("Verschlüsselt: " + ver);
  * 		console.log("Entschlüsselt: " + ent);
  * 		console.log("Ver-/Entschlüsselt: " + encrypt(text) + ', ' + decrypt(encrypt(text)));
+ *    console.log(`Text: ${text}, Verschlüsselt: ${encrypt(text, key)}, Entschlüsselt: ${decrypt(encrypt(text,key), key)}`);
  **********************************************************************/
 let Modulus = 65536;
-const salt = '${ThisIsTheSaltInMySoup}';
+const salt = '${LikeSaltEvenThoughSaltIsImportantAndIsAlsoNeededByTheHumanBody}';
 function nextRandom(X, modulus) {
 /* Methode: Lineare Kongruenz =>  X[i] = (a * X[i-1] + b) mod m    */
 /* Mit den gewählten Parametern ergibt sich eine maximale Periode, */
@@ -982,11 +1077,11 @@ function crypt_HGC(EinText, key, encrypt) {
 }
 export function encrypt(text, key) {
 	key = typeof key === 'undefined' ? salt : key;
-  return escape(crypt_HGC(text, key, 1));
+  return encodeURIComponent(crypt_HGC(text, key, 1));
 }
 export function decrypt(chiffre, key) {
 	key = typeof key === 'undefined' ? salt : key;
-  return crypt_HGC(unescape(chiffre), key, 0);
+  return crypt_HGC(decodeURIComponent(chiffre), key, 0);
 }
 
 /**********************************************************************
@@ -1054,7 +1149,7 @@ export function getUrlPara(para) {
 	if (!para) {										// return of all url-parameters as whole string:
 		return decodeURI(params).replace(/_/g, '/').replace(/\+/g, ' ');	// "name=Jonathan Smith&age=18"
 	} else {												// question of unique parameter
-		if (params.has(para)) {		// check if parameter exists
+		if (params.has(para)) {		    // check if parameter exists
 			return params.get(para);		// if para=name, returns "Jonathan Smith"
 		} else {											// parameter does not exists
 			return false	// error string
@@ -1175,7 +1270,7 @@ export function findObjArr(objArr, property, value, para) {
  * Bsp.: 
  * 	const objArr = [{...}];
  * 	const sortProp = "age";
- * 	const oder = "asc";
+ * 	const order = "asc";
  * 	let obj = sortObjArr(objArr, sortProp, order);
  *	[ 
  *		{ name: 'Max', age: 20 }, 
@@ -1184,12 +1279,132 @@ export function findObjArr(objArr, property, value, para) {
  *	]
  **********************************************************************/ 
 export function sortObjArr(objArr, sortProp, order) {
-	oder = typeof order === 'undefined' ? "asc" : "des";		// -1: ascending; 1: descending
+	order = typeof order === 'undefined' ? "asc" : "des";		// -1: ascending; 1: descending
+	objArr = typeof objArr === 'undefined' ? [{}] : objArr;
 	if(order === "des") {
 		return objArr.sort((c1, c2) => (c1[sortProp] < c2[sortProp]) ? -1 : (c1[sortProp] > c2[sortProp]) ? 1 : 0)
 	} else {
 		return objArr.sort((c1, c2) => (c1[sortProp] < c2[sortProp]) ? 1 : (c1[sortProp] > c2[sortProp]) ? -1 : 0)
 	}	
+}
+
+/********************************************************************** 
+ * Service Worker
+ * The update() method of the ServiceWorkerRegistration interface attempts 
+ * to update the service worker. It fetches the worker's script URL, and 
+ * if the new worker is not byte-by-byte identical to the current worker, 
+ * it installs the new worker.
+ **********************************************************************/ 
+export function forceServiceWorkerUpdate() {
+
+	let pwaSupport = false;
+
+  if ('serviceWorker' in navigator) {  // if serviceworker supported in browser
+
+		navigator.serviceWorker.getRegistrations()
+			.then(function(registrations) {
+				for(let registration of registrations) {
+					registration.unregister();
+					console.log(`DEBUG - Serviceworker unregister was successful!`);
+				}
+			});
+
+		if('caches' in window) {
+			caches.keys()
+				.then(function(keyList) {
+					return Promise.all(keyList.map(function(key) {
+						console.log(`DEBUG - Caches deleted: ${JSON.stringify(key)}`);
+						return caches.delete(key);
+					}));
+				})
+		}
+
+    navigator.serviceWorker
+			.register("/service-worker.js")
+			.then(registration => {
+				
+				registration.addEventListener("updatefound", (res) => {
+					// If updatefound is fired, it means that there's a new service worker being installed.
+					const installingWorker = registration.installing;
+					console.log(`DEBUG - A new serviceworker updatefound: ${JSON.stringify(res)}`);
+					
+					// You can listen for changes to the installing service worker's
+					// state via installingWorker.onstatechange
+				});
+
+				// updatefound is fired if service-worker.js changes.
+        registration.onupdatefound = function(res) {
+          let installingWorker = registration.installing;
+					console.log(`DEBUG - A new serviceworker is being installed: ${JSON.stringify(res)}`);
+          installingWorker.onstatechange = () => {
+            switch (installingWorker.state) {
+              case 'installed':
+                if (navigator.serviceWorker.controller) {
+                  // At this point, the old content will have been purged and the fresh content will have been added to the cache.
+                  // It's the perfect time to display a "New content is available; please refresh."
+                  console.log('DEBUG - Serviceworker new or updated content is available.');
+                } else {
+                  // At this point, everything has been precached.
+                  // It's the perfect time to display a "Content is cached for offline use." message.
+                  console.log('DEBUG - Serviceworker content is now available offline!');
+                }
+                break;
+              case 'redundant':
+                console.log('DEBUG - The installing serviceworker became redundant.');
+                break;
+            }
+						setInterval( () => registration.update(), 86400 );  // update intervall every day - 3600 * 24
+          }
+				}
+			})
+			.catch(err => {
+				const errStr = err + '';  // always string
+					if(errStr.indexOf("401") > 0) {
+						console.log(`DEBUG - Serviceworker registration failed: Unauthorized Access`); 
+					} else if (errStr.indexOf("400") > 0){
+						console.log(`DEBUG - Serviceworker registration failed: Unaccepted URL`); 	
+					} else if (errStr.indexOf("404") > 0){
+						console.log(`DEBUG - Serviceworker registration failed: ServiceWorker-Script not found`);
+					} else if (errStr.indexOf("408") > 0){
+						console.log(`DEBUG - Serviceworker registration failed: Requested Timeout`); 	 
+					} else if (errStr.indexOf("500") > 0){
+						console.log(`DEBUG - Serviceworker registration failed: ServiceWorker-Script not found`); 
+					} else {
+						console.log("DEBUG - Serviceworker registration failed: " + err);
+					}
+			});
+  }
+
+}
+
+/********************************************************************** 
+ * Speichert einen Blob als Datei in den download ordner
+ * Bsp.:
+ *      const type = "application/pdf", "text/csv" or 'text/plain';
+ *      const dateiname = 'test.txt';
+ *      const count = 5;
+ *      const content = `${count} registrierte User:  // z.B. mehrzeiliger String
+ *           ${JSON.stringify(res.data.userData)}`;
+ *						
+ *      fileSave(content, type, dateiname);
+ *      
+ **********************************************************************/ 
+export function fileSave(content, type, filename) {
+
+	// Create blob object  
+	const myBlob = new Blob([content], {type: type});
+
+	// Create download link
+	const url = window.URL.createObjectURL(myBlob);
+	let anchor = document.createElement("a");
+	anchor.href = url;
+	anchor.download = filename;
+
+	// Force download
+	anchor.click();
+	window.URL.revokeObjectURL(url);
+	//document.removeChild(anchor);
+
 }
 
 export { toRadians, toDegree, getBase64 };

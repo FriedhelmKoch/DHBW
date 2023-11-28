@@ -13,17 +13,9 @@ class TaskList extends Component {
 						
 					{this.props.todos.map(function(todo) {
 						return (
-							<li key={todo.id}>#{todo.id.substring(0, 4)}... : {todo.title}</li>  // key dient React, um die Liste bei React intern zu verwalten, dabei muss die Key-id eindeutig sein!
+							<li key={todo.id}>#{todo.id.substring(0, 45)}... : {todo.title}</li>  // key dient React, um die Liste bei React intern zu verwalten, dabei muss die Key-id eindeutig sein!
 						)
 					})
-					
-					/* oder alternativ als Pfeilfunktion
-					this.props.todos.map((todo, index) => {
-						return (
-							<li key={index}>#{todo.id.substring(0, 4)}... : {todo.title}</li>  // key dient React, um die Liste bei React intern zu verwalten, dabei muss die Key-id eindeutig sein!
-						)
-					})
-					*/
 
 					}
 

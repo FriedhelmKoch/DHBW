@@ -32,9 +32,9 @@
 
 	<script language="JavaScript">
 		var geoOptions = {
-      enableHighAccuracy: true,     // Super-Präzisions-Modus
-      timeout: 1000,                // Maximum Wartezeit
-      maximumAge: 0                 // Maximum Cache-Alter
+      enableHighAccuracy: true,  // Super-Präzisions-Modus
+      timeout: 10000,  // Maximum Wartezeit (ms)
+      maximumAge: 0  // indicates that the web application is willing to accept a cached position whose age is no greater than the specified time in milliseconds
     }
     function geoSuccess(pos) {
 			var crd = pos.coords;
@@ -50,19 +50,18 @@
 					document.writeln("<td width='250px'>Longitude [Grad-Dez]: </td>");
 					document.writeln("<td width='150px'>" + lon + "</td>");
 				document.writeln("</tr><tr>");
+					document.writeln("<td width='250px'>Genauigkeit Koordinaten [m]: </td>");
+					document.writeln("<td width='150px'>" + crd.accuracy + "</td>");		
+				document.writeln("</tr><tr>");
 					document.writeln("<td width='250px'>Höhe über Meerespiegel [m]: </td>");
 					document.writeln("<td width='150px'>" + crd.altitude + "</td>");
 				document.writeln("</tr><tr>");
-					document.writeln("<td width='250px'>Genauigkeit [m]: </td>");
-					document.writeln("<td width='150px'>" + crd.accuracy + "</td>");	
+					document.writeln("<td width='250px'>Genauigkeit Höhenangabe [m]: </td>");
+					document.writeln("<td width='150px'>" + crd.altitudeAccuracy + "</td>");	
 				document.writeln("</tr>");
 			document.writeln("</table>");
 
 			reverseGeocoding(lon, lat);
-    }
-    function geoError(err) {
-      console.warn(`ERROR(${err.code}): ${err.message}`);
-      alert("ACHTUNG: Ohne Deine Geolocation-Daten ist die Funktionalität von viaLinked nur eingeschränkt möglich! Um die Geolocation-Funktionalität von viaLinked besser einschätzen zu können, klicke auf das 'viaLinked-Logo' oben links und lese bitte unser Datenschutz- und Nutzungsrichtlinien nach.");
     }
 
 		function geoError(err) {
@@ -81,6 +80,7 @@
 					alert('UNKNOWN ERROR: Deine Positionsdaten können aus technischen Gründen nicht ermittelt werden.');
 					break;
 			}		
+			document.writeln("<h3>Deine Positionsdaten können nicht ermittelt werden. Wahrscheinlich hast du die Ermittlung deiner GPS Position im Browser ausgestellt.</h2>");
 		}
 
     if (navigator.geolocation) {
@@ -110,6 +110,8 @@
 						city = pos.village
 					} else if (municipality != null) {
 						city = pos.municipality
+					} else if (farm != null) {
+						city = pos.farm	
 					} else {
 						city = "not defined"
 					}
@@ -128,6 +130,8 @@
 						history = pos.historic
 					} else if (pos.tourism != null) {
 						history = pos.tourism
+					} else if (pos.amenity != null) {
+						history = pos.amenity		
 					} else {
 						history = "not defined"
 					}
@@ -135,6 +139,12 @@
 					let place = "";
 					if (pos.footway != null) {
 						place = pos.footway
+					} else if (pos.locality != null) {
+						place = pos.locality	
+					} else if (pos.shop != null) {
+						place = pos.shop
+					} else if (pos.leisure != null) {
+						place = pos.leisure	
 					} else {
 						place = "not defined"
 					}
@@ -144,26 +154,25 @@
 					document.writeln("<h2>Reverse Geocoding</h2>");
 					document.writeln("<table cellspacing=2 cellpadding=5 width='400px' bgcolor='#ccffff'>");
 						document.writeln("<tr>"); 
-							document.writeln("<td width='70px'>Categorie/Type:</td>");
-							document.writeln("<td width='330px'>" + json.osm_type + "</td>");
-						document.writeln("</tr><tr>");
 							if (history != "not defined") {
 									document.writeln("<td width='70px'>Attraktion:</td>");
 									document.writeln("<td width='330px'>" + history + "</td>");
 								document.writeln("</tr><tr>");
 							}
-							if (pos.shop != null) {
-									document.writeln("<td width='70px'>Shop:</td>");
-									document.writeln("<td width='330px'>" + pos.shop + "</td>");
-								document.writeln("</tr><tr>");
-							}
 							if (place != "not defined") {
-									document.writeln("<td width='70px'>Platz:</td>");
+									document.writeln("<td width='70px'>Standort:</td>");
 									document.writeln("<td width='330px'>" + place + "</td>");
 								document.writeln("</tr><tr>");
 							}
-							document.writeln("<td width='70px'>Strasse Nr.:</td>");
-							document.writeln("<td width='330px'>" + pos.road + " " + houseNumber + "</td>");
+							if (houseNumber != "not defined") {
+									document.writeln("<td width='70px'>Strasse Nr.:</td>");
+									document.writeln("<td width='330px'>" + pos.road + " " + houseNumber + "</td>");
+								document.writeln("</tr><tr>");
+							} else if (pos.road != null) {
+									document.writeln("<td width='70px'>Strasse:</td>");
+									document.writeln("<td width='330px'>" + pos.road + "</td>");
+								document.writeln("</tr><tr>");
+							} 
 						document.writeln("</tr><tr>");
 							document.writeln("<td width='70px'>Plz Ort: </td>");
 							document.writeln("<td width='330px'>" + pos.postcode + " " + city + "</td>");
@@ -185,7 +194,7 @@
 					document.writeln("</table>");
 
 					document.writeln("<h2>Reverse Geocoding - Objekt</h2>");
-					document.writeln("JSON-Objekt: " + JSON.stringify(json));
+					document.writeln("JSON-Objekt: " + JSON.stringify(json.address));
 
 				})
 		}
