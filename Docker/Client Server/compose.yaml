@@ -1,0 +1,17 @@
+# compose.yaml
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    environment: # Hinzufügen oder erweitern Sie diesen Block
+      - NODE_OPTIONS=--openssl-legacy-provider
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
