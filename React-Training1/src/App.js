@@ -16,7 +16,7 @@ const locDat = `Zulu-Datum: (${iso}) in lokales Datum: ${dat}`;
 console.log("Aktuelle Zeit in Zulu-Datum: " + iso);     // ISO Format: 2020-11-05T11:34:12.000Z
 console.log(locDat);
 
-const tit1 = "Hello";          // string
+const tit1 = "Hallo";          // string
 const tit2 = "DHBW";
 const combination = <h1>Hello {tit2}!</h1>;
 
@@ -78,9 +78,10 @@ const { vorName: name } = person;     //umbennen
 console.log(`Vorname = ${name}`);
 
 function combineName(item) {
-  return item.vorName + ' ' + item.nachName;
+  return item.plz + ' ' + item.ort;
 }
-const gruss = 'Ich heiße: ' + combineName(contact.person);
+
+const gruss = 'Ich heiße: ' + combineName(contact.person.adresse);
 console.log(gruss);
 
 function schreibe({ email: mailAdresse }) {
