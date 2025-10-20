@@ -1,0 +1,27 @@
+[
+  {
+    "from": "Max Mustermann <max@example.com>",
+    "subject": "Bewerbung Softwareentwickler",
+    "html": "<p>Sehr geehrtes Team,</p><p>ich habe umfangreiche Erfahrung in <b>agilen Projekten</b> und Scrum-Methodik. Gerne möchte ich Ihr Team unterstützen.</p><p>Mit freundlichen Grüßen<br>Max Mustermann</p>"
+  },
+  {
+    "from": "Julia Schmidt <julia.schmidt@example.com>",
+    "subject": "Bewerbung Projektmanager",
+    "html": "<p>Hallo,</p><p>Ich habe mehrere Jahre Erfahrung in der Organisation von <b>Kanban-Projekten</b> und agilen Arbeitsmethoden.</p><p>Beste Grüße<br>Julia Schmidt</p>"
+  },
+  {
+    "from": "Lukas Fischer <lukas.fischer@example.com>",
+    "subject": "Bewerbung IT-Consultant",
+    "html": "<p>Liebe Personalabteilung,</p><p>In meinen bisherigen Rollen konnte ich Teams in <b>Scrum</b> erfolgreich begleiten und agile Projekte leiten.</p><p>Freundliche Grüße<br>Lukas Fischer</p>"
+  },
+  {
+    "from": "Anna Meyer <anna.meyer@example.com>",
+    "subject": "Bewerbung Junior Developer",
+    "html": "<p>Sehr geehrte Damen und Herren,</p><p>Ich interessiere mich sehr für Ihre IT-Projekte und bringe erste Erfahrungen im Bereich Softwareentwicklung mit.</p><p>Mit besten Grüßen<br>Anna Meyer</p>"
+  },
+  {
+    "from": "Tom Schneider <tom.schneider@example.com>",
+    "subject": "Bewerbung Backend Developer",
+    "html": "<p>Hallo,</p><p>Ich habe Kenntnisse in <b>agilen Projekten</b> und verteilten Scrum-Teams. Würde mich über die Möglichkeit freuen, Ihr Team zu unterstützen.</p><p>Viele Grüße<br>Tom Schneider</p>"
+  }
+]
