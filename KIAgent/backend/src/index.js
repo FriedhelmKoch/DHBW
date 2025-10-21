@@ -21,49 +21,21 @@ const purify = DOMPurify;
 async function processMail(raw) {
   try {
     const parsed = await simpleParser(raw.body || raw);
-
     let from = parsed.from?.text || '(Unbekannt)';
     let subject = parsed.subject || '(Kein Betreff)';
     let html = parsed.html || parsed.textAsHtml || parsed.text || '(Kein Inhalt)';
 
-    // Apple-Mail Header entfernen
     html = html.replace(/--Apple-Mail[^]*?--/g, '');
-
-    // Quoted-printable Dekodierung
     html = html.replace(/=\r\n/g, '').replace(/=([0-9A-F]{2})/gi, (m, hex) =>
       String.fromCharCode(parseInt(hex, 16))
     );
 
     html = purify.sanitize(html);
-
     return { from, subject, html };
   } catch (err) {
     return { from: '(Fehler beim Parsen)', subject: '(Fehler beim Parsen)', html: '(Fehler beim Parsen der Mail-Inhalte)' };
   }
 }
-
-// --- Endpunkt Demo-Mails ---
-app.get('/emails/demo', async (req, res) => {
-  try {
-    const query = req.query.query?.toLowerCase() || "";
-
-    const mails = demoMails.map(mail => {
-      const match = query && (mail.subject.toLowerCase().includes(query) || mail.html.toLowerCase().includes(query));
-      return {
-        ...mail,
-        match,
-        summary: '(Demo)',
-        tokens: 0,
-        cost: 0
-      };
-    });
-
-    res.json(mails);
-  } catch (err) {
-    console.error("Fehler beim Laden der Demo-Mails", err);
-    res.status(500).json({ error: "Fehler beim Laden der Demo-Mails" });
-  }
-});
 
 // --- IMAP Konfiguration für echte Mails ---
 const imapConfig = {
@@ -77,6 +49,16 @@ const imapConfig = {
   },
   onError: console.error
 };
+
+// --- Endpunkt Demo-Mails ---
+app.get('/emails/demo', async (req, res) => {
+  const query = req.query.query?.toLowerCase() || "";
+  const mails = demoMails.map(mail => ({
+    ...mail,
+    match: query && (mail.subject.toLowerCase().includes(query) || mail.html.toLowerCase().includes(query))
+  }));
+  res.json(mails);
+});
 
 // --- Endpunkt echte Mails ---
 app.get('/emails/real', async (req, res) => {
@@ -104,13 +86,13 @@ app.get('/emails/real', async (req, res) => {
 // --- Endpunkt AI-Zusammenfassung ---
 app.get('/emails/ai', async (req, res) => {
   const folder = req.query.folder || 'INBOX';
+  const query = req.query.query?.toLowerCase() || "";
 
   if (!process.env.OPENAI_API_KEY) {
+    // Demo-Daten
     const mails = demoMails.map(mail => ({
       ...mail,
-      summary: '(API-Key fehlt)',
-      tokens: 0,
-      cost: 0
+      match: query && (mail.subject.toLowerCase().includes(query) || mail.html.toLowerCase().includes(query))
     }));
     return res.json(mails);
   }
@@ -126,7 +108,7 @@ app.get('/emails/ai', async (req, res) => {
       const raw = m.parts.find(p => p.which === '')?.body || '';
       const processed = await processMail({ body: raw });
 
-      // Demo AI-Zusammenfassung
+      // Hier könntest du echte OpenAI-Zusammenfassung aufrufen
       processed.summary = 'Dies ist eine AI-Zusammenfassung.';
       processed.tokens = 50;
       processed.cost = 0.0004;
@@ -150,10 +132,7 @@ app.get('/emails/ai-filter', async (req, res) => {
   if (!process.env.OPENAI_API_KEY) {
     const mails = demoMails.map(mail => ({
       ...mail,
-      match: query && (mail.subject.toLowerCase().includes(query) || mail.html.toLowerCase().includes(query)),
-      summary: '(Demo AI-Filter)',
-      tokens: 0,
-      cost: 0
+      match: query && (mail.subject.toLowerCase().includes(query) || mail.html.toLowerCase().includes(query))
     }));
     return res.json(mails);
   }
@@ -188,7 +167,6 @@ app.get('/emails/ai-filter', async (req, res) => {
 // --- Endpunkt AI-Reply ---
 app.post('/emails/ai-reply', async (req, res) => {
   const mails = req.body.mails || [];
-  // Demo-Antwort generieren
   const replies = mails.map(mail => ({
     originalMail: mail,
     reply: `Hallo ${mail.from.split('<')[0].trim()},\n\nVielen Dank für Ihre Nachricht zu "${mail.subject}". Wir melden uns zeitnah zurück.\n\nBeste Grüße\nIhr Team`

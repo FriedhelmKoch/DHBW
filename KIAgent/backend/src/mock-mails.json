@@ -1,27 +1,82 @@
 [
   {
-    "from": "Max Mustermann <max@example.com>",
-    "subject": "Bewerbung Softwareentwickler",
-    "html": "<p>Sehr geehrtes Team,</p><p>ich habe umfangreiche Erfahrung in <b>agilen Projekten</b> und Scrum-Methodik. Gerne möchte ich Ihr Team unterstützen.</p><p>Mit freundlichen Grüßen<br>Max Mustermann</p>"
+    "from": "max.mueller@gmail.com",
+    "subject": "Bewerbung als Projektingenieur – Schwerpunkt Automatisierungstechnik",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>mit großem Interesse habe ich Ihre Stellenausschreibung für die Position des Projektingenieurs gelesen. Als Maschinenbauingenieur mit Schwerpunkt <strong>Automatisierungstechnik</strong> bringe ich mehrjährige Erfahrung in der Entwicklung und Implementierung automatisierter Fertigungslinien mit. Zuletzt war ich bei Siemens tätig, wo ich Robotersteuerungen und SPS-Systeme optimierte.</p><p>Ich bin überzeugt, dass meine Expertise in der Prozessautomatisierung und mein systematisches Denken einen echten Mehrwert für die ThyssenKrupp AG darstellen.</p><p>Mit freundlichen Grüßen,<br>Max Müller</p>",
+    "summary": "Automatisierungsexperte mit Erfahrung in SPS- und Robotiksteuerung bei Siemens. Starker Fokus auf Prozessautomatisierung und Effizienzsteigerung.",
+    "tokens": 289,
+    "cost": "0.006"
   },
   {
-    "from": "Julia Schmidt <julia.schmidt@example.com>",
-    "subject": "Bewerbung Projektmanager",
-    "html": "<p>Hallo,</p><p>Ich habe mehrere Jahre Erfahrung in der Organisation von <b>Kanban-Projekten</b> und agilen Arbeitsmethoden.</p><p>Beste Grüße<br>Julia Schmidt</p>"
+    "from": "laura.schneider@web.de",
+    "subject": "Initiativbewerbung als Projektingenieurin – Prozessoptimierung",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>als erfahrene <strong>Wirtschaftsingenieurin</strong> mit Schwerpunkt Prozessanalyse und -optimierung bewerbe ich mich um die ausgeschriebene Position. In meiner letzten Anstellung bei BASF leitete ich ein interdisziplinäres Team zur Einführung von Lean-Management-Methoden, wodurch wir die Durchlaufzeit um 18 % senken konnten.</p><p>Ich arbeite datenbasiert, teamorientiert und mit einem klaren Fokus auf Effizienzsteigerung.</p><p>Mit freundlichen Grüßen,<br>Laura Schneider</p>",
+    "summary": "Wirtschaftsingenieurin mit Lean-Management-Erfahrung und Erfolgen in Prozessoptimierung. Stark analytisch und teamorientiert.",
+    "tokens": 254,
+    "cost": "0.005"
   },
   {
-    "from": "Lukas Fischer <lukas.fischer@example.com>",
-    "subject": "Bewerbung IT-Consultant",
-    "html": "<p>Liebe Personalabteilung,</p><p>In meinen bisherigen Rollen konnte ich Teams in <b>Scrum</b> erfolgreich begleiten und agile Projekte leiten.</p><p>Freundliche Grüße<br>Lukas Fischer</p>"
+    "from": "michael.krause@posteo.de",
+    "subject": "Bewerbung als Projektingenieur mit CAD- und Simulationserfahrung",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>ich habe Elektrotechnik an der RWTH Aachen studiert und bringe fundierte Kenntnisse in <strong>CAD, FEM-Simulationen und Elektrosystemplanung</strong> mit. Derzeit bin ich bei einem mittelständischen Unternehmen tätig, wo ich das Design neuer Steuerungseinheiten mitentwickle.</p><p>Ich suche nun eine neue Herausforderung, bei der ich meine analytischen Fähigkeiten und mein technisches Verständnis in ein internationales Umfeld einbringen kann.</p><p>Freundliche Grüße,<br>Michael Krause</p>",
+    "summary": "Elektroingenieur mit Schwerpunkt CAD-Design und FEM-Simulationen. Erfahren in Systementwicklung und elektrotechnischer Planung.",
+    "tokens": 263,
+    "cost": "0.005"
   },
   {
-    "from": "Anna Meyer <anna.meyer@example.com>",
-    "subject": "Bewerbung Junior Developer",
-    "html": "<p>Sehr geehrte Damen und Herren,</p><p>Ich interessiere mich sehr für Ihre IT-Projekte und bringe erste Erfahrungen im Bereich Softwareentwicklung mit.</p><p>Mit besten Grüßen<br>Anna Meyer</p>"
+    "from": "julia.meier@icloud.com",
+    "subject": "Projektingenieurin mit Erfahrung in agilen Entwicklungsprozessen",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>Ich bewerbe mich auf Ihre Stelle als Projektingenieurin, da ich meine bisherigen Erfahrungen in <strong>agilen Projekten (Scrum, Kanban)</strong> ideal mit der Arbeit bei ThyssenKrupp verbinden kann. Als Projektleiterin bei Bosch leitete ich mehrere cross-funktionale Teams und führte agile Methoden erfolgreich in der Produktentwicklung ein.</p><p>Ich freue mich darauf, meine organisatorische Stärke und Kommunikationsfähigkeit in Ihr Team einzubringen.</p><p>Mit besten Grüßen,<br>Julia Meier</p>",
+    "summary": "Erfahrene Projektingenieurin mit agilem Mindset (Scrum, Kanban). Führte agile Teams bei Bosch und etablierte effiziente Entwicklungsprozesse.",
+    "tokens": 315,
+    "cost": "0.006"
   },
   {
-    "from": "Tom Schneider <tom.schneider@example.com>",
-    "subject": "Bewerbung Backend Developer",
-    "html": "<p>Hallo,</p><p>Ich habe Kenntnisse in <b>agilen Projekten</b> und verteilten Scrum-Teams. Würde mich über die Möglichkeit freuen, Ihr Team zu unterstützen.</p><p>Viele Grüße<br>Tom Schneider</p>"
+    "from": "green.engineering@t-online.de",
+    "subject": "Bewerbung Projektingenieur – Nachhaltigkeit & Energieeffizienz",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>Nachhaltigkeit ist für mich mehr als ein Trend – sie ist eine Haltung. Als Umwelt- und Verfahrenstechniker mit fünf Jahren Berufserfahrung im Bereich <strong>Energieeffizienz</strong> konnte ich bei Evonik mehrere Projekte zur CO₂-Reduktion erfolgreich umsetzen.</p><p>Ich möchte die Gelegenheit nutzen, bei ThyssenKrupp nachhaltige Produktionsprozesse weiter voranzutreiben.</p><p>Mit freundlichen Grüßen,<br>Daniel Fischer</p>",
+    "summary": "Umwelttechniker mit Spezialisierung auf Energieeffizienz und CO₂-Reduktion. Starkes Engagement für nachhaltige Produktionsprozesse.",
+    "tokens": 271,
+    "cost": "0.005"
+  },
+  {
+    "from": "lisa.bauer@student.uni-duisburg.de",
+    "subject": "Bewerbung als Projektingenieurin – Berufseinsteigerin mit Leidenschaft für Technik",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>ich habe mein Studium im Bereich Maschinenbau an der Universität Duisburg-Essen kürzlich erfolgreich abgeschlossen. Während meines Praktikums bei Daimler konnte ich erste Erfahrungen im Projektmanagement und in der Fertigungsoptimierung sammeln.</p><p>Ich bin hochmotiviert, mein Wissen in der Praxis einzusetzen und mich fachlich sowie persönlich weiterzuentwickeln.</p><p>Mit freundlichen Grüßen,<br>Lisa Bauer</p>",
+    "summary": "Junge Maschinenbauingenieurin mit ersten Erfahrungen bei Daimler. Engagiert, wissbegierig und bereit für den Berufseinstieg.",
+    "tokens": 238,
+    "cost": "0.005"
+  },
+  {
+    "from": "markus.hoffmann@techpm.com",
+    "subject": "Projektingenieur mit IT- und Digitalisierungsfokus",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>Mit über 10 Jahren Erfahrung im <strong>IT-Projektmanagement</strong> bringe ich fundierte Kenntnisse in der Digitalisierung von Fertigungsprozessen mit. Bei meinem aktuellen Arbeitgeber leitete ich die Einführung eines MES-Systems zur Produktionssteuerung.</p><p>Ich möchte diese Schnittstelle aus Technik und IT in Ihre Ingenieurprojekte einbringen.</p><p>Mit freundlichen Grüßen,<br>Markus Hoffmann</p>",
+    "summary": "Senior-Projektingenieur mit Fokus auf IT und Digitalisierung. Erfahrung in MES-Einführung und technischer Prozessintegration.",
+    "tokens": 280,
+    "cost": "0.006"
+  },
+  {
+    "from": "sabine.keller@jobmail.de",
+    "subject": "Bewerbung Projektingenieurin – Kommunikation und Teamarbeit im Fokus",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>Ich bin eine kommunikative Projektingenieurin mit starkem Fokus auf <strong>Teamarbeit und interdisziplinäre Abstimmung</strong>. In meiner bisherigen Tätigkeit bei ZF Friedrichshafen AG koordinierte ich regelmäßig Projektteams aus Entwicklung, Einkauf und Qualitätssicherung.</p><p>Ich schätze den offenen Austausch und möchte in einem Umfeld arbeiten, das Zusammenarbeit großschreibt.</p><p>Mit freundlichen Grüßen,<br>Sabine Keller</p>",
+    "summary": "Kommunikative Ingenieurin mit Erfahrung in Teamkoordination und interdisziplinärer Zusammenarbeit. Fokus auf Soft Skills und Abstimmung.",
+    "tokens": 259,
+    "cost": "0.005"
+  },
+  {
+    "from": "andre.sousa@globalmail.com",
+    "subject": "International erfahrener Projektingenieur – Bewerbung",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>Ich bin Maschinenbauingenieur aus Portugal und bringe internationale Projekterfahrung aus Spanien, Brasilien und Deutschland mit. Besonders in der <strong>interkulturellen Teamführung</strong> und technischen Dokumentation in mehreren Sprachen habe ich meine Stärken.</p><p>Ich bin überzeugt, dass meine globale Perspektive und mein technisches Know-how gut zu ThyssenKrupp passen.</p><p>Beste Grüße,<br>André Sousa</p>",
+    "summary": "International erfahrener Ingenieur mit interkultureller Teamführung und Mehrsprachigkeit. Starker globaler Projektfokus.",
+    "tokens": 268,
+    "cost": "0.005"
+  },
+  {
+    "from": "dr.hanna.weber@researchlab.de",
+    "subject": "Bewerbung Projektingenieurin – Forschung & Entwicklung",
+    "html": "<p>Sehr geehrte Frau Musterfrau,</p><p>Ich habe promoviert im Bereich Werkstofftechnik und war mehrere Jahre in der <strong>Forschung und Entwicklung neuer Leichtbaukomponenten</strong> tätig. Ich suche nun eine Position, in der ich meine Innovationskraft in konkrete industrielle Projekte einbringen kann.</p><p>Ich bin sicher, dass meine analytische Arbeitsweise und mein wissenschaftlicher Hintergrund gut zu Ihrer Entwicklungsabteilung passen.</p><p>Mit freundlichen Grüßen,<br>Dr. Hanna Weber</p>",
+    "summary": "Werkstoffexpertin mit Promotion und Erfahrung in F&E. Fokus auf Leichtbau, Innovation und analytisches Arbeiten.",
+    "tokens": 297,
+    "cost": "0.006"
   }
 ]

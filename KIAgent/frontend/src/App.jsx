@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { Sparkles } from "lucide-react";
+import "./styles.css";
 
 export default function App() {
   const [emails, setEmails] = useState([]);
-  const [mode, setMode] = useState("demo"); // demo | real | ai | ai-filter
+  const [mode, setMode] = useState("demo");
   const [folder, setFolder] = useState("INBOX");
   const [folders] = useState([
     "Bewerbungen",
@@ -12,7 +14,7 @@ export default function App() {
     "INBOX",
     "OUTBOX",
   ]);
-  const [query, setQuery] = useState("agile Projekte");
+  const [query, setQuery] = useState("agilen Projekte");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMails, setSelectedMails] = useState([]);
   const [aiReplies, setAiReplies] = useState([]);
@@ -51,10 +53,9 @@ export default function App() {
   };
 
   const sendAIReply = async () => {
-    // Hier würde normalerweise ein Backend Call stattfinden
     const mockReplies = selectedMails.map((mail) => ({
       originalMail: mail,
-      reply: `Dies ist eine vorgefertigte Antwort auf "${mail.subject}"`,
+      reply: `🧠 Automatisch generierte Antwort auf "${mail.subject}" — Vielen Dank für Ihre Bewerbung, wir melden uns in Kürze.`,
     }));
     setAiReplies(mockReplies);
     setShowAIConfirm(false);
@@ -66,9 +67,19 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <h2 style={{ marginBottom: "12px" }}>🤖 AI-Email-Agent</h2>
+      <h2 className="app-title">
+        <Sparkles className="sparkle-icon" /> AI-Email-Agent{" "}
+        <a
+          href="stellenausschreibung.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:underline"
+        >
+          Projektingenieur (m/w/d) – Automatisierungstechnik
+        </a>
+      </h2>
 
-      <div className="controls">
+      <div className="controls floating">
         <select value={folder} onChange={(e) => setFolder(e.target.value)}>
           {folders.map((f) => (
             <option key={f} value={f}>
@@ -101,47 +112,52 @@ export default function App() {
           onClick={handleAIReplyClick}
           disabled={selectedMails.length === 0}
         >
-          <span className="icon">🤖</span>
-          <span>AI-Reply</span>
+          🤖 AI-Reply
         </button>
       </div>
 
       {isLoading && <p>⏳ Mails werden geladen...</p>}
 
-      {emails.map((mail, i) => (
-        <div
-          key={i}
-          className={`email-card ${mail.match ? "highlight" : ""}`}
-        >
-          <input
-            type="checkbox"
-            checked={selectedMails.includes(mail)}
-            onChange={() => toggleSelect(mail)}
-          />
-          <h3>{mail.subject}</h3>
-          <p>
-            <strong>Von:</strong> {mail.from}
-          </p>
+      {/* Mail-Karten */}
+      <div className="mail-frames">
+        {emails.map((mail, i) => (
           <div
-            className="email-body"
-            dangerouslySetInnerHTML={{ __html: mail.html }}
-          />
-          {mail.summary && (
-            <p className="ai-summary">
-              <strong>AI:</strong> {mail.summary}{" "}
-              {mail.tokens && (
-                <>
-                  — <em>{mail.tokens} Tokens (${mail.cost})</em>
-                </>
-              )}
+            key={i}
+            className={`email-card-frame ${mail.match ? "highlight" : ""}`}
+          >
+            <div className="email-card-header">
+              <input
+                type="checkbox"
+                checked={selectedMails.includes(mail)}
+                onChange={() => toggleSelect(mail)}
+              />
+              <h3>{mail.subject}</h3>
+            </div>
+            <p>
+              <strong>Von:</strong> {mail.from}
             </p>
-          )}
-        </div>
-      ))}
+            <div
+              className="email-body-frame"
+              dangerouslySetInnerHTML={{ __html: mail.html }}
+            />
+            {mail.summary && (
+              <p className="ai-summary">
+                <strong>AI-Summary:</strong> {mail.summary}
+                {mail.tokens && (
+                  <>
+                    {" "}
+                    — <em>{mail.tokens} Tokens (€{mail.cost})</em>
+                  </>
+                )}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
 
       {aiReplies.length > 0 && (
         <div style={{ marginTop: "20px" }}>
-          <h3>AI-Generierte Antworten:</h3>
+          <h3>🧠 AI-Generierte Antworten:</h3>
           {aiReplies.map((r, i) => (
             <div
               key={i}
@@ -150,6 +166,7 @@ export default function App() {
                 backgroundColor: "#e8f5e9",
                 padding: "10px",
                 marginBottom: "10px",
+                borderRadius: "8px",
               }}
             >
               <p>
@@ -165,7 +182,8 @@ export default function App() {
         <div className="modal-overlay">
           <div className="modal">
             <p>
-              Möchten Sie für die ausgewählten Mails eine AI-Antwort generieren?
+              Möchten Sie für die ausgewählten Mails eine KI-Antwort
+              generieren?
             </p>
             <div className="modal-buttons">
               <button onClick={sendAIReply}>Ja</button>
