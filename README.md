@@ -35,6 +35,8 @@
 	- Hier wird das HTML5-Geolocation-Modell genutzt und mittels Reverse-Geocoding über 'Nominatim' die Adresse im Klartext mit Strasse/Nr/PLZ/Ort... extrahiert
 - Maps
 	- Eine Karte über Leaflet, OpenStreetMap und Markers in Vanilla-JavaScript
+- Land-Water-Checker
+	- Überprüft, ob sich eine Geo-Position an Land oder auf dem Wasser befindet. Es wird zudem auch eine Map dazu angezeigt.	
 - ES6-Sniplets
 	- Fibonacci, Passwort, Datumsumrechnung, Perl 'sprintf', MD5-Hash, ...	
 ```
