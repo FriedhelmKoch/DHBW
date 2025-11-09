@@ -294,7 +294,8 @@ function App() {
     { name: "Berlin Brandenburger Tor", lat: 52.5163, lon: 13.3777, zoom: 15 },
     { name: "Atlantik (offen)", lat: 47.0000, lon: -20.0000, zoom: 5 },
     { name: "Bodensee Mitte", lat: 47.6000, lon: 9.4000, zoom: 10 },
-    { name: "Mittelmeer", lat: 39.0000, lon: 15.0000, zoom: 6 }
+    { name: "Mittelmeer", lat: 39.0000, lon: 15.0000, zoom: 6 },
+    { name: "Mittelmeer (Nizza / Cap-Ferrat)", lat: 43.6784503207141, lon: 7.31008081353319, zoom: 13 }
   ];
 
   // Bestimme optimalen Zoom-Level basierend auf Positionstyp
