@@ -12,7 +12,6 @@ class Card extends Component {
 
     } 
 
-    
     render() {
         console.log(this);
         
@@ -33,11 +32,3 @@ class Card extends Component {
 }
 
 export default Card;
-
-// define the types of the properties that are passed to the component
-Card.prototype.props = /** @type { { 
-    title: string, 
-    fontSize: number,
-    children: React.ReactNode 
-} } */ ({});
-
