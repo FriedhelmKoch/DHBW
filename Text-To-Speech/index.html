@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech App - Dokumentiert</title>
+    <style>
+        /* CSS Styles bleiben gleich wie vorher */
+        :root {
+            --primary-color: #4f46e5;
+            --primary-dark: #4338ca;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --warning-color: #dc2626;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .browser-warning {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--warning-color);
+        }
+
+        .browser-warning.hidden {
+            display: none;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            resize: vertical;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .primary-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .primary-btn:hover:not(:disabled) {
+            background-color: var(--primary-dark);
+        }
+
+        .secondary-btn {
+            background-color: #e5e7eb;
+            color: var(--text-color);
+        }
+
+        .secondary-btn:hover:not(:disabled) {
+            background-color: #d1d5db;
+        }
+
+        .voice-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        select {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            min-width: 200px;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .slider-label span {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e7eb;
+            outline: none;
+        }
+
+        .status {
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status.active {
+            display: block;
+            background-color: #dbeafe;
+            color: var(--primary-dark);
+        }
+
+        .status.recording {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status.info {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .firefox-info {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        @media (max-width: 600px) {
+            .buttons {
+                flex-direction: column;
+            }
+            
+            button, select {
+                width: 100%;
+            }
+            
+            .voice-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Text-to-Speech App</h1>
+            <p>Konvertiere Text in Sprache oder nutze deine Stimme</p>
+        </header>
+
+        <div id="browserWarning" class="browser-warning hidden">
+            <strong>Hinweis für Firefox-Nutzer:</strong> Die Spracherkennung ist in Firefox nicht verfügbar. Bitte verwende Chrome, Edge oder Safari für alle Funktionen.
+        </div>
+
+        <div class="card">
+            <textarea id="textInput" placeholder="Gib hier deinen Text ein oder nutze die Spracherkennung...">Hallo! Diese App kann Text vorlesen und Sprache erkennen.</textarea>
+            
+            <div class="buttons">
+                <button id="speakBtn" class="primary-btn">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828a1 1 0 010-1.415z" clip-rule="evenodd"></path>
+                    </svg>
+                    Text vorlesen
+                </button>
+                
+                <button id="recordBtn" class="secondary-btn">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path>
+                    </svg>
+                    Spracherkennung
+                </button>
+            </div>
+
+            <div class="voice-controls">
+                <select id="voiceSelect">
+                    <option value="">Stimme wird geladen...</option>
+                </select>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Geschwindigkeit</span>
+                        <span id="rateValue">1.0</span>
+                    </div>
+                    <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Lautstärke</span>
+                        <span id="volumeValue">1.0</span>
+                    </div>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                </div>
+            </div>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div class="firefox-info hidden" id="firefoxInfo">
+            <h3>Firefox Information</h3>
+            <p>In Firefox ist nur die Text-to-Speech Funktion verfügbar. Für Spracherkennung verwende bitte Chrome, Edge oder Safari.</p>
+        </div>
+    </div>
+
+    <script>
+        // =============================================================================
+        // DOM-ELEMENTE INITIALISIEREN
+        // =============================================================================
+        const textInput = document.getElementById('textInput');
+        const speakBtn = document.getElementById('speakBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const rateSlider = document.getElementById('rateSlider');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const rateValue = document.getElementById('rateValue');
+        const volumeValue = document.getElementById('volumeValue');
+        const status = document.getElementById('status');
+        const browserWarning = document.getElementById('browserWarning');
+        const firefoxInfo = document.getElementById('firefoxInfo');
+
+        // =============================================================================
+        // WEB SPEECH API INITIALISIERUNG
+        // =============================================================================
+        
+        /**
+         * SPEECH SYNTHESIS (Text-to-Speech)
+         * 
+         * Die SpeechSynthesis-Schnittstelle ist der Controller für die Sprachsynthese.
+         * Sie wird verwendet, um Text in Sprache umzuwandeln.
+         * 
+         * Wichtige Eigenschaften:
+         * - speaking: Boolean, ob gerade gesprochen wird
+         * - paused: Boolean, ob die Wiedergabe pausiert ist
+         * - pending: Boolean, ob eine Warteschlange vorhanden ist
+         * 
+         * Wichtige Methoden:
+         * - speak(): Startet die Sprachausgabe
+         * - cancel(): Bricht die Sprachausgabe ab
+         * - pause(): Pausiert die Sprachausgabe
+         * - resume(): Setzt die Sprachausgabe fort
+         * - getVoices(): Gibt verfügbare Stimmen zurück
+         */
+        const synth = window.speechSynthesis;
+
+        /**
+         * SPEECH RECOGNITION (Speech-to-Text)
+         * 
+         * Die SpeechRecognition-Schnittstelle erkennt gesprochene Sprache.
+         * ACHTUNG: Wird in Firefox nicht unterstützt!
+         * 
+         * Browser-Präfixe:
+         * - Chrome/Safari: webkitSpeechRecognition
+         * - Firefox: Nicht unterstützt
+         * - Edge: SpeechRecognition (neuere Versionen)
+         */
+        let recognition = null;
+
+        // Browser-Erkennung
+        let isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+        let isChrome = navigator.userAgent.toLowerCase().includes('chrome');
+        let isSafari = navigator.userAgent.toLowerCase().includes('safari') && !navigator.userAgent.toLowerCase().includes('chrome');
+
+        // =============================================================================
+        // BROWSER-ERKENNUNG UND INITIALISIERUNG
+        // =============================================================================
+
+        /**
+         * detectBrowser()
+         * 
+         * Erkennt den Browser und konfiguriert die App entsprechend.
+         * - Firefox: Deaktiviert Spracherkennung
+         * - Chrome/Safari: Aktiviert Spracherkennung
+         */
+        function detectBrowser() {
+            console.log('Browser erkannt:', {
+                firefox: isFirefox,
+                chrome: isChrome,
+                safari: isSafari,
+                userAgent: navigator.userAgent
+            });
+
+            if (isFirefox) {
+                // Firefox: Spracherkennung deaktivieren
+                browserWarning.classList.remove('hidden');
+                firefoxInfo.classList.remove('hidden');
+                recordBtn.disabled = true;
+                recordBtn.innerHTML = `
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path>
+                    </svg>
+                    Spracherkennung (nicht verfügbar)
+                `;
+            } else {
+                // Chrome, Safari, Edge: Spracherkennung aktivieren
+                initSpeechRecognition();
+            }
+        }
+
+        // =============================================================================
+        // SPEECH RECOGNITION (SPRACHEINGABE) - IMPLEMENTIERUNG
+        // =============================================================================
+
+        /**
+         * initSpeechRecognition()
+         * 
+         * Initialisiert die Spracherkennung für kompatible Browser.
+         * 
+         * Konfigurationsoptionen:
+         * - continuous: Boolean - Kontinuierliche Erkennung oder Einzelaufnahme
+         * - interimResults: Boolean - Zwischenergebnisse anzeigen
+         * - lang: String - Sprache der Erkennung (z.B. 'de-DE', 'en-US')
+         * - maxAlternatives: Number - Anzahl der Alternativen pro Ergebnis
+         * 
+         * Wichtige Events:
+         * - onstart: Wird ausgelöst, wenn die Erkennung startet
+         * - onresult: Wird ausgelöst, wenn ein Ergebnis vorliegt
+         * - onerror: Wird bei Fehlern ausgelöst
+         * - onend: Wird ausgelöst, wenn die Erkennung endet
+         */
+        function initSpeechRecognition() {
+            // Prüfen, ob Spracherkennung verfügbar ist
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                // SpeechRecognition-Objekt erstellen (mit Browser-Präfix)
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                
+                // =========================================================================
+                // KONFIGURATION DER SPRACHERKENNUNG
+                // =========================================================================
+                
+                /**
+                 * continuous: false
+                 * - Einzelaufnahme: Stoppt automatisch nach einer Pause
+                 * - continuous: true würde kontinuierlich aufnehmen
+                 */
+                recognition.continuous = false;
+                
+                /**
+                 * interimResults: false
+                 * - Nur finale Ergebnisse zurückgeben
+                 * - true würde Zwischenergebnisse während des Sprechens liefern
+                 */
+                recognition.interimResults = false;
+                
+                /**
+                 * lang: 'de-DE'
+                 * - Sprache der Spracherkennung
+                 * - Weitere Optionen: 'en-US', 'fr-FR', 'es-ES', etc.
+                 */
+                recognition.lang = 'de-DE';
+                
+                // =========================================================================
+                // EVENT-HANDLER FÜR SPRACHERKENNUNG
+                // =========================================================================
+                
+                /**
+                 * onstart - Wird ausgelöst, wenn die Spracherkennung startet
+                 */
+                recognition.onstart = () => {
+                    showStatus('Spracherkennung aktiv... Sprich jetzt!', 'recording');
+                    recordBtn.innerHTML = `
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"></path>
+                        </svg>
+                        Stopp
+                    `;
+                };
+                
+                /**
+                 * onresult - Wird ausgelöst, wenn ein Sprachergebnis vorliegt
+                 * 
+                 * Das Event-Objekt enthält:
+                 * - results: Array der Erkennungsergebnisse
+                 * - resultIndex: Index des aktuellen Results
+                 * 
+                 * results[0] = erstes Ergebnis
+                 * results[0][0] = beste Alternative des ersten Ergebnisses
+                 * results[0][0].transcript = erkannten Text
+                 * results[0][0].confidence = Konfidenzwert (0-1)
+                 */
+                recognition.onresult = (event) => {
+                    // Das erste Ergebnis und die beste Alternative extrahieren
+                    const transcript = event.results[0][0].transcript;
+                    
+                    // Erkannten Text ins Textfeld schreiben
+                    textInput.value = transcript;
+                    showStatus('Spracherkennung abgeschlossen.', 'active');
+                };
+                
+                /**
+                 * onerror - Wird bei Fehlern ausgelöst
+                 * 
+                 * Häufige Fehler:
+                 * - 'no-speech': Keine Sprache erkannt
+                 * - 'audio-capture': Mikrofon nicht verfügbar
+                 * - 'not-allowed': Berechtigung verweigert
+                 * - 'network': Netzwerkfehler
+                 */
+                recognition.onerror = (event) => {
+                    showStatus('Fehler bei der Spracherkennung: ' + event.error, 'error');
+                };
+                
+                /**
+                 * onend - Wird ausgelöst, wenn die Spracherkennung endet
+                 * (automatisch oder manuell)
+                 */
+                recognition.onend = () => {
+                    showStatus('', 'recording');
+                    recordBtn.innerHTML = `
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path>
+                        </svg>
+                        Spracherkennung
+                    `;
+                };
+                
+                showStatus('Spracherkennung bereit', 'info');
+            } else {
+                // Spracherkennung nicht verfügbar
+                showStatus('Spracherkennung nicht verfügbar', 'error');
+                recordBtn.disabled = true;
+            }
+        }
+
+        // =============================================================================
+        // SPEECH SYNTHESIS (STIMMAUSGABE) - IMPLEMENTIERUNG
+        // =============================================================================
+
+        /**
+         * loadVoices()
+         * 
+         * Lädt die verfügbaren Stimmen für die Sprachausgabe.
+         * 
+         * Wichtige Hinweise:
+         * - Stimmen werden asynchron geladen
+         * - In Firefox sind Stimmen oft nicht sofort verfügbar
+         * - onvoiceschanged Event wird ausgelöst, wenn Stimmen geladen sind
+         */
+        function loadVoices() {
+            // Verfügbare Stimmen abrufen
+            const voices = synth.getVoices();
+            
+            if (voices.length === 0) {
+                // Stimmen sind noch nicht geladen - Event-Listener hinzufügen
+                if (synth.onvoiceschanged !== undefined) {
+                    synth.onvoiceschanged = loadVoices;
+                }
+                // Timeout für Browser, die Stimmen langsam laden (z.B. Firefox)
+                setTimeout(loadVoices, 1000);
+            } else {
+                // Stimmenliste füllen
+                populateVoiceList(voices);
+            }
+        }
+
+        /**
+         * populateVoiceList(voices)
+         * 
+         * Füllt das Dropdown-Menü mit den verfügbaren Stimmen.
+         * 
+         * @param {Array} voices - Array von SpeechSynthesisVoice-Objekten
+         * 
+         * SpeechSynthesisVoice Eigenschaften:
+         * - name: String - Name der Stimme
+         * - lang: String - Sprache der Stimme (z.B. 'de-DE', 'en-US')
+         * - localService: Boolean - Ob die Stimme lokal oder remote ist
+         * - default: Boolean - Ob dies die Standard-Stimme ist
+         */
+        function populateVoiceList(voices) {
+            voiceSelect.innerHTML = '';
+            
+            if (voices.length === 0) {
+                const option = document.createElement('option');
+                option.textContent = 'Keine Stimmen verfügbar';
+                option.disabled = true;
+                voiceSelect.appendChild(option);
+                return;
+            }
+            
+            // Standard-Option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Standard-Stimme';
+            voiceSelect.appendChild(defaultOption);
+            
+            // Stimmen nach Sprache gruppieren
+            const germanVoices = voices.filter(voice => voice.lang.includes('de'));
+            const englishVoices = voices.filter(voice => voice.lang.includes('en'));
+            const otherVoices = voices.filter(voice => 
+                !voice.lang.includes('de') && !voice.lang.includes('en')
+            );
+            
+            // Deutsche Stimmen hinzufügen
+            if (germanVoices.length > 0) {
+                germanVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    voiceSelect.appendChild(option);
+                });
+            }
+            
+            // Englische Stimmen hinzufügen
+            if (englishVoices.length > 0) {
+                englishVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    voiceSelect.appendChild(option);
+                });
+            }
+            
+            // Andere Stimmen hinzufügen
+            if (otherVoices.length > 0) {
+                otherVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    voiceSelect.appendChild(option);
+                });
+            }
+            
+            showStatus(`${voices.length} Stimmen geladen`, 'info');
+        }
+
+        /**
+         * speakText()
+         * 
+         * Wandelt den eingegebenen Text in Sprache um und gibt ihn aus.
+         * 
+         * Verwendet SpeechSynthesisUtterance:
+         * - text: String - Der vorzulesende Text
+         * - voice: SpeechSynthesisVoice - Die ausgewählte Stimme
+         * - rate: Number - Sprechgeschwindigkeit (0.1 - 10, Standard: 1)
+         * - pitch: Number - Tonhöhe (0 - 2, Standard: 1)
+         * - volume: Number - Lautstärke (0 - 1, Standard: 1)
+         * 
+         * Wichtige Events:
+         * - onstart: Wird ausgelöst, wenn die Wiedergabe startet
+         * - onend: Wird ausgelöst, wenn die Wiedergabe endet
+         * - onerror: Wird bei Fehlern ausgelöst
+         * - onpause: Wird bei Pause ausgelöst
+         * - onresume: Wird bei Fortsetzung ausgelöst
+         */
+        function speakText() {
+            // Prüfen, ob bereits gesprochen wird
+            if (synth.speaking) {
+                synth.cancel();
+                speakBtn.innerHTML = `
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828a1 1 0 010-1.415z" clip-rule="evenodd"></path>
+                    </svg>
+                    Text vorlesen
+                `;
+                return;
+            }
+
+            // Text validieren
+            const text = textInput.value.trim();
+            if (text === '') {
+                showStatus('Bitte gib einen Text ein.', 'error');
+                return;
+            }
+
+            // =========================================================================
+            // SPEECH SYNTHESIS UTTERANCE ERSTELLEN UND KONFIGURIEREN
+            // =========================================================================
+            
+            /**
+             * SpeechSynthesisUtterance-Objekt erstellen
+             * @param {string} text - Der vorzulesende Text
+             */
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Ausgewählte Stimme zuweisen
+            const selectedVoice = voiceSelect.value;
+            if (selectedVoice) {
+                const voices = synth.getVoices();
+                const voice = voices.find(v => v.name === selectedVoice);
+                if (voice) {
+                    utterance.voice = voice;
+                }
+            }
+            
+            // =========================================================================
+            // KONFIGURATION DER SPRACHAUSGABE
+            // =========================================================================
+            
+            /**
+             * rate: Sprechgeschwindigkeit
+             * - 0.1 = sehr langsam
+             * - 1.0 = normale Geschwindigkeit (Standard)
+             * - 2.0 = doppelte Geschwindigkeit
+             * - 10.0 = maximale Geschwindigkeit
+             */
+            utterance.rate = parseFloat(rateSlider.value);
+            
+            /**
+             * volume: Lautstärke
+             * - 0.0 = stumm
+             * - 0.5 = halbe Lautstärke
+             * - 1.0 = maximale Lautstärke (Standard)
+             */
+            utterance.volume = parseFloat(volumeSlider.value);
+            
+            /**
+             * pitch: Tonhöhe (nicht in dieser App konfigurierbar, aber verfügbar)
+             * - 0.0 = tiefste Tonhöhe
+             * - 1.0 = normale Tonhöhe (Standard)
+             * - 2.0 = höchste Tonhöhe
+             */
+            // utterance.pitch = 1.0; // Standardwert
+            
+            // =========================================================================
+            // EVENT-HANDLER FÜR SPRACHAUSGABE
+            // =========================================================================
+            
+            /**
+             * onstart - Wird ausgelöst, wenn die Sprachausgabe startet
+             */
+            utterance.onstart = () => {
+                showStatus('Text wird vorgelesen...', 'active');
+                speakBtn.innerHTML = `
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    Stopp
+                `;
+            };
+            
+            /**
+             * onend - Wird ausgelöst, wenn die Sprachausgabe endet
+             */
+            utterance.onend = () => {
+                showStatus('Wiedergabe beendet', 'info');
+                speakBtn.innerHTML = `
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828a1 1 0 010-1.415z" clip-rule="evenodd"></path>
+                    </svg>
+                    Text vorlesen
+                `;
+            };
+            
+            /**
+             * onerror - Wird bei Fehlern ausgelöst
+             */
+            utterance.onerror = (event) => {
+                showStatus('Fehler beim Vorlesen', 'error');
+                speakBtn.innerHTML = `
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828a1 1 0 010-1.415z" clip-rule="evenodd"></path>
+                    </svg>
+                    Text vorlesen
+                `;
+            };
+            
+            // =========================================================================
+            // SPRACHAUSGABE STARTEN
+            // =========================================================================
+            
+            /**
+             * synth.speak(utterance)
+             * 
+             * Startet die Sprachausgabe mit den konfigurierten Einstellungen.
+             * Die Ausgabe erfolgt asynchron und blockiert nicht den Hauptthread.
+             */
+            synth.speak(utterance);
+        }
+
+        // =============================================================================
+        // HILFSFUNKTIONEN
+        // =============================================================================
+
+        /**
+         * showStatus(message, type)
+         * 
+         * Zeigt Statusmeldungen an der Benutzeroberfläche an.
+         * 
+         * @param {string} message - Die anzuzeigende Nachricht
+         * @param {string} type - Der Typ der Nachricht ('active', 'error', 'info', 'recording')
+         */
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = 'status';
+            if (type) {
+                status.classList.add(type);
+            }
+            
+            // Status nach 5 Sekunden ausblenden (außer bei Fehlern)
+            if (type !== 'error') {
+                setTimeout(() => {
+                    status.textContent = '';
+                    status.className = 'status';
+                }, 5000);
+            }
+        }
+
+        // =============================================================================
+        // EVENT-LISTENER
+        // =============================================================================
+
+        // Text vorlesen Button
+        speakBtn.addEventListener('click', speakText);
+        
+        // Spracherkennung Button
+        recordBtn.addEventListener('click', () => {
+            // Nur in kompatiblen Browsern
+            if (!isFirefox && recognition) {
+                if (recognition.recording) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            }
+        });
+        
+        // Geschwindigkeits-Slider
+        rateSlider.addEventListener('input', () => {
+            rateValue.textContent = rateSlider.value;
+        });
+        
+        // Lautstärke-Slider
+        volumeSlider.addEventListener('input', () => {
+            volumeValue.textContent = volumeSlider.value;
+        });
+
+        // =============================================================================
+        // INITIALISIERUNG
+        // =============================================================================
+
+        // Browser erkennen und konfigurieren
+        detectBrowser();
+        
+        // Stimmen laden
+        loadVoices();
+
+        // Nochmal nach 2 Sekunden versuchen, Stimmen zu laden (für langsame Browser)
+        setTimeout(loadVoices, 2000);
+    </script>
+</body>
+</html>

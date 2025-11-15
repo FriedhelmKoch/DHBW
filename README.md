@@ -18,7 +18,9 @@
 - Kamera
 	- ein simpler Kamerazugriff über den Browser
 - Speech
-	- Sprachwiedergabe eines kurzen Textes
+	- Sehr einfache Sprachwiedergabe eines kurzen Textes
+- Text-To-Speech
+	- Eine erweiterte Sprach-Aufnahme und -Wiedergabe Demo (SpeechRecognition-Schnittstelle mittels window.speechSynthesis, SpeechSynthesisUtterance mittels synth.speak(utterance)) im Browser.	
 - Notification
 	- eine Notification gemäß PWA (funktioniert nicht unter Safari und iOS)
 - F7-React-Template
