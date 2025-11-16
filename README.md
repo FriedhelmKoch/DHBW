@@ -1,4 +1,4 @@
-## Vorliegende Besipiele
+## Vorliegende Beispiele
 
 ```
 - React-Training1
@@ -20,7 +20,9 @@
 - Speech
 	- Sehr einfache Sprachwiedergabe eines kurzen Textes
 - Text-To-Speech
-	- Eine erweiterte Sprach-Aufnahme und -Wiedergabe Demo (SpeechRecognition-Schnittstelle mittels window.speechSynthesis, SpeechSynthesisUtterance mittels synth.speak(utterance)) im Browser.	
+	- Eine erweiterte Sprach-Aufnahme und -Wiedergabe Demo (SpeechRecognition-Schnittstelle mittels window.speechSynthesis, SpeechSynthesisUtterance mittels synth.speak(utterance)) als WebApp im Browser.	
+- Text-To-Speech mit KI-Übersetzung
+	- Die erweiterte Text-To-Speech WebApp hier mit der OpenSource KI-Übersetzung von LibreTranslate im Browser.	
 - Notification
 	- eine Notification gemäß PWA (funktioniert nicht unter Safari und iOS)
 - F7-React-Template

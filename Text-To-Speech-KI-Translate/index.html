@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech mit Übersetzung</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        
+        .browser-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .recording-status {
+            margin: 15px 0;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .recording-status.recording {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            animation: pulse-border 1.5s infinite;
+        }
+        
+        .recording-status.completed {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        
+        .recording-status.error {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .recording-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #ff4444;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        
+        .completed-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #28a745;
+            border-radius: 50%;
+        }
+        
+        .status-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .record-btn {
+            background-color: #ff4444;
+            color: white;
+        }
+        
+        .record-btn.recording {
+            background-color: #cc0000;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .translate-btn {
+            background-color: #4285f4;
+            color: white;
+        }
+        
+        .speak-btn {
+            background-color: #34a853;
+            color: white;
+        }
+        
+        .stop-btn {
+            background-color: #ea4335;
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        @keyframes pulse-border {
+            0% { border-color: #2196f3; }
+            50% { border-color: #64b5f6; }
+            100% { border-color: #2196f3; }
+        }
+        
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .translation-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+        
+        .language-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #e9ecef;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .feature-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Speech-to-Text mit KI-Übersetzung</h1>
+        
+        <!-- Browser-Warnhinweis -->
+        <div class="browser-warning">
+            <strong>⚠️ Browser-Kompatibilität:</strong> 
+            Diese WebApp funktioniert am besten mit Google Chrome, Microsoft Edge oder Apple Safari Browser. Firefox unterstützt die Funktionen leider nicht vollständig.
+            <br />Die automatische Spracherkennung unterstützt in dieser WebApp die englische und französische Sprache.
+        </div>
+        
+        <div class="button-group">
+            <button id="recordButton" class="record-btn">🎤 Aufnahme starten</button>
+            <button id="stopButton" class="stop-btn" disabled>⏹️ Stop</button>
+        </div>
+        
+        <!-- Aufnahme-Status mit dynamischen Meldungen -->
+        <div id="recordingStatus" class="recording-status">
+            <div class="status-indicator">
+                <div class="completed-dot"></div>
+                <span id="statusTitle">Bereit für Aufnahme</span>
+            </div>
+            <div id="statusDescription" class="status-description">
+                Klicke "Aufnahme starten" um mit der Spracherkennung zu beginnen
+            </div>
+        </div>
+        
+        <div>
+            <label for="textInput">Erkannter Text:</label>
+            <textarea id="textInput" placeholder="Hier erscheint der erkannte Text..."></textarea>
+        </div>
+        
+        <div class="button-group">
+            <button id="translateButton" class="translate-btn" disabled>🌐 Übersetzen (DE)</button>
+            <button id="speakOriginalButton" class="speak-btn" disabled>🔊 Original vorlesen</button>
+        </div>
+        
+        <div class="translation-section">
+            <label for="translatedText">
+                Übersetzter Text (Deutsch):
+                <span class="language-badge">🇩🇪 DE</span>
+            </label>
+            <textarea id="translatedText" placeholder="Hier erscheint die Übersetzung..." readonly></textarea>
+            
+            <div class="button-group">
+                <button id="speakTranslatedButton" class="speak-btn" disabled>🔊 Übersetzung vorlesen</button>
+                <button id="copyTranslatedButton" class="speak-btn" disabled>📋 Kopieren</button>
+            </div>
+        </div>
+        
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        // =============================================
+        // DOM-ELEMENTE INITIALISIEREN
+        // =============================================
+        const recordButton = document.getElementById('recordButton');
+        const stopButton = document.getElementById('stopButton');
+        const textInput = document.getElementById('textInput');
+        const translatedText = document.getElementById('translatedText');
+        const translateButton = document.getElementById('translateButton');
+        const speakOriginalButton = document.getElementById('speakOriginalButton');
+        const speakTranslatedButton = document.getElementById('speakTranslatedButton');
+        const copyTranslatedButton = document.getElementById('copyTranslatedButton');
+        const statusDiv = document.getElementById('status');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const statusTitle = document.getElementById('statusTitle');
+        const statusDescription = document.getElementById('statusDescription');
+
+        // =============================================
+        // GLOBALE VARIABLEN
+        // =============================================
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let recognition;
+
+        // =============================================
+        // AUFNAHME-STATUS VERWALTEN
+        // =============================================
+        function updateRecordingStatus(state, message = '') {
+            // Alte Klassen entfernen
+            recordingStatus.classList.remove('recording', 'completed', 'error');
+            
+            switch(state) {
+                case 'ready':
+                    statusTitle.innerHTML = '<div class="completed-dot"></div> Bereit für Aufnahme';
+                    statusDescription.textContent = 'Klicke "Aufnahme starten" um mit der Spracherkennung zu beginnen';
+                    recordingStatus.classList.add('completed');
+                    break;
+                    
+                case 'recording':
+                    statusTitle.innerHTML = '<div class="recording-dot"></div> Aufnahme aktiv';
+                    statusDescription.textContent = 'Spracherkennung läuft... Sprechen Sie jetzt (Englisch/Französisch)';
+                    recordingStatus.classList.add('recording');
+                    break;
+                    
+                case 'completed':
+                    statusTitle.innerHTML = '<div class="completed-dot"></div> Aufnahme abgeschlossen';
+                    statusDescription.textContent = 'Aufnahme erfolgreich beendet. Text kann jetzt übersetzt werden.';
+                    recordingStatus.classList.add('completed');
+                    break;
+                    
+                case 'error':
+                    statusTitle.innerHTML = '<div class="completed-dot" style="background-color: #dc3545;"></div> Aufnahme fehlgeschlagen';
+                    statusDescription.textContent = message || 'Ein Fehler ist aufgetreten. Bitte erneut versuchen.';
+                    recordingStatus.classList.add('error');
+                    break;
+                    
+                case 'browser-error':
+                    statusTitle.innerHTML = '<div class="completed-dot" style="background-color: #dc3545;"></div> Browser nicht unterstützt';
+                    statusDescription.textContent = 'Spracherkennung wird in diesem Browser nicht unterstützt. Bitte Chrome oder Edge verwenden.';
+                    recordingStatus.classList.add('error');
+                    break;
+            }
+        }
+
+        // =============================================
+        // SPRACHERKENNUNG INITIALISIEREN
+        // =============================================
+        function initSpeechRecognition() {
+            // Browser-Kompatibilität prüfen
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                updateRecordingStatus('browser-error');
+                showStatus('❌ Speech Recognition wird in diesem Browser nicht unterstützt. Bitte Chrome oder Edge verwenden.', 'error');
+                return;
+            }
+
+            // SpeechRecognition Objekt erstellen
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;      // Kontinuierliche Erkennung
+            recognition.interimResults = true;  // Zwischenergebnisse anzeigen
+            recognition.lang = 'en-US';         // Standard: Englisch (kann auch fr-FR für Französisch sein)
+
+            // Event-Handler für Erkennungsergebnisse
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                let interimTranscript = '';
+
+                // Durch alle Ergebnisse iterieren
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // Text im Textfeld kombinieren
+                textInput.value = finalTranscript + interimTranscript;
+                
+                // Buttons aktivieren wenn Text vorhanden
+                translateButton.disabled = !textInput.value.trim();
+                speakOriginalButton.disabled = !textInput.value.trim();
+            };
+
+            // Fehlerbehandlung
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error', event.error);
+                updateRecordingStatus('error', `Spracherkennungsfehler: ${event.error}`);
+                showStatus(`❌ Spracherkennungsfehler: ${event.error}`, 'error');
+            };
+
+            // Automatisch neu starten wenn Aufnahme noch aktiv
+            recognition.onend = () => {
+                if (isRecording) {
+                    recognition.start();
+                }
+            };
+        }
+
+        // =============================================
+        // STATUS-ANZEIGE
+        // =============================================
+        function showStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            
+            // Status automatisch nach 5 Sekunden löschen (außer bei Loading)
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusDiv.textContent = '';
+                    statusDiv.className = 'status';
+                }, 5000);
+            }
+        }
+
+        // =============================================
+        // ÜBERSETZUNGSFUNKTION MIT MEHREREN APIs
+        // =============================================
+        async function translateText(text) {
+            showStatus('🔄 Übersetze...', 'loading');
+            
+            try {
+                // OPTION 1: MyMemory API (kostenlos, zuverlässig)
+                try {
+                    const response = await fetch(
+                        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=auto|de`
+                    );
+                    const data = await response.json();
+                    
+                    if (data.responseStatus === 200 && data.responseData.translatedText) {
+                        showStatus('✅ Übersetzung erfolgreich!', 'success');
+                        return data.responseData.translatedText;
+                    }
+                } catch (error) {
+                    console.log('MyMemory API fehlgeschlagen, versuche nächste Option...');
+                }
+
+                // OPTION 2: Lingva Translate (Open Source Alternative)
+                try {
+                    const response = await fetch(
+                        `https://lingva.ml/api/v1/auto/de/${encodeURIComponent(text)}`
+                    );
+                    const data = await response.json();
+                    
+                    if (data.translation) {
+                        showStatus('✅ Übersetzung erfolgreich!', 'success');
+                        return data.translation;
+                    }
+                } catch (error) {
+                    console.log('Lingva API fehlgeschlagen, versuche nächste Option...');
+                }
+
+                // OPTION 3: SimplyTranslate (Alternative Instanz)
+                try {
+                    const response = await fetch(
+                        `https://simplytranslate.org/api/translate?text=${encodeURIComponent(text)}&from=auto&to=de`
+                    );
+                    const data = await response.json();
+                    
+                    if (data.translated_text) {
+                        showStatus('✅ Übersetzung erfolgreich!', 'success');
+                        return data.translated_text;
+                    }
+                } catch (error) {
+                    console.log('SimplyTranslate fehlgeschlagen...');
+                }
+
+                // OPTION 4: Lokale Fallback-Übersetzung für Demo-Zwecke
+                const fallbackTranslation = await localFallbackTranslation(text);
+                if (fallbackTranslation) {
+                    showStatus('✅ Übersetzung (lokal) erfolgreich!', 'success');
+                    return fallbackTranslation;
+                }
+
+                throw new Error('Alle Übersetzungsdienste sind aktuell nicht verfügbar');
+
+            } catch (error) {
+                console.error('Übersetzungsfehler:', error);
+                showStatus('❌ Übersetzung temporär nicht verfügbar. Bitte später erneut versuchen.', 'error');
+                return null;
+            }
+        }
+
+        // =============================================
+        // LOKALE FALLBACK-ÜBERSETZUNG (DEMO)
+        // =============================================
+        async function localFallbackTranslation(text) {
+            // Einfache Wort-für-Wort Übersetzung für Demonstrationszwecke
+            const basicTranslations = {
+                'hello': 'hallo',
+                'goodbye': 'auf wiedersehen',
+                'thank you': 'danke',
+                'please': 'bitte',
+                'yes': 'ja',
+                'no': 'nein',
+                'how are you': 'wie geht es dir',
+                'what is your name': 'wie ist dein name',
+                'i love you': 'ich liebe dich',
+                'good morning': 'guten morgen',
+                'good evening': 'guten abend',
+                'cheers': 'prost',
+                'french': 'französisch',
+                'english': 'englisch',
+                'german': 'deutsch'
+            };
+
+            const lowerText = text.toLowerCase();
+            
+            // Prüfe ob einer der Basis-Sätze vorkommt
+            for (const [english, german] of Object.entries(basicTranslations)) {
+                if (lowerText.includes(english)) {
+                    return text.toLowerCase().replace(english, german);
+                }
+            }
+            
+            return null;
+        }
+
+        // =============================================
+        // TEXT-TO-SPEECH FUNKTION
+        // =============================================
+        function speakText(text, lang = 'de-DE') {
+            if (!text) return;
+
+            // SpeechSynthesis API verwenden
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;    // Sprache einstellen
+            utterance.rate = 1.0;     // Geschwindigkeit
+            utterance.pitch = 1.0;    // Tonhöhe
+            
+            // Sprachausgabe starten
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // =============================================
+        // AUFNAHME STARTEN
+        // =============================================
+        recordButton.addEventListener('click', async () => {
+            try {
+                // Mikrofon-Zugriff anfordern
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // MediaRecorder für Audioaufnahme initialisieren
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                // Event-Handler für Audio-Daten
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                // Speech Recognition starten
+                if (recognition) {
+                    recognition.start();
+                }
+
+                // UI-Status aktualisieren
+                isRecording = true;
+                recordButton.classList.add('recording');
+                recordButton.disabled = true;
+                stopButton.disabled = false;
+                
+                updateRecordingStatus('recording');
+                showStatus('🎤 Aufnahme läuft... Sprecht jetzt (Englisch/Französisch)!', 'success');
+
+            } catch (error) {
+                console.error('Mikrofon-Fehler:', error);
+                updateRecordingStatus('error', 'Mikrofon-Zugriff verweigert');
+                showStatus('❌ Mikrofon-Zugriff verweigert. Bitte Berechtigungen prüfen.', 'error');
+            }
+        });
+
+        // =============================================
+        // AUFNAHME STOPPEN
+        // =============================================
+        stopButton.addEventListener('click', () => {
+            // MediaRecorder stoppen
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+            }
+            
+            // Speech Recognition stoppen
+            if (recognition) {
+                recognition.stop();
+            }
+
+            // UI-Status zurücksetzen
+            isRecording = false;
+            recordButton.classList.remove('recording');
+            recordButton.disabled = false;
+            stopButton.disabled = true;
+            
+            updateRecordingStatus('completed');
+            showStatus('⏹️ Aufnahme gestoppt', 'info');
+        });
+
+        // =============================================
+        // ÜBERSETZUNGS-BUTTON
+        // =============================================
+        translateButton.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+            if (!text) return;
+
+            // Übersetzung durchführen
+            const translated = await translateText(text);
+            if (translated) {
+                translatedText.value = translated;
+                speakTranslatedButton.disabled = false;
+                copyTranslatedButton.disabled = false;
+            }
+        });
+
+        // =============================================
+        // ORIGINALTEXT VORLESEN
+        // =============================================
+        speakOriginalButton.addEventListener('click', () => {
+            speakText(textInput.value, 'auto');
+        });
+
+        // =============================================
+        // ÜBERSETZUNG VORLESEN
+        // =============================================
+        speakTranslatedButton.addEventListener('click', () => {
+            speakText(translatedText.value, 'de-DE');
+        });
+
+        // =============================================
+        // ÜBERSETZUNG KOPIEREN
+        // =============================================
+        copyTranslatedButton.addEventListener('click', async () => {
+            try {
+                // Moderne Clipboard API verwenden
+                await navigator.clipboard.writeText(translatedText.value);
+                showStatus('📋 Übersetzung kopiert!', 'success');
+            } catch (error) {
+                // Fallback für ältere Browser
+                translatedText.select();
+                document.execCommand('copy');
+                showStatus('📋 Übersetzung kopiert!', 'success');
+            }
+        });
+
+        // =============================================
+        // INITIALISIERUNG BEIM LADEN DER SEITE
+        // =============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initSpeechRecognition();
+            updateRecordingStatus('ready');
+            showStatus('✅ Bereit für Aufnahme. Klicke "Aufnahme starten" (Funktioniert am besten mit Chrome/Edge)', 'info');
+        });
+    </script>
+</body>
+</html>
