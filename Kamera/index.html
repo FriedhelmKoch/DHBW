@@ -1,23 +1,411 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Moderne Kamera Demo</title>
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #6b7ff7;
+            --dark-color: #333;
+            --light-color: #f8f9fa;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 75%; /* 4:3 Aspect Ratio */
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        #videoElement {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #canvasElement {
+            display: none;
+        }
+
+        .controls {
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            background-color: var(--light-color);
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .gallery {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(231, 76, 60, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .status {
+            padding: 10px 20px;
+            text-align: center;
+            background-color: #e9ecef;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 0;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .description {
+                font-size: 0.9rem;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+    </style>
 </head>
-<body style="margin: 0;">
-    <video autoplay playsinline style="width: 100vw; height: 100vh;"></video>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kamera Demo</h1>
+            <p class="description">Eine einfache Kamerademo für Desktop und Mobile, mit der auch Fotos aufgenommen werden können.</p>
+        </header>
+        
+        <div class="camera-container">
+            <video id="videoElement" autoplay playsinline></video>
+            <canvas id="canvasElement"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button id="startCamera" class="btn-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" fill="currentColor"/>
+                    <path d="M20 4H16.83L15.59 2.65C15.22 2.24 14.68 2 14.12 2H9.88C9.32 2 8.78 2.24 8.41 2.65L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z" fill="currentColor"/>
+                </svg>
+                Kamera starten
+            </button>
+            <button id="takePhoto" class="btn-success" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" fill="currentColor"/>
+                    <path d="M20 4H16.83L15.59 2.65C15.22 2.24 14.68 2 14.12 2H9.88C9.32 2 8.78 2.24 8.41 2.65L7.17 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z" fill="currentColor"/>
+                </svg>
+                Foto aufnehmen
+            </button>
+            <button id="stopCamera" class="btn-danger" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6H18V18H6V6Z" fill="currentColor"/>
+                </svg>
+                Kamera stoppen
+            </button>
+        </div>
+        
+        <div class="status" id="statusMessage">
+            Klicken Sie auf "Kamera starten", um die Kamera zu aktivieren.
+        </div>
+        
+        <div class="gallery" id="photoGallery">
+            <!-- Hier werden die aufgenommenen Fotos angezeigt -->
+        </div>
+    </div>
+
     <script>
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-            .then(stream => document.querySelector('video').srcObject = stream);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elemente auswählen
+            const videoElement = document.getElementById('videoElement');
+            const canvasElement = document.getElementById('canvasElement');
+            const startCameraButton = document.getElementById('startCamera');
+            const takePhotoButton = document.getElementById('takePhoto');
+            const stopCameraButton = document.getElementById('stopCamera');
+            const statusMessage = document.getElementById('statusMessage');
+            const photoGallery = document.getElementById('photoGallery');
+            
+            let stream = null;
+            
+            // Kamera starten
+            startCameraButton.addEventListener('click', async function() {
+                try {
+                    // Zugriff auf die Kamera anfordern
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'environment' 
+                        } 
+                    });
+                    
+                    // Video-Element mit dem Stream verbinden
+                    videoElement.srcObject = stream;
+                    
+                    // Buttons aktivieren/deaktivieren
+                    startCameraButton.disabled = true;
+                    takePhotoButton.disabled = false;
+                    stopCameraButton.disabled = false;
+                    
+                    // Status aktualisieren
+                    statusMessage.textContent = 'Kamera ist aktiv. Klicken Sie auf "Foto aufnehmen", um ein Bild zu erstellen.';
+                    statusMessage.style.color = '#2ecc71';
+                    
+                } catch (error) {
+                    console.error('Fehler beim Zugriff auf die Kamera:', error);
+                    statusMessage.textContent = 'Fehler: Kamera konnte nicht gestartet werden. Bitte überprüfen Sie Ihre Berechtigungen.';
+                    statusMessage.style.color = '#e74c3c';
+                }
+            });
+            
+            // Foto aufnehmen
+            takePhotoButton.addEventListener('click', function() {
+                if (!stream) return;
+                
+                // Canvas-Element für die Fotoaufnahme vorbereiten
+                const context = canvasElement.getContext('2d');
+                canvasElement.width = videoElement.videoWidth;
+                canvasElement.height = videoElement.videoHeight;
+                
+                // Bild vom Video auf den Canvas zeichnen
+                context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+                
+                // Bild als Data-URL exportieren
+                const imageDataURL = canvasElement.toDataURL('image/png');
+                
+                // Bild zur Galerie hinzufügen
+                addPhotoToGallery(imageDataURL);
+                
+                // Status aktualisieren
+                statusMessage.textContent = 'Foto wurde aufgenommen und zur Galerie hinzugefügt.';
+                statusMessage.style.color = '#2ecc71';
+            });
+            
+            // Kamera stoppen
+            stopCameraButton.addEventListener('click', function() {
+                if (stream) {
+                    // Alle Stream-Tracks stoppen
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                    
+                    // Video-Element zurücksetzen
+                    videoElement.srcObject = null;
+                    
+                    // Buttons aktivieren/deaktivieren
+                    startCameraButton.disabled = false;
+                    takePhotoButton.disabled = true;
+                    stopCameraButton.disabled = true;
+                    
+                    // Status aktualisieren
+                    statusMessage.textContent = 'Kamera wurde gestoppt. Klicken Sie auf "Kamera starten", um sie erneut zu aktivieren.';
+                    statusMessage.style.color = '#6c757d';
+                }
+            });
+            
+            // Foto zur Galerie hinzufügen
+            function addPhotoToGallery(imageDataURL) {
+                // Element für das Foto erstellen
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                
+                // Bild erstellen
+                const img = document.createElement('img');
+                img.src = imageDataURL;
+                img.alt = 'Aufgenommenes Foto';
+                
+                // Löschen-Button erstellen
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-btn';
+                deleteButton.innerHTML = '×';
+                deleteButton.addEventListener('click', function() {
+                    photoGallery.removeChild(galleryItem);
+                    updateGalleryStatus();
+                });
+                
+                // Elemente zusammenfügen
+                galleryItem.appendChild(img);
+                galleryItem.appendChild(deleteButton);
+                
+                // Zur Galerie hinzufügen
+                photoGallery.appendChild(galleryItem);
+                
+                // Galerie-Status aktualisieren
+                updateGalleryStatus();
+            }
+            
+            // Galerie-Status aktualisieren
+            function updateGalleryStatus() {
+                const galleryItems = photoGallery.querySelectorAll('.gallery-item');
+                
+                if (galleryItems.length === 0) {
+                    photoGallery.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #6c757d;">Noch keine Fotos aufgenommen</p>';
+                }
+            }
+            
+            // Initialen Galerie-Status setzen
+            updateGalleryStatus();
+        });
     </script>
-    <script>
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('./sw.js')
-				.then(reg => console.log('Registrierung erfolgreich. Scope ist ' + reg))
-				.catch(err => console.log('Registrierung fehlgeschlagen mit ' + err));
-		}
-	</script>
 </body>
 </html>
