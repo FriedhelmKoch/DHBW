@@ -1,222 +1,545 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* App.css - Responsive Version */
+:root {
+  --primary-color: #4A90E2;
+  --secondary-color: #F5A623;
+  --background-dark: #0f2027;
+  --background-medium: #203a43;
+  --background-light: #2c5364;
+  --text-color: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
+* {
+  box-sizing: border-box;
 }
 
 .App {
   text-align: center;
+  background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-medium) 50%, var(--background-light) 100%);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   padding: 20px;
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
 .App-header {
-  max-width: 850px;
+  max-width: 1200px;
+  margin: 0 auto;
   width: 100%;
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.98);
-  border-radius: 20px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  margin: 20px;
+}
+
+.header-content {
+  margin-bottom: 30px;
 }
 
 h1 {
-  color: #2c3e50;
-  margin-bottom: 25px;
-  font-size: 2.5rem;
-  font-weight: 700;
-  background: linear-gradient(45deg, #3498db, #9b59b6);
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  background: linear-gradient(45deg, #00d2ff, var(--primary-color));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1.2;
 }
 
+.app-beschreibung {
+  opacity: 0.9;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ladeanzeige */
+.lade-anzeige {
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 500px;
+  margin: 30px auto;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+}
+
+.lade-balken {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.lade-fortschritt {
+  height: 100%;
+  background: linear-gradient(90deg, #00d2ff, var(--primary-color));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.lade-prozent {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 10px 0;
+  color: #00d2ff;
+}
+
+.lade-details {
+  opacity: 0.7;
+  font-size: 0.9rem;
+  margin-top: 15px;
+}
+
+/* Status Bereich */
+.status-bereich {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.status-badge {
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge.bereit {
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  color: #4CAF50;
+}
+
+.status-badge.emotion {
+  background: rgba(255, 165, 0, 0.1);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  color: #FFA726;
+}
+
+.emotion-icon {
+  font-size: 1.2rem;
+}
+
+/* Erkennungs Container */
 .erkennungs-container {
+  margin: 30px auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.video-wrapper {
   position: relative;
-  width: 800px;
-  height: 600px;
-  margin: 25px auto 40px;
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   background: #000;
-  border: 3px solid #fff;
+  aspect-ratio: 4/3;
+  width: 100%;
+  max-width: 800px; /* Desktop: 800px max */
+  margin: 0 auto;
 }
 
 .webcam-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scaleX(-1);
+  display: block;
 }
 
 .gesichts-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+  transform: scaleX(-1);
 }
 
-.lade-anzeige {
-  background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+/* Emotion Overlay */
+.emotion-overlay {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 15px;
   border-radius: 12px;
-  padding: 25px;
-  margin: 25px auto;
-  max-width: 600px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  animation: fadeIn 0.5s ease-out;
+  z-index: 10;
+  max-width: calc(100% - 40px);
 }
 
-.lade-anzeige p {
-  color: #2d3436;
-  font-size: 1.2rem;
-  font-weight: 600;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.emotion-display-overlay {
+  min-width: 180px;
+}
+
+.emotion-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
   margin-bottom: 15px;
 }
 
-.lade-balken {
-  width: 100%;
-  height: 10px;
-  background: #dfe6e9;
-  border-radius: 5px;
+.emotion-text {
+  text-align: left;
+}
+
+.emotion-header h3 {
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+
+.konfidenz-balken {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
   overflow: hidden;
 }
 
-.lade-fortschritt {
-  width: 100%;
+.konfidenz-fortschritt {
   height: 100%;
-  background: linear-gradient(90deg, #00b894, #00cec9);
-  animation: ladeAnimation 2s infinite ease-in-out;
+  transition: width 0.3s ease;
+  border-radius: 3px;
 }
 
-@keyframes ladeAnimation {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.modell-bereit {
-  color: #00b894;
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin: 20px 0;
-  animation: pulsieren 2s infinite;
-}
-
-@keyframes pulsieren {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.erklaerung {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  padding: 30px;
-  border-radius: 15px;
-  margin-top: 30px;
-  text-align: left;
-  border: 2px solid #dee2e6;
-}
-
-.erklaerung h3 {
-  color: #2c3e50;
-  margin-bottom: 20px;
-  font-size: 1.6rem;
-  font-weight: 700;
-}
-
-.erklaerung ul {
-  list-style-type: none;
-  margin: 25px 0;
-  padding: 0;
-}
-
-.erklaerung li {
-  padding: 12px 0;
-  color: #34495e;
-  border-bottom: 1px solid #bdc3c7;
-  font-size: 1.1rem;
+/* Kontrollen */
+.kontrollen {
+  margin-top: 20px;
   display: flex;
-  align-items: center;
-}
-
-.erklaerung li:before {
-  content: '✓';
-  color: #00b894;
-  font-weight: bold;
-  font-size: 1.3rem;
-  margin-right: 15px;
-  background: #fff;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  max-width: 800px;
 }
 
-.hinweise {
-  background: linear-gradient(135deg, #d0ecff, #a5d8ff);
-  padding: 20px;
-  border-radius: 10px;
-  margin-top: 25px;
-  border-left: 5px solid #339af0;
+.kontroll-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.hinweise p {
-  margin: 10px 0;
-  color: #1864ab;
-  font-size: 1rem;
-  font-weight: 600;
+.kontroll-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
 }
 
-.hinweise strong {
-  color: #1c7ed6;
+.webcam-status {
+  background: rgba(0, 255, 0, 0.1);
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  font-size: 0.9rem;
 }
 
-/* Responsive Design */
-@media (max-width: 850px) {
-  .App-header {
-    max-width: 95%;
-    padding: 20px;
-    margin: 10px;
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin: 40px auto;
+  max-width: 800px;
+}
+
+.info-card {
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 15px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(5px);
+}
+
+.info-card h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+}
+
+.info-card ul {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.info-card li {
+  margin-bottom: 10px;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+/* Emotion Statistik */
+.emotion-statistik {
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 15px;
+  margin: 30px auto;
+  border: 1px solid var(--border-color);
+  max-width: 800px;
+  width: 100%;
+}
+
+.emotion-statistik h4 {
+  margin-top: 0;
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}
+
+.emotion-verteilung {
+  margin-top: 20px;
+}
+
+.emotion-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.emotion-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.emotion-label {
+  font-size: 0.9rem;
+}
+
+.verteilung-balken {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+  min-width: 100px;
+}
+
+.verteilung-fortschritt {
+  height: 100%;
+  transition: width 0.5s ease;
+  border-radius: 5px;
+}
+
+.emotion-prozent {
+  min-width: 50px;
+  text-align: right;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Footer */
+.footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+  opacity: 0.7;
+  font-size: 0.85rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1199px) {
+  .video-wrapper {
+    max-width: 700px;
   }
   
-  .erkennungs-container {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4/3;
+  .info-grid {
+    max-width: 700px;
   }
   
-  .webcam-video,
-  .gesichts-canvas {
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 4/3;
+  .emotion-statistik {
+    max-width: 700px;
+  }
+  
+  .footer {
+    max-width: 700px;
+  }
+}
+
+@media (max-width: 991px) {
+  .video-wrapper {
+    max-width: 600px;
   }
   
   h1 {
     font-size: 2rem;
   }
-}
-
-@media (max-width: 600px) {
-  h1 {
-    font-size: 1.7rem;
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+    max-width: 600px;
   }
   
-  .erklaerung {
+  .emotion-statistik {
+    max-width: 600px;
+  }
+  
+  .footer {
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 767px) {
+  .App {
+    padding: 15px;
+  }
+  
+  .video-wrapper {
+    max-width: 95vw;
+    border-radius: 10px;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  .app-beschreibung {
+    font-size: 1rem;
+    padding: 0 10px;
+  }
+  
+  .emotion-overlay {
+    top: 10px;
+    right: 10px;
+    padding: 12px;
+  }
+  
+  .emotion-header {
+    gap: 10px;
+  }
+  
+  .emotion-header h3 {
+    font-size: 1rem;
+  }
+  
+  .kontrollen {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .kontroll-button, .webcam-status {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .info-card {
     padding: 20px;
   }
   
-  .erklaerung li {
-    font-size: 1rem;
+  .emotion-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .emotion-item-header {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .verteilung-balken {
+    width: 100%;
+  }
+  
+  .emotion-prozent {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.6rem;
+  }
+  
+  .status-bereich {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .status-badge {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .emotion-overlay {
+    position: relative;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0 0 10px 10px;
+    margin-top: -1px;
+  }
+  
+  .video-wrapper {
+    border-radius: 10px 10px 0 0;
+  }
+  
+  .info-card h3 {
+    font-size: 1.2rem;
+  }
+  
+  .info-card li {
+    font-size: 0.9rem;
+  }
+}
+
+/* Utility Classes */
+@media (min-width: 992px) {
+  .desktop-800 {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Performance Optimierungen */
+@media (prefers-reduced-motion: reduce) {
+  .emotion-overlay,
+  .kontroll-button {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Dark Mode Unterstützung */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-dark: #0a1929;
+    --background-medium: #1a2b3c;
+    --background-light: #2a3b4c;
   }
 }
