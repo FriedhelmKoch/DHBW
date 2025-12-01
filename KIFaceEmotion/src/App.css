@@ -1,94 +1,145 @@
-/* App.css - Responsive Version */
-:root {
-  --primary-color: #4A90E2;
-  --secondary-color: #F5A623;
-  --background-dark: #0f2027;
-  --background-medium: #203a43;
-  --background-light: #2c5364;
-  --text-color: #ffffff;
-  --card-bg: rgba(255, 255, 255, 0.05);
-  --border-color: rgba(255, 255, 255, 0.1);
+/* App.css - Optimiert für iPhone 11 Pro und alle Geräte */
+
+/* Reset und Basis-Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-* {
-  box-sizing: border-box;
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Safari/iOS spezifische Optimierungen */
+@supports (-webkit-touch-callout: none) {
+  .App {
+    height: -webkit-fill-available;
+  }
 }
 
 .App {
-  text-align: center;
-  background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-medium) 50%, var(--background-light) 100%);
   min-height: 100vh;
-  padding: 20px;
-  color: var(--text-color);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: -webkit-fill-available;
+  background: linear-gradient(135deg, #0c1c24 0%, #1a2f3a 50%, #243b47 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
-.App-header {
-  max-width: 1200px;
+.app-container {
+  width: 100%;
+  max-width: 800px;
   margin: 0 auto;
+  padding: clamp(12px, 3vw, 20px);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  text-align: center;
+  margin-bottom: clamp(20px, 4vw, 30px);
   width: 100%;
 }
 
 .header-content {
-  margin-bottom: 30px;
+  margin-bottom: clamp(15px, 3vw, 25px);
 }
 
 h1 {
-  font-size: 2.2rem;
-  margin-bottom: 10px;
-  background: linear-gradient(45deg, #00d2ff, var(--primary-color));
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  margin-bottom: 0.5em;
+  background: linear-gradient(45deg, #00d2ff, #3a7bd5);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1.2;
+  padding: 0 clamp(10px, 3vw, 20px);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .app-beschreibung {
-  opacity: 0.9;
-  font-size: 1.1rem;
-  margin-bottom: 30px;
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
+  opacity: 0.85;
+  line-height: 1.5;
+  padding: 0 clamp(10px, 3vw, 20px);
   max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
 }
 
 /* Ladeanzeige */
 .lade-anzeige {
-  background: var(--card-bg);
-  padding: 30px;
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: clamp(20px, 5vw, 30px);
+  margin: clamp(15px, 4vw, 25px) auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   max-width: 500px;
-  margin: 30px auto;
-  border: 1px solid var(--border-color);
-  backdrop-filter: blur(10px);
+  width: 100%;
+}
+
+.lade-inhalt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(15px, 3vw, 20px);
+}
+
+.lade-spinner {
+  width: clamp(40px, 10vw, 50px);
+  height: clamp(40px, 10vw, 50px);
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid #00d2ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.lade-text {
+  font-size: clamp(1rem, 3.5vw, 1.2rem);
+  font-weight: 500;
 }
 
 .lade-balken {
+  width: 100%;
   height: 8px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   overflow: hidden;
-  margin: 20px 0;
 }
 
 .lade-fortschritt {
   height: 100%;
-  background: linear-gradient(90deg, #00d2ff, var(--primary-color));
+  background: linear-gradient(90deg, #00d2ff, #3a7bd5);
   transition: width 0.3s ease;
-  border-radius: 4px;
 }
 
 .lade-prozent {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
   font-weight: bold;
-  margin: 10px 0;
   color: #00d2ff;
 }
 
-.lade-details {
+.lade-hinweis {
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
   opacity: 0.7;
-  font-size: 0.9rem;
-  margin-top: 15px;
+  text-align: center;
+  margin-top: 5px;
 }
 
 /* Status Bereich */
@@ -96,69 +147,75 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 15px;
-  margin: 20px 0;
+  gap: 12px;
+  margin: clamp(15px, 3vw, 25px) 0;
+  padding: 0 clamp(10px, 3vw, 20px);
 }
 
 .status-badge {
-  padding: 12px 24px;
+  padding: 10px 18px;
   border-radius: 25px;
-  font-size: 0.9rem;
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
   font-weight: 500;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid;
+  white-space: nowrap;
 }
 
-.status-badge.bereit {
+.status-bereit {
   background: rgba(0, 255, 0, 0.1);
-  border: 1px solid rgba(0, 255, 0, 0.3);
-  color: #4CAF50;
+  border-color: rgba(0, 255, 0, 0.3);
 }
 
-.status-badge.emotion {
+.status-emotion {
   background: rgba(255, 165, 0, 0.1);
-  border: 1px solid rgba(255, 165, 0, 0.3);
-  color: #FFA726;
+  border-color: rgba(255, 165, 0, 0.3);
 }
 
-.emotion-icon {
-  font-size: 1.2rem;
+.status-icon {
+  font-size: 1.1em;
 }
 
-/* Erkennungs Container */
+/* Hauptinhalt */
+.app-main {
+  flex: 1;
+  width: 100%;
+}
+
 .erkennungs-container {
-  margin: 30px auto;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin-bottom: clamp(25px, 5vw, 35px);
 }
 
-.video-wrapper {
+/* Video Container */
+.video-container {
   position: relative;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  background: #000;
-  aspect-ratio: 4/3;
   width: 100%;
-  max-width: 800px; /* Desktop: 800px max */
-  margin: 0 auto;
+  aspect-ratio: 4/3;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 0 auto 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
 }
 
 .webcam-video {
+  position: absolute;
   width: 100%;
   height: 100%;
   object-fit: cover;
   transform: scaleX(-1);
-  display: block;
 }
 
 .gesichts-canvas {
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
@@ -168,41 +225,63 @@ h1 {
 /* Emotion Overlay */
 .emotion-overlay {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: clamp(12px, 3vw, 20px);
+  right: clamp(12px, 3vw, 20px);
   background: rgba(0, 0, 0, 0.85);
-  padding: 15px;
+  padding: clamp(10px, 2.5vw, 15px);
   border-radius: 12px;
   backdrop-filter: blur(10px);
-  border: 1px solid var(--border-color);
-  animation: fadeIn 0.5s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   z-index: 10;
-  max-width: calc(100% - 40px);
+  max-width: min(250px, 65vw);
+  animation: slideIn 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .emotion-display-overlay {
-  min-width: 180px;
+  width: 100%;
 }
 
 .emotion-header {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
+  gap: clamp(8px, 2vw, 12px);
+  margin-bottom: 12px;
 }
 
-.emotion-text {
-  text-align: left;
+.emotion-icon {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  flex-shrink: 0;
 }
 
-.emotion-header h3 {
-  font-size: 1.1rem;
+.emotion-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.emotion-info h3 {
+  font-size: clamp(0.95rem, 3vw, 1.2rem);
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.konfidenz-text {
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+  opacity: 0.8;
+  margin: 0;
 }
 
 .konfidenz-balken {
@@ -215,102 +294,136 @@ h1 {
 .konfidenz-fortschritt {
   height: 100%;
   transition: width 0.3s ease;
-  border-radius: 3px;
 }
 
 /* Kontrollen */
 .kontrollen {
-  margin-top: 20px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 15px;
-  width: 100%;
-  max-width: 800px;
+  gap: clamp(12px, 3vw, 20px);
+  padding: 0 10px;
+  margin-top: 20px;
 }
 
 .kontroll-button {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   color: white;
-  border: none;
-  padding: 12px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: clamp(10px, 3vw, 14px) clamp(18px, 4vw, 24px);
   border-radius: 25px;
+  font-size: clamp(0.9rem, 2.8vw, 1rem);
   cursor: pointer;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(5px);
-  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.kontroll-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.webcam-status {
-  background: rgba(0, 255, 0, 0.1);
-  padding: 10px 20px;
-  border-radius: 20px;
-  border: 1px solid rgba(0, 255, 0, 0.3);
-  font-size: 0.9rem;
-}
-
-/* Info Grid */
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-  margin: 40px auto;
-  max-width: 800px;
-}
-
-.info-card {
-  background: var(--card-bg);
-  padding: 25px;
-  border-radius: 15px;
-  text-align: left;
-  border: 1px solid var(--border-color);
   backdrop-filter: blur(5px);
+  -webkit-appearance: none;
+  touch-action: manipulation;
 }
 
-.info-card h3 {
-  margin-top: 0;
-  color: var(--primary-color);
-  font-size: 1.3rem;
-  margin-bottom: 15px;
+.kontroll-button:active {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(0.98);
 }
 
-.info-card ul {
-  padding-left: 20px;
-  margin: 0;
+.button-icon {
+  font-size: 1.1em;
 }
 
-.info-card li {
-  margin-bottom: 10px;
-  line-height: 1.5;
-  font-size: 0.95rem;
+.button-text {
+  white-space: nowrap;
 }
 
-/* Emotion Statistik */
-.emotion-statistik {
-  background: var(--card-bg);
-  padding: 25px;
-  border-radius: 15px;
-  margin: 30px auto;
-  border: 1px solid var(--border-color);
-  max-width: 800px;
+.webcam-indicator {
+  background: rgba(0, 255, 0, 0.08);
+  padding: clamp(8px, 2.5vw, 12px) clamp(15px, 3.5vw, 20px);
+  border-radius: 25px;
+  border: 1px solid rgba(0, 255, 0, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(0.9rem, 2.8vw, 1rem);
+}
+
+.indicator-icon {
+  font-size: 1.1em;
+}
+
+.indicator-text {
+  white-space: nowrap;
+}
+
+/* Info Container */
+.info-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: clamp(20px, 4vw, 30px);
+  margin-bottom: clamp(25px, 5vw, 35px);
   width: 100%;
 }
 
+.info-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: clamp(20px, 4vw, 25px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-title {
+  font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+  color: #00d2ff;
+  margin-bottom: clamp(15px, 3vw, 20px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.info-list {
+  list-style: none;
+  padding: 0;
+}
+
+.info-list li {
+  margin-bottom: clamp(10px, 2.5vw, 14px);
+  line-height: 1.5;
+  font-size: clamp(0.9rem, 2.8vw, 1rem);
+  padding-left: 24px;
+  position: relative;
+}
+
+.info-list li:before {
+  content: "•";
+  color: #00d2ff;
+  position: absolute;
+  left: 8px;
+  font-size: 1.2em;
+}
+
+.info-list strong {
+  color: #4A90E2;
+}
+
+/* Statistik */
+.statistik-container {
+  width: 100%;
+  margin-bottom: clamp(25px, 5vw, 35px);
+}
+
+.emotion-statistik {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: clamp(20px, 4vw, 25px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .emotion-statistik h4 {
-  margin-top: 0;
-  color: var(--primary-color);
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+  color: #00d2ff;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 .emotion-verteilung {
@@ -320,8 +433,8 @@ h1 {
 .emotion-item {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 12px;
+  gap: clamp(12px, 3vw, 16px);
+  margin-bottom: clamp(12px, 3vw, 16px);
 }
 
 .emotion-item-header {
@@ -332,214 +445,288 @@ h1 {
   flex-shrink: 0;
 }
 
-.emotion-label {
-  font-size: 0.9rem;
+.emotion-item-icon {
+  font-size: 1.2em;
+}
+
+.emotion-item-label {
+  font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .verteilung-balken {
   flex: 1;
+  min-width: 80px;
   height: 10px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
   overflow: hidden;
-  min-width: 100px;
 }
 
 .verteilung-fortschritt {
   height: 100%;
   transition: width 0.5s ease;
-  border-radius: 5px;
 }
 
 .emotion-prozent {
-  min-width: 50px;
+  min-width: 45px;
   text-align: right;
   font-weight: 500;
-  font-size: 0.9rem;
+  color: #00d2ff;
+  font-size: 0.95rem;
+}
+
+/* Mobile Statistik */
+.mobile-statistik {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 25px;
+}
+
+.mobile-statistik h4 {
+  font-size: 1.1rem;
+  color: #00d2ff;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.mobile-emotionen {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mobile-emotion {
+  font-size: 1.8rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Footer */
-.footer {
-  margin-top: 40px;
+.app-footer {
+  margin-top: auto;
   padding-top: 20px;
-  border-top: 1px solid var(--border-color);
-  opacity: 0.7;
-  font-size: 0.85rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
 }
 
-/* Responsive Breakpoints */
-@media (max-width: 1199px) {
-  .video-wrapper {
-    max-width: 700px;
+.footer-text {
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+  opacity: 0.6;
+  line-height: 1.5;
+  padding: 0 10px;
+}
+
+/* iPhone Notch/Safe Area Support */
+@supports (padding: max(0px)) {
+  .app-container {
+    padding-left: max(clamp(12px, 3vw, 20px), env(safe-area-inset-left));
+    padding-right: max(clamp(12px, 3vw, 20px), env(safe-area-inset-right));
+    padding-top: max(clamp(12px, 3vw, 20px), env(safe-area-inset-top));
+    padding-bottom: max(clamp(12px, 3vw, 20px), env(safe-area-inset-bottom));
   }
   
-  .info-grid {
-    max-width: 700px;
-  }
-  
-  .emotion-statistik {
-    max-width: 700px;
-  }
-  
-  .footer {
-    max-width: 700px;
+  .video-container {
+    margin-left: env(safe-area-inset-left);
+    margin-right: env(safe-area-inset-right);
   }
 }
 
-@media (max-width: 991px) {
-  .video-wrapper {
-    max-width: 600px;
+/* Hochformat/Landscape Optimierungen */
+@media (orientation: landscape) and (max-height: 600px) {
+  .app-container {
+    padding: 10px;
   }
   
-  h1 {
-    font-size: 2rem;
+  .video-container {
+    aspect-ratio: 16/9;
+    max-height: 60vh;
   }
   
-  .info-grid {
+  .info-container {
     grid-template-columns: 1fr;
-    max-width: 600px;
-  }
-  
-  .emotion-statistik {
-    max-width: 600px;
-  }
-  
-  .footer {
-    max-width: 600px;
-  }
-}
-
-@media (max-width: 767px) {
-  .App {
-    padding: 15px;
-  }
-  
-  .video-wrapper {
-    max-width: 95vw;
-    border-radius: 10px;
-  }
-  
-  h1 {
-    font-size: 1.8rem;
-  }
-  
-  .app-beschreibung {
-    font-size: 1rem;
-    padding: 0 10px;
+    gap: 15px;
   }
   
   .emotion-overlay {
-    top: 10px;
-    right: 10px;
-    padding: 12px;
+    max-width: 200px;
+    padding: 10px;
   }
   
-  .emotion-header {
-    gap: 10px;
-  }
-  
-  .emotion-header h3 {
-    font-size: 1rem;
-  }
-  
-  .kontrollen {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .kontroll-button, .webcam-status {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .info-card {
-    padding: 20px;
-  }
-  
-  .emotion-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .emotion-item-header {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .verteilung-balken {
-    width: 100%;
-  }
-  
-  .emotion-prozent {
-    align-self: flex-end;
-  }
-}
-
-@media (max-width: 480px) {
-  h1 {
-    font-size: 1.6rem;
-  }
-  
-  .status-bereich {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .status-badge {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .emotion-overlay {
-    position: relative;
-    top: 0;
-    right: 0;
-    width: 100%;
-    max-width: 100%;
-    border-radius: 0 0 10px 10px;
-    margin-top: -1px;
-  }
-  
-  .video-wrapper {
-    border-radius: 10px 10px 0 0;
-  }
-  
-  .info-card h3 {
+  .emotion-icon {
     font-size: 1.2rem;
   }
   
-  .info-card li {
+  .emotion-info h3 {
     font-size: 0.9rem;
   }
 }
 
-/* Utility Classes */
-@media (min-width: 992px) {
-  .desktop-800 {
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+/* Sehr kleine Geräte (iPhone SE, etc.) */
+@media (max-width: 375px) and (max-height: 700px) {
+  h1 {
+    font-size: 1.3rem;
+  }
+  
+  .app-beschreibung {
+    font-size: 0.85rem;
+  }
+  
+  .video-container {
+    border-radius: 12px;
+  }
+  
+  .emotion-overlay {
+    top: 8px;
+    right: 8px;
+    padding: 8px;
+    max-width: 55vw;
+  }
+  
+  .kontrollen {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .kontroll-button,
+  .webcam-indicator {
+    justify-content: center;
+  }
+}
+
+/* Dunkelmodus Optimierung */
+@media (prefers-color-scheme: dark) {
+  .App {
+    background: linear-gradient(135deg, #0a161d 0%, #15242d 50%, #1e313c 100%);
+  }
+  
+  .info-card,
+  .emotion-statistik,
+  .mobile-statistik {
+    background: rgba(255, 255, 255, 0.03);
   }
 }
 
 /* Performance Optimierungen */
 @media (prefers-reduced-motion: reduce) {
-  .emotion-overlay,
-  .kontroll-button {
-    animation: none;
-    transition: none;
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-/* Dark Mode Unterstützung */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-dark: #0a1929;
-    --background-medium: #1a2b3c;
-    --background-light: #2a3b4c;
-  }
+/* App.css - Zusätzliche Stile */
+
+.modell-fehler {
+  background: rgba(255, 50, 50, 0.1);
+  border: 1px solid rgba(255, 50, 50, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 600px;
+  text-align: center;
+}
+
+.modell-fehler h3 {
+  color: #ff6b6b;
+  margin-bottom: 10px;
+}
+
+.modell-fehler p {
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.neu-laden-button {
+  background: #4A90E2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.neu-laden-button:hover {
+  background: #3a7bd5;
+}
+
+/* Zusätzliche Stile für Fehleranzeige */
+.modell-fehler {
+  background: rgba(255, 50, 50, 0.1);
+  border: 1px solid rgba(255, 50, 50, 0.3);
+  border-radius: 12px;
+  padding: 25px;
+  margin: 25px auto;
+  max-width: 700px;
+  text-align: left;
+}
+
+.modell-fehler h3 {
+  color: #ff6b6b;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.modell-fehler p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.fehler-details {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.fehler-details p {
+  margin-bottom: 5px;
+}
+
+.fehler-loesungstipps {
+  background: rgba(255, 193, 7, 0.1);
+  border-left: 4px solid #ffc107;
+  padding: 15px;
+  border-radius: 0 8px 8px 0;
+  margin-top: 20px;
+  font-size: 0.9rem;
+}
+
+.neu-laden-button {
+  background: #4A90E2;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 15px auto;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.neu-laden-button:hover {
+  background: #3a7bd5;
+  transform: translateY(-2px);
+}
+
+.debug-info {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  margin-top: 10px;
+  font-family: monospace;
 }
