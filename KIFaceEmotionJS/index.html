@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gesichts- & Emotionserkennung (Vanilla JS)</title>
+    
+    <!-- Externe CSS Datei -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- face-api.js von CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.js"></script>
+</head>
+<body>
+    <div class="App">
+        <div class="app-container">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-content">
+                    <h1>KI Gesichts- & Emotionserkennung</h1>
+                    <p class="app-beschreibung">
+                        Echtzeit-Erkennung von Gesichtslandmarken und Emotionen
+                    </p>
+                </div>
+                
+                <!-- Status- und Ladebereich -->
+                <div id="status-container">
+                    <div class="lade-anzeige">
+                        <div class="lade-inhalt">
+                            <div class="lade-spinner"></div>
+                            <p class="lade-text">Lade KI-Modelle...</p>
+                            <div class="lade-balken">
+                                <div id="lade-fortschritt" class="lade-fortschritt" style="width: 0%"></div>
+                            </div>
+                            <p id="lade-prozent" class="lade-prozent">0%</p>
+                            <p class="lade-hinweis">
+                                Beim ersten Mal kann dies etwas dauern
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Hauptinhalt -->
+            <main class="app-main">
+                <div class="erkennungs-container">
+                    <!-- Video Container -->
+                    <div id="video-container" class="video-container">
+                        <video 
+                            id="webcam-video" 
+                            class="webcam-video"
+                            autoplay 
+                            muted
+                            playsinline
+                        ></video>
+                        <canvas id="gesichts-canvas" class="gesichts-canvas"></canvas>
+                        <div id="emotion-overlay" class="emotion-overlay" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- Kontrollbuttons -->
+                    <div class="kontrollen">
+                        <button 
+                            id="reset-historie-button"
+                            class="kontroll-button"
+                            disabled
+                        >
+                            <span class="button-icon">📊</span>
+                            <span class="button-text">Historie zurücksetzen</span>
+                        </button>
+                        
+                        <div id="webcam-indicator" class="webcam-indicator">
+                            <span class="indicator-icon">⏳</span>
+                            <span class="indicator-text">Kamera lädt</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info-Karten -->
+                <div class="info-container">
+                    <div class="info-card">
+                        <h3 class="info-title">🔬 Funktionsweise</h3>
+                        <ul class="info-list">
+                            <li><strong>68 Gesichtslandmarken</strong> werden erkannt</li>
+                            <li><strong>7 Grundemotionen</strong> nach Paul Ekman</li>
+                            <li><strong>Echtzeit-Emotionserkennung</strong></li>
+                            <li><strong>Lokale Verarbeitung</strong> - keine Server</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3 class="info-title">💡 Tipps</h3>
+                        <ul class="info-list">
+                            <li>Gute Beleuchtung verwenden</li>
+                            <li>Direkt in die Kamera schauen</li>
+                            <li>Klar erkennbare Gesichtsausdrücke</li>
+                            <li id="mobile-tip" style="display:none;">Gerät ruhig halten</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Statistik Container (werden durch JS befüllt) -->
+                <div id="statistik-container"></div>
+                <div id="mobile-statistik-container"></div>
+            </main>
+            
+            <!-- Footer -->
+            <footer class="app-footer">
+                <p class="footer-text">
+                    Gesichts- und Emotions-Erkennung &copy; 2024 | Verwendet TensorFlow.js und face-api.js
+                </p>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- Externe JavaScript Datei -->
+    <script src="app.js"></script>
+</body>
+</html>

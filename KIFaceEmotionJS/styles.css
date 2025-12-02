@@ -1,0 +1,1020 @@
+/* ===== RESET & BASICS ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ===== APP LAYOUT ===== */
+.App {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0c1c24 0%, #1a2f3a 50%, #243b47 100%);
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    /* WICHTIG für iOS: allow scroll */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: clamp(12px, 3vw, 20px);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* WICHTIG: volle Höhe */
+}
+
+/* ===== HEADER ===== */
+.app-header {
+    text-align: center;
+    margin-bottom: clamp(20px, 4vw, 30px);
+    width: 100%;
+}
+
+.header-content {
+    margin-bottom: clamp(15px, 3vw, 25px);
+}
+
+h1 {
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
+    margin-bottom: 0.5em;
+    background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    padding: 0 clamp(10px, 3vw, 20px);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.app-beschreibung {
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+    opacity: 0.85;
+    line-height: 1.5;
+    padding: 0 clamp(10px, 3vw, 20px);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ===== LOADING INDICATOR ===== */
+.lade-anzeige {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: clamp(20px, 5vw, 30px);
+    margin: clamp(15px, 4vw, 25px) auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 500px;
+    width: 100%;
+}
+
+.lade-inhalt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(15px, 3vw, 20px);
+}
+
+.lade-spinner {
+    width: clamp(40px, 10vw, 50px);
+    height: clamp(40px, 10vw, 50px);
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid #00d2ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.lade-text {
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    font-weight: 500;
+}
+
+.lade-balken {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.lade-fortschritt {
+    height: 100%;
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    transition: width 0.3s ease;
+}
+
+.lade-prozent {
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    font-weight: bold;
+    color: #00d2ff;
+}
+
+.lade-hinweis {
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+    opacity: 0.7;
+    text-align: center;
+    margin-top: 5px;
+}
+
+/* ===== STATUS AREA ===== */
+.status-bereich {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: clamp(15px, 3vw, 25px) 0;
+    padding: 0 clamp(10px, 3vw, 20px);
+}
+
+.status-badge {
+    padding: 10px 18px;
+    border-radius: 25px;
+    font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid;
+    white-space: nowrap;
+}
+
+.status-bereit {
+    background: rgba(0, 255, 0, 0.1);
+    border-color: rgba(0, 255, 0, 0.3);
+}
+
+.status-emotion {
+    background: rgba(255, 165, 0, 0.1);
+    border-color: rgba(255, 165, 0, 0.3);
+}
+
+.status-icon {
+    font-size: 1.1em;
+}
+
+/* ===== MAIN CONTENT ===== */
+.app-main {
+    flex: 1;
+    width: 100%;
+    /* WICHTIG für iOS: ermöglicht Scrollen wenn Inhalt zu lang */
+    min-height: 0;
+    overflow-y: visible;
+}
+
+.erkennungs-container {
+    width: 100%;
+    margin-bottom: clamp(25px, 5vw, 35px);
+}
+
+/* ===== VIDEO CONTAINER ===== */
+.video-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #000;
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 0 auto 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+}
+
+/* Fallback für Browser ohne aspect-ratio support */
+@supports not (aspect-ratio: 4/3) {
+    .video-container {
+        height: 0;
+        padding-bottom: 75%; /* 4:3 Aspect Ratio */
+        position: relative;
+    }
+    
+    .video-container .webcam-video,
+    .video-container .gesichts-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.webcam-video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    
+}
+
+.gesichts-canvas {
+    position: absolute;
+    pointer-events: none;
+    
+}
+
+/* ===== EMOTION OVERLAY ===== */
+.emotion-overlay {
+    position: absolute;
+    top: clamp(12px, 3vw, 20px);
+    right: clamp(12px, 3vw, 20px);
+    background: rgba(0, 0, 0, 0.85);
+    padding: clamp(10px, 2.5vw, 15px);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    z-index: 10;
+    max-width: min(250px, 65vw);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.emotion-display-overlay {
+    width: 100%;
+}
+
+.emotion-header {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 2vw, 12px);
+    margin-bottom: 12px;
+}
+
+.emotion-icon {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    flex-shrink: 0;
+}
+
+.emotion-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.emotion-info h3 {
+    font-size: clamp(0.95rem, 3vw, 1.2rem);
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.konfidenz-text {
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+    opacity: 0.8;
+    margin: 0;
+}
+
+.konfidenz-balken {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.konfidenz-fortschritt {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+/* ===== CONTROLS ===== */
+.kontrollen {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(12px, 3vw, 20px);
+    padding: 0 10px;
+    margin-top: 20px;
+}
+
+.kontroll-button {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: clamp(10px, 3vw, 14px) clamp(18px, 4vw, 24px);
+    border-radius: 25px;
+    font-size: clamp(0.9rem, 2.8vw, 1rem);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(5px);
+    -webkit-appearance: none;
+    touch-action: manipulation;
+    /* iOS Touch Target Mindestgröße */
+    min-height: 44px;
+}
+
+.kontroll-button:active {
+    background: rgba(255, 255, 255, 0.12);
+    transform: scale(0.98);
+}
+
+.kontroll-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.button-icon {
+    font-size: 1.1em;
+}
+
+.button-text {
+    white-space: nowrap;
+}
+
+.webcam-indicator {
+    background: rgba(0, 255, 0, 0.08);
+    padding: clamp(8px, 2.5vw, 12px) clamp(15px, 3.5vw, 20px);
+    border-radius: 25px;
+    border: 1px solid rgba(0, 255, 0, 0.25);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: clamp(0.9rem, 2.8vw, 1rem);
+    min-height: 44px;
+}
+
+.indicator-icon {
+    font-size: 1.1em;
+}
+
+.indicator-text {
+    white-space: nowrap;
+}
+
+/* ===== INFO CARDS ===== */
+.info-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: clamp(20px, 4vw, 30px);
+    margin-bottom: clamp(25px, 5vw, 35px);
+    width: 100%;
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: clamp(20px, 4vw, 25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-title {
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    color: #00d2ff;
+    margin-bottom: clamp(15px, 3vw, 20px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+}
+
+.info-list li {
+    margin-bottom: clamp(10px, 2.5vw, 14px);
+    line-height: 1.5;
+    font-size: clamp(0.9rem, 2.8vw, 1rem);
+    padding-left: 24px;
+    position: relative;
+}
+
+.info-list li:before {
+    content: "•";
+    color: #00d2ff;
+    position: absolute;
+    left: 8px;
+    font-size: 1.2em;
+}
+
+.info-list strong {
+    color: #4A90E2;
+}
+
+/* ===== EMOTION STATISTICS - CARD DESIGN ===== */
+.statistik-container {
+    width: 100%;
+    margin-bottom: clamp(25px, 5vw, 35px);
+}
+
+.emotion-statistik {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: clamp(20px, 4vw, 25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.emotion-statistik h4 {
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    color: #00d2ff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Emotions Grid Layout - Karten Design */
+.emotion-verteilung {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+/* Emotion Card */
+.emotion-karte {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 18px;
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.emotion-karte:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.emotion-karte-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.emotion-karte-icon {
+    font-size: 1.8em;
+    min-width: 40px;
+    text-align: center;
+}
+
+.emotion-karte-name {
+    font-size: 1rem;
+    font-weight: 500;
+    flex: 1;
+    margin-left: 12px;
+    text-align: left;
+}
+
+.emotion-karte-prozent {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #00d2ff;
+    min-width: 60px;
+    text-align: right;
+}
+
+.emotion-karte-balken-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.emotion-karte-balken {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.emotion-karte-fortschritt {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.emotion-karte-count {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    min-width: 50px;
+    text-align: right;
+}
+
+/* ===== MOBILE STATISTICS ===== */
+.mobile-statistik {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 25px;
+}
+
+.mobile-statistik h4 {
+    font-size: 1.1rem;
+    color: #00d2ff;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Mobile Emotion Items */
+.mobile-emotion-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-emotion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.mobile-emotion-icon {
+    font-size: 1.4em;
+    min-width: 30px;
+    text-align: center;
+}
+
+.mobile-emotion-label {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.mobile-emotion-percent {
+    font-size: 1.1rem;
+    font-weight: bold;
+    min-width: 50px;
+    text-align: right;
+}
+
+.mobile-emotion-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.mobile-emotion-progress {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.mobile-emotion-count {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    text-align: right;
+}
+
+.mobile-stats-info {
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 15px;
+}
+
+.mobile-emotions-list {
+    margin-bottom: 20px;
+}
+
+.mobile-recent-container {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-recent-title {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.mobile-recent-emotions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.mobile-recent-item {
+    font-size: 1.5em;
+    opacity: 0.9;
+}
+
+.mobile-reset-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.mobile-reset-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 44px;
+}
+
+.mobile-reset-button:active {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(0.95);
+}
+
+.mobile-placeholder {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.mobile-placeholder-icon {
+    font-size: 2.5rem;
+    opacity: 0.3;
+    margin-bottom: 15px;
+}
+
+.mobile-placeholder-text {
+    opacity: 0.7;
+    margin-bottom: 10px;
+}
+
+.mobile-placeholder-count {
+    display: inline-block;
+    background: rgba(0, 210, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+}
+
+/* ===== MODEL ERROR ===== */
+.modell-fehler {
+    background: rgba(208, 2, 27, 0.1);
+    border-radius: 16px;
+    padding: clamp(20px, 5vw, 30px);
+    margin: clamp(15px, 4vw, 25px) auto;
+    border: 1px solid rgba(208, 2, 27, 0.4);
+    max-width: 500px;
+    width: 100%;
+    text-align: left;
+}
+
+.modell-fehler h3 {
+    color: #D0021B;
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.modell-fehler p {
+    font-size: clamp(0.9rem, 3vw, 1rem);
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+.fehler-details {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+}
+
+.fehler-details p {
+    margin: 5px 0;
+}
+
+.neu-laden-button {
+    width: 100%;
+    background: #D0021B;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    margin-bottom: 15px;
+}
+
+.neu-laden-button:hover {
+    background: #a30215;
+}
+
+.neu-laden-button:active {
+    transform: scale(0.98);
+}
+
+.fehler-loesungstipps {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* ===== FOOTER ===== */
+.app-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.footer-text {
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+    opacity: 0.6;
+    line-height: 1.5;
+    padding: 0 10px;
+}
+
+.debug-info {
+    font-size: 0.7rem;
+    opacity: 0.4;
+    margin-top: 5px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+/* iPhone Notch/Safe Area Support */
+@supports (padding: max(0px)) {
+    .app-container {
+        padding-left: max(clamp(12px, 3vw, 20px), env(safe-area-inset-left));
+        padding-right: max(clamp(12px, 3vw, 20px), env(safe-area-inset-right));
+        padding-top: max(clamp(12px, 3vw, 20px), env(safe-area-inset-top));
+        padding-bottom: max(clamp(12px, 3vw, 20px), env(safe-area-inset-bottom));
+    }
+    
+    .app-footer {
+        padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+}
+
+/* Mobile Devices */
+@media (max-width: 768px) {
+    .emotion-verteilung {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .emotion-karte {
+        padding: 15px;
+    }
+    
+    .emotion-karte-icon {
+        font-size: 1.6em;
+        min-width: 35px;
+    }
+    
+    .emotion-karte-prozent {
+        font-size: 1.2rem;
+    }
+    
+    /* WICHTIG: Für iOS auf Mobile */
+    .app-main {
+        padding-bottom: 40px; /* Extra Platz für Footer */
+    }
+    
+    .mobile-statistik {
+        margin-left: env(safe-area-inset-left);
+        margin-right: env(safe-area-inset-right);
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+}
+
+/* Landscape Mode */
+@media (orientation: landscape) and (max-height: 600px) {
+    .app-container {
+        padding: 10px;
+    }
+    
+    .video-container {
+        aspect-ratio: 16/9;
+        max-height: 60vh;
+    }
+    
+    .info-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .emotion-overlay {
+        max-width: 200px;
+        padding: 10px;
+    }
+    
+    .emotion-icon {
+        font-size: 1.2rem;
+    }
+    
+    .emotion-info h3 {
+        font-size: 0.9rem;
+    }
+}
+
+/* Very Small Devices */
+@media (max-width: 375px) and (max-height: 700px) {
+    h1 {
+        font-size: 1.3rem;
+    }
+    
+    .app-beschreibung {
+        font-size: 0.85rem;
+    }
+    
+    .video-container {
+        border-radius: 12px;
+    }
+    
+    .emotion-overlay {
+        top: 8px;
+        right: 8px;
+        padding: 8px;
+        max-width: 55vw;
+    }
+    
+    .kontrollen {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .kontroll-button,
+    .webcam-indicator {
+        justify-content: center;
+    }
+    
+    .emotion-karte {
+        padding: 12px;
+    }
+    
+    .emotion-karte-icon {
+        font-size: 1.4em;
+        min-width: 30px;
+    }
+    
+    .emotion-karte-name {
+        font-size: 0.9rem;
+    }
+    
+    .emotion-karte-prozent {
+        font-size: 1.1rem;
+    }
+}
+
+/* Dark Mode Optimization */
+@media (prefers-color-scheme: dark) {
+    .App {
+        background: linear-gradient(135deg, #0a161d 0%, #15242d 50%, #1e313c 100%);
+    }
+    
+    .info-card,
+    .emotion-statistik,
+    .mobile-statistik,
+    .lade-anzeige,
+    .emotion-karte {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .status-bereit {
+        background: rgba(0, 255, 0, 0.15);
+    }
+    
+    .status-emotion {
+        background: rgba(255, 165, 0, 0.15);
+    }
+    
+    .kontroll-button {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .kontroll-button:active {
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* ===== iOS SAFARI SPECIFIC FIXES ===== */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Safari braucht spezielle Behandlung für 100vh */
+    .App {
+        height: 100%;
+        min-height: -webkit-fill-available;
+    }
+    
+    html, body {
+        height: 100%;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Verhindere Bounce Effect auf iOS */
+    body {
+        overscroll-behavior-y: none;
+    }
+    
+    /* Fallback für aspect-ratio auf älteren iOS Versionen */
+    .video-container {
+        height: 0;
+        padding-bottom: 75%;
+        position: relative;
+    }
+    
+    .video-container .webcam-video,
+    .video-container .gesichts-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* Safari Font Rendering */
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Safari Touch Improvements */
+    @media (hover: none) and (pointer: coarse) {
+        .kontroll-button:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.95);
+        }
+        
+        .emotion-karte:hover {
+            transform: none;
+        }
+        
+        .mobile-reset-button {
+            min-height: 44px;
+            min-width: 44px;
+        }
+    }
+    
+    /* Safari Text Gradient Fix */
+    h1 {
+        background: -webkit-linear-gradient(45deg, #00d2ff, #3a7bd5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+}
+
+/* Fallback für Browser ohne backdrop-filter support */
+@supports not (backdrop-filter: blur(10px)) {
+    .status-badge,
+    .kontroll-button,
+    .emotion-overlay {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.7);
+    }
+}
+
+/* WICHTIG: Verhindere horizontales Scrollen auf allen Geräten */
+.app-container {
+    overflow-x: hidden;
+}
+
+/* Verbesserte Scrollbarkeit für lange Inhalte */
+@media (max-width: 768px) {
+    .App {
+        overflow-y: auto;
+    }
+    
+    .app-main {
+        overflow-y: visible;
+        position: relative;
+    }
+}

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotionen aus Text analysieren</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3/dist/universal-sentence-encoder.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --neutral-color: #6c757d;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --border-radius: 10px;
+            --box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 10px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            font-size: 1.2rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            resize: vertical;
+            transition: var(--transition);
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .analyze-btn:hover {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .clear-btn {
+            background: #f1f3f9;
+            color: var(--text-secondary);
+        }
+
+        .clear-btn:hover {
+            background: #e2e6ea;
+        }
+
+        .samples-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .samples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .sample-card {
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 4px solid var(--neutral-color);
+            height: 100%;
+        }
+
+        .sample-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sample-card.freude { border-left-color: #4CAF50; }
+        .sample-card.liebe { border-left-color: #9c27b0; }
+        .sample-card.ueberraschung { border-left-color: #ff9800; }
+        .sample-card.trauer { border-left-color: #2196F3; }
+        .sample-card.wut { border-left-color: #f44336; }
+        .sample-card.angst { border-left-color: #673ab7; }
+        .sample-card.neutral { border-left-color: var(--neutral-color); }
+
+        .sample-emoji {
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+        }
+
+        .sample-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .sample-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .emotion-display {
+            width: 100%;
+        }
+
+        .emotion-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            padding: 18px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: var(--transition);
+            background: var(--light-bg);
+        }
+
+        .emotion-freude { color: #4CAF50; background: rgba(76, 175, 80, 0.1) !important; }
+        .emotion-liebe { color: #9c27b0; background: rgba(156, 39, 176, 0.1) !important; }
+        .emotion-ueberraschung { color: #ff9800; background: rgba(255, 152, 0, 0.1) !important; }
+        .emotion-trauer { color: #2196F3; background: rgba(33, 150, 243, 0.1) !important; }
+        .emotion-wut { color: #f44336; background: rgba(244, 67, 54, 0.1) !important; }
+        .emotion-angst { color: #673ab7; background: rgba(103, 58, 183, 0.1) !important; }
+        .emotion-neutral { color: var(--neutral-color); background: rgba(108, 117, 125, 0.1) !important; }
+
+        .emotion-details {
+            width: 100%;
+        }
+
+        .detail-title {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--primary-color);
+        }
+
+        .probability-list {
+            list-style: none;
+        }
+
+        .probability-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .probability-bar {
+            height: 6px;
+            width: 100%;
+            border-radius: 3px;
+            background: #e9ecef;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .probability-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(67, 97, 238, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Mobile Optimierungen */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                max-width: 100%;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .samples-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .emotion-text {
+                font-size: 1.4rem;
+                padding: 15px;
+            }
+        }
+
+        @media (min-width: 601px) and (max-width: 800px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .samples-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-brain"></i> Emotionen aus Text analysieren</h1>
+            <p class="subtitle">KI-gestützte Analyse von Emotionen in Texten. Testen Sie es mit eigenen Texten oder wählen Sie ein Beispiel.</p>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-edit"></i> Text eingeben</h2>
+                <textarea id="text-input" placeholder="Schreiben Sie hier Ihren Text... oder wählen Sie ein Beispiel aus der Liste unten."></textarea>
+                
+                <div class="button-group">
+                    <button class="analyze-btn" onclick="analyzeText()">
+                        <i class="fas fa-search"></i> Emotion analysieren
+                    </button>
+                    <button class="clear-btn" onclick="clearText()">
+                        <i class="fas fa-eraser"></i> Text löschen
+                    </button>
+                </div>
+            </div>
+
+            <div class="card samples-section">
+                <h2 class="card-title"><i class="fas fa-comment-dots"></i> Textbeispiele</h2>
+                <p style="margin-bottom: 10px; color: var(--text-secondary); font-size: 0.9rem;">Klicken Sie auf ein Beispiel, um es in das Eingabefeld zu laden:</p>
+                
+                <div class="samples-grid" id="samples-container">
+                    <!-- Samples werden via JavaScript geladen -->
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-chart-bar"></i> Analyseergebnis</h2>
+                <div class="result-container">
+                    <div class="emotion-display">
+                        <div id="emotion-display" class="emotion-text">Warten auf Eingabe...</div>
+                    </div>
+                    
+                    <div class="emotion-details">
+                        <h3 class="detail-title">Emotionsverteilung</h3>
+                        <ul class="probability-list" id="probability-list">
+                            <!-- Probabilities werden via JavaScript geladen -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Emotionen-Analyse mit TensorFlow.js & Universal Sentence Encoder</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
