@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI Personenzähler Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="header-content">
+                <i class="fas fa-users icon-large"></i>
+                <h1>KI Personenzähler</h1>
+                <p class="subtitle">Echtzeit-Objekterkennung mit TensorFlow.js</p>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <div class="upload-section card">
+                <div class="upload-header">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h2>Bild hochladen</h2>
+                </div>
+                <p class="upload-hint">Laden Sie ein Bild hoch, um Personen automatisch erkennen zu lassen</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-images upload-icon"></i>
+                    <p class="upload-text">Klicken Sie hier oder ziehen Sie ein Bild hierher</p>
+                    <p class="upload-formats">Unterstützte Formate: JPG, PNG</p>
+                    <input type="file" id="imageUpload" accept="image/jpeg, image/png" class="file-input">
+                </div>
+                
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p class="progress-text" id="progressText">Bereit für Analyse</p>
+                </div>
+            </div>
+
+            <div class="results-section card">
+                <div class="results-header">
+                    <i class="fas fa-chart-bar"></i>
+                    <h2>Ergebnisse</h2>
+                </div>
+                
+                <div class="results-content">
+                    <div class="count-display">
+                        <div class="count-number" id="count">0</div>
+                        <div class="count-label">Personen erkannt</div>
+                    </div>
+                    
+                    <div class="confidence-info">
+                        <div class="confidence-item">
+                            <span class="confidence-label">Konfidenz-Schwelle:</span>
+                            <span class="confidence-value">60%</span>
+                        </div>
+                        <div class="confidence-item">
+                            <span class="confidence-label">Modell-Status:</span>
+                            <span class="confidence-value status-indicator" id="modelStatus">Lädt...</span>
+                        </div>
+                        <div class="confidence-item">
+                            <span class="confidence-label">Gespeichert:</span>
+                            <span class="confidence-value" id="storageCount">0 Bilder</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-section card">
+                <div class="section-header">
+                    <i class="fas fa-image"></i>
+                    <h2>Bildanalyse</h2>
+                    <button class="btn-save" id="saveBtn">
+                        <i class="fas fa-save"></i> Aktuelles Bild speichern
+                    </button>
+                </div>
+                
+                <div class="image-container" id="imageContainer">
+                    <div class="placeholder" id="imagePlaceholder">
+                        <i class="fas fa-user-friends placeholder-icon"></i>
+                        <p>Hier wird Ihr Bild mit Erkennungsergebnissen angezeigt</p>
+                    </div>
+                    <canvas id="canvas"></canvas>
+                    <img id="inputImage" style="display: none;">
+                </div>
+                
+                <div class="image-info" id="imageInfo">
+                    <p><i class="fas fa-info-circle"></i> Grüne Boxen kennzeichnen erkannte Personen</p>
+                </div>
+            </div>
+
+            <!-- Neue History Section -->
+            <div class="history-section card">
+                <div class="section-header">
+                    <i class="fas fa-history"></i>
+                    <h2>Analysierte Bilder</h2>
+                    <button class="btn-clear" id="clearBtn">
+                        <i class="fas fa-trash"></i> Alle löschen
+                    </button>
+                </div>
+                
+                <div class="history-controls">
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label for="sortBy">
+                                <i class="fas fa-sort-amount-down"></i> Sortieren nach:
+                            </label>
+                            <select id="sortBy" class="filter-select">
+                                <option value="date-desc">Neueste zuerst</option>
+                                <option value="date-asc">Älteste zuerst</option>
+                                <option value="count-desc">Meiste Personen</option>
+                                <option value="count-asc">Wenigste Personen</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filterCount">
+                                <i class="fas fa-filter"></i> Personen filtern:
+                            </label>
+                            <select id="filterCount" class="filter-select">
+                                <option value="all">Alle</option>
+                                <option value="0">0 Personen</option>
+                                <option value="1-5">1-5 Personen</option>
+                                <option value="6-10">6-10 Personen</option>
+                                <option value="10+">10+ Personen</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="storage-info">
+                        <i class="fas fa-database"></i>
+                        <span id="storageUsage">0 KB verwendet</span>
+                    </div>
+                </div>
+                
+                <div class="history-grid" id="historyGrid">
+                    <div class="history-empty" id="historyEmpty">
+                        <i class="fas fa-images empty-icon"></i>
+                        <p>Noch keine Bilder analysiert</p>
+                        <p class="empty-subtext">Laden Sie Ihr erstes Bild hoch!</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>Personenzähler © 2024 | TensorFlow.js & COCO-SSD Model | 
+                <span id="modelInfo">Model Version: 2.2.2 | 
+                    <button class="btn-storage" id="manageStorage">
+                        <i class="fas fa-cog"></i> Foto-Ablage Einsehen
+                    </button>
+                </span>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal für Bild-Details -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Bilddetails</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <canvas id="modalCanvas"></canvas>
+                </div>
+                <div class="modal-info">
+                    <div class="modal-info-item">
+                        <span class="modal-label">Personen:</span>
+                        <span class="modal-value" id="modalCount">0</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-label">Datum:</span>
+                        <span class="modal-value" id="modalDate">-</span>
+                    </div>
+                    <div class="modal-info-item">
+                        <span class="modal-label">Größe:</span>
+                        <span class="modal-value" id="modalSize">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="modalDelete">
+                    <i class="fas fa-trash"></i> Löschen
+                </button>
+                <button class="btn-primary" id="modalAnalyze">
+                    <i class="fas fa-redo"></i> Neu analysieren
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TensorFlow Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2/dist/coco-ssd.min.js"></script>
+    
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
