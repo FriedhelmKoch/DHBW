@@ -1,104 +1,1453 @@
+<!--
+ * ============================================================================
+ * Karten WebApp mit Wetter und Golfplätzen - v1.0.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter 
+ * gleichen Bedingungen 4.0 International Lizenz.
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, müssen Sie Ihre Beiträge unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-	<title>Marker Leaflet Map</title>
-	<meta charset="utf-8" />
-	<link rel="stylesheet" type="text/css" href="./leaflet.css" />
+    <title>Map Demo App - Mit Wetter & Golfplätzen</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-width=800px">
+    <link rel="stylesheet" type="text/css" href="./leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: visible;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .controls-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .btn {
+            padding: 8px 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn.active {
+            background-color: #2c3e50;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+        }
+        
+        .btn-warning {
+            background-color: #f39c12;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d68910;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .btn-info {
+            background-color: #17a2b8;
+        }
+        
+        .btn-info:hover {
+            background-color: #138496;
+        }
+        
+        #map {
+            width: 100%;
+            height: 400px;
+        }
+        
+        .info-panel {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .info-panel h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .coordinates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .coordinate-box {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            min-width: 180px;
+        }
+        
+        .coordinate-box h4 {
+            color: #3498db;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .coordinate-value {
+            font-family: monospace;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        .marker-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: white;
+            margin-bottom: 15px;
+        }
+        
+        .marker-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .marker-item:last-child {
+            border-bottom: none;
+        }
+        
+        .marker-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .marker-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #3498db;
+            font-size: 0.9rem;
+            padding: 5px;
+        }
+        
+        .weather-info {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+            display: none;
+        }
+        
+        .weather-info.show {
+            display: block;
+        }
+        
+        .weather-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .weather-temp {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2196f3;
+        }
+        
+        .weather-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .golf-course-marker {
+            background-color: #27ae60;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .scroll-hint {
+            text-align: center;
+            padding: 10px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .scroll-hint i {
+            margin-right: 5px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+        
+        /* Für schmale Bildschirme */
+        @media (max-width: 600px) {
+            body {
+                padding: 5px;
+                overflow-y: auto;
+            }
+            
+            .app-container {
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .controls-panel {
+                padding: 8px;
+            }
+            
+            .btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+                flex: 1 0 calc(50% - 8px);
+                justify-content: center;
+            }
+            
+            #map {
+                height: 350px;
+            }
+            
+            .coordinates {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .coordinate-box {
+                min-width: 100%;
+            }
+            
+            .scroll-hint {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .btn {
+                flex: 1 0 100%;
+            }
+            
+            #map {
+                height: 300px;
+            }
+        }
+        
+        .drawing-instructions {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+            font-size: 0.9rem;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        .drawing-instructions.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Scrollbar Styling */
+        .marker-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .marker-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .marker-list::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 3px;
+        }
+        
+        .marker-list::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+        
+        .layer-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .layer-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        /* Legende Styling */
+        .leaflet-control.legend {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 12px;
+            max-width: 200px;
+        }
+        
+        .legend h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+        
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            border-radius: 3px;
+            display: inline-block;
+            border: 1px solid #ccc;
+        }
+        
+        .legend-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
+    <div class="drawing-instructions" id="drawingInstructions"></div>
+    
+    <div class="app-container">
+        <div class="header">
+            <h1><i class="fas fa-map-marked-alt"></i> Karten Demo WebApp</h1>
+            <p>Mit Wetterdaten und Golfplätzen</p>
+        </div>
+        
+        <div class="controls-panel">
+            <button class="btn active" id="modeSelectBtn">
+                <i class="fas fa-mouse-pointer"></i> Auswählen
+            </button>
+            <button class="btn" id="modeMarkerBtn">
+                <i class="fas fa-map-marker-alt"></i> Marker
+            </button>
+            <button class="btn" id="modePolygonBtn">
+                <i class="fas fa-draw-polygon"></i> Polygon
+            </button>
+            <button class="btn" id="modeCircleBtn">
+                <i class="fas fa-circle"></i> Kreis
+            </button>
+            <button class="btn" id="modeRouteBtn">
+                <i class="fas fa-route"></i> Route
+            </button>
+            <button class="btn btn-danger" id="clearBtn">
+                <i class="fas fa-trash-alt"></i> Löschen
+            </button>
+            <button class="btn btn-info" id="weatherBtn">
+                <i class="fas fa-cloud-sun"></i> Wetter
+            </button>
+        </div>
+        
+        <div class="layer-controls">
+            <div class="layer-checkbox">
+                <input type="checkbox" id="toggleGolfCourses" checked>
+                <label for="toggleGolfCourses">Golfplätze anzeigen</label>
+            </div>
+            <div class="layer-checkbox">
+                <input type="checkbox" id="toggleWeatherLayer">
+                <label for="toggleWeatherLayer">Wetter-Layer anzeigen</label>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+        
+        <div class="weather-info" id="weatherInfo">
+            <div class="weather-header">
+                <i class="fas fa-cloud-sun fa-2x" style="color:#2196f3"></i>
+                <div>
+                    <div class="weather-temp" id="weatherTemp">--°C</div>
+                    <div id="weatherLocation">Lade Wetterdaten...</div>
+                </div>
+            </div>
+            <div class="weather-details">
+                <div><i class="fas fa-wind"></i> Wind: <span id="weatherWind">-- km/h</span></div>
+                <div><i class="fas fa-tint"></i> Luftfeuchtigkeit: <span id="weatherHumidity">--%</span></div>
+                <div><i class="fas fa-cloud-rain"></i> Niederschlag: <span id="weatherPrecipitation">-- mm</span></div>
+                <div><i class="fas fa-temperature-high"></i> Gefühlt: <span id="weatherFeelsLike">--°C</span></div>
+            </div>
+        </div>
+        
+        <div class="scroll-hint">
+            <i class="fas fa-arrow-down"></i> Scrollen Sie nach unten für mehr Informationen
+        </div>
+        
+        <div class="info-panel">
+            <h3><i class="fas fa-info-circle"></i> Karteninformationen</h3>
+            
+            <div class="coordinates">
+                <div class="coordinate-box">
+                    <h4>Kartenmitte:</h4>
+                    <div class="coordinate-value" id="centerCoords">48.130064, 11.583815</div>
+                </div>
+                <div class="coordinate-box">
+                    <h4>Zoom-Level:</h4>
+                    <div class="coordinate-value" id="zoomLevel">14</div>
+                </div>
+                <div class="coordinate-box">
+                    <h4>Elemente gesamt:</h4>
+                    <div class="coordinate-value" id="elementCount">1</div>
+                </div>
+            </div>
+            
+            <h4>Elemente auf der Karte:</h4>
+            <div class="marker-list" id="elementList">
+                <div class="marker-item">
+                    <span><i class="fas fa-landmark"></i> Deutsches Museum (Start)</span>
+                    <div class="marker-actions">
+                        <button class="marker-action-btn" onclick="centerOnMarker(0)"><i class="fas fa-crosshairs"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; font-size: 0.9rem; color: #7f8c8d;">
+                <p><i class="fas fa-lightbulb"></i> <strong>Bedienung:</strong> Wählen Sie oben einen Modus aus und klicken Sie dann auf die Karte.</p>
+                <p><i class="fas fa-times-circle"></i> Elemente löschen: Klicken Sie auf das X in der Liste oder direkt auf das Element auf der Karte.</p>
+                <p><i class="fas fa-golf-ball"></i> Golfplätze werden automatisch im aktuellen Kartenbereich angezeigt.</p>
+                <p><i class="fas fa-home"></i> Klicken Sie auf das <i class="fas fa-home" style="color:#3498db"></i> Icon oben links, um zu Ihrer Position zu springen.</p>
+            </div>
 
-	<div id="map" style="width: 600px; height: 400px"></div>
+						<!-- Footer -->
+            <footer class="app-footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
+                <p class="footer-text">
+                    <span style="vertical-align: middle;">
+                        Karten WebApp mit Golfplätzen und Wetter | Unter Verwendung von OpenStreetMap und Leaflet<br />
+                        Copyright © <script>document.write(new Date().getFullYear())</script> 
+                        Friedhelm Koch | Lizenz: 
+                        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+                        target="_blank" style="color: rgb(109, 182, 255);">CC BY-NC-SA 4.0</a>
+                    </span>
+                </p>
+            </footer>
 
-	<script src="./leaflet.js" ></script>
+        </div>
+    </div>
 
-	<script>
-    var map = L.map('map').setView([48.130064, 11.583815], 14);  // München: Deutsches Museum
-    mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-    L.tileLayer(
-			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '&copy; ' + mapLink + ' Contributors',
-			maxZoom: 18,
-    }).addTo(map);
-
-    // Liste der Markerpositionen
-    var markerPositions = [
-      [48.130064, 11.583815] // Position des ersten Markers
-    ];
-
-    // Erster Marker mit Änderungs-Event
-    var marker = L.marker([48.130064, 11.583815], {
-			draggable: true,
-			title: 'Deutsches Museum',
-			opacity: 0.5
-    })
-    .addTo(map)
-    .bindPopup("Latitude: 48.130064<br>Longitude: 11.583815")
-    .openPopup();
-
-    // Event-Listener, um die Popup-Anzeige zu aktualisieren, wenn der Marker verschoben wird
-    marker.on('moveend', function (e) {
-			var lat = e.target.getLatLng().lat.toFixed(6);
-			var lon = e.target.getLatLng().lng.toFixed(6);
-			e.target.getPopup().setContent("Latitude: " + lat + "<br>Longitude: " + lon);
-			e.target.openPopup();
-    });
-
-    // Funktion, um die aktuelle Position zu erhalten und einen Marker hinzuzufügen
-    function addCurrentLocationMarker() {
-			if (navigator.geolocation) {
-				navigator.geolocation.getCurrentPosition(function (position) {
-					var lat = position.coords.latitude;
-					var lon = position.coords.longitude;
-
-					// Position zur Liste hinzufügen
-					markerPositions.push([lat, lon]);
-
-					// Marker-Icon rot gestalten
-					var redIcon = L.icon({
-						iconUrl: './images/marker-icon-2x.png',
-						iconSize: [25, 41],
-						iconAnchor: [12, 41],
-						popupAnchor: [1, -34]
-					});
-
-					L.marker([lat, lon], {
-						icon: redIcon,
-						title: 'Deine Position:'
-					}).addTo(map)
-					.bindPopup("<b>Deine Position:</b><br>" +
-						"Latitude: " + lat.toFixed(6) + "<br>" +
-						"Longitude: " + lon.toFixed(6) + "<br>" +
-						'<a href="https://dhbw.koch.team" target="_blank"><img src="./images/icon_PlaceMarker.png" alt="Icon" width="25" height="25">&nbsp;&nbsp;' +
-						'Zurück zur DHBW Website</a>'
-					)
-					.openPopup();
-
-					// Karte so anpassen, dass beide Marker mit Puffer zu den Rändern sichtbar sind
-					map.fitBounds(markerPositions, { padding: [50, 50] });
-
-					// Home-Icon führt immer wieder auf die eigene Position und zentriert Karte
-					var goToCurrentLocationControl = L.control({ position: 'bottomleft' });  // can be: topleft, topright, bottomleft, bottomright
-						goToCurrentLocationControl.onAdd = function () {
-							let div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-							div.innerHTML = '<img src="./images/icon_Center.png" alt="Zu deiner Position" style="width: 30px; height: 30px; cursor: pointer;">';
-							div.onclick = function () {
-								map.setView([lat, lon], 7);
-							};
-							return div;
-						};
-						goToCurrentLocationControl.addTo(map);
-
-				}, function (error) {
-						console.error("Geolocation error: ", error.message);
-				});
-			} else {
-				alert("Geolocation is not supported by this browser.");
-			}
-    }
-
-    // Aktuelle Position hinzufügen
-    addCurrentLocationMarker();
-	</script>
-		
+    <script src="./leaflet.js"></script>
+    <script>
+        // Globale Variablen
+        let map;
+        let markers = [];
+        let polygons = [];
+        let circles = [];
+        let polylines = [];
+        let currentLocationMarker = null;
+        let currentLocationLatLng = null; // WICHTIG: Speichern der Position
+        let currentMode = 'select';
+        let currentDrawingElement = null;
+        let drawingPoints = [];
+        
+        // Layer
+        let weatherLayer = null;
+        let golfCourseLayer = null;
+        let golfCourseMarkers = [];
+        let isWeatherLayerActive = false;
+        let homeControlAdded = false;
+        
+        // Wetter-API (Open-Meteo für kostenlose Wetterdaten)
+        const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
+        
+        // Modus wechseln
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Alle Modus-Buttons zurücksetzen
+            document.querySelectorAll('#modeSelectBtn, #modeMarkerBtn, #modePolygonBtn, #modeCircleBtn, #modeRouteBtn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Aktiven Modus hervorheben
+            document.getElementById(`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}Btn`).classList.add('active');
+            
+            // Event-Listener für alte Zeichenoperationen entfernen
+            map.off('click');
+            map.off('dblclick');
+            
+            // Zeichnen zurücksetzen
+            if (currentDrawingElement) {
+                map.removeLayer(currentDrawingElement);
+                currentDrawingElement = null;
+                drawingPoints = [];
+            }
+            
+            // Anleitung ausblenden
+            document.getElementById('drawingInstructions').classList.remove('show');
+            
+            // Für jeden Modus entsprechende Event-Listener setzen
+            if (mode === 'marker') {
+                showInstructions('Klicken Sie auf die Karte, um einen Marker hinzuzufügen');
+                map.on('click', addMarkerAtClick);
+            } else if (mode === 'polygon') {
+                showInstructions('Klicken Sie Punkte für das Polygon. Doppelklick zum Beenden oder ESC zum Abbrechen.');
+                startDrawingPolygon();
+            } else if (mode === 'circle') {
+                showInstructions('Klicken Sie auf die Karte, um einen Kreis hinzuzufügen');
+                map.on('click', addCircleAtClick);
+            } else if (mode === 'route') {
+                showInstructions('Klicken Sie Punkte für die Route. Doppelklick zum Beenden oder ESC zum Abbrechen.');
+                startDrawingRoute();
+            }
+        }
+        
+        // Anleitung anzeigen
+        function showInstructions(text) {
+            const instructions = document.getElementById('drawingInstructions');
+            instructions.textContent = text;
+            instructions.classList.add('show');
+            
+            setTimeout(() => {
+                instructions.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Karte initialisieren
+        function initMap() {
+            map = L.map('map').setView([48.130064, 11.583815], 14);
+            
+            // Basiskarten-Layer
+            const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19
+            });
+            
+            const topographicLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+                maxZoom: 17
+            });
+            
+            const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                maxZoom: 19
+            });
+            
+            // Satelliten-Layer (optional)
+            const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+                maxZoom: 19
+            });
+            
+            // Standard-Layer hinzufügen
+            osmLayer.addTo(map);
+            
+            // Layer-Steuerung hinzufügen
+            const baseLayers = {
+                "OpenStreetMap": osmLayer,
+                "Topografisch": topographicLayer,
+                "Satellit": satelliteLayer,
+                "Dunkelmodus": darkLayer
+            };
+            
+            const layerControl = L.control.layers(baseLayers).addTo(map);
+            
+            // Wetter-Layer (Radar-Karte) - Demo ohne API-Key
+            weatherLayer = L.tileLayer('https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=demo', {
+                attribution: 'Weather data &copy; OpenWeatherMap',
+                opacity: 0.5,
+                maxZoom: 18
+            });
+            
+            // Layer zu Kontrollen hinzufügen
+            layerControl.addOverlay(weatherLayer, "Niederschlags-Radar (Demo)");
+            
+            // Maßstabsleiste hinzufügen
+            L.control.scale({imperial: false, position: 'bottomleft'}).addTo(map);
+            
+            // LEGENDE - Korrigierte Version mit Inline-Styles
+            const legend = L.control({position: 'bottomright'});
+            
+            legend.onAdd = function() {
+                const div = L.DomUtil.create('div', 'legend');
+                div.style.backgroundColor = 'white';
+                div.style.padding = '10px';
+                div.style.borderRadius = '5px';
+                div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+                div.style.fontSize = '12px';
+                div.style.maxWidth = '200px';
+                
+                div.innerHTML = `
+                    <h4 style="margin: 0 0 8px 0; color: #333; font-size: 13px; font-weight: bold;">Legende</h4>
+                    <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 5px; font-size: 11px;">
+                        <div class="legend-color" style="width: 18px; height: 18px; margin-right: 8px; border-radius: 3px; display: inline-block; border: 1px solid #ccc; background-color: #3498db;"></div>
+                        <span>Standard Marker</span>
+                    </div>
+                    <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 5px; font-size: 11px;">
+                        <div class="legend-color" style="width: 18px; height: 18px; margin-right: 8px; border-radius: 3px; display: inline-block; border: 1px solid #ccc; background-color: #e74c3c;"></div>
+                        <span>Deine Position</span>
+                    </div>
+                    <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 5px; font-size: 11px;">
+                        <div class="legend-color" style="width: 18px; height: 18px; margin-right: 8px; border-radius: 3px; display: inline-block; border: 1px solid #ccc; background-color: #27ae60;"></div>
+                        <span>Polygon / Golfplatz</span>
+                    </div>
+                    <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 5px; font-size: 11px;">
+                        <div class="legend-color" style="width: 18px; height: 18px; margin-right: 8px; border-radius: 3px; display: inline-block; border: 1px solid #ccc; background-color: #f39c12;"></div>
+                        <span>Kreis</span>
+                    </div>
+                    <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 5px; font-size: 11px;">
+                        <div class="legend-color" style="width: 18px; height: 18px; margin-right: 8px; border-radius: 3px; display: inline-block; border: 1px solid #ccc; background-color: #9b59b6;"></div>
+                        <span>Route</span>
+                    </div>
+                `;
+                return div;
+            };
+            
+            legend.addTo(map);
+            
+            // Ereignis-Listener für Kartenänderungen
+            map.on('moveend', function() {
+                updateMapInfo();
+                loadGolfCoursesInView();
+            });
+            
+            map.on('zoomend', updateMapInfo);
+            
+            // Ersten Marker hinzufügen
+            addInitialMarker();
+            
+            // Eigene Position abrufen
+            getCurrentLocation();
+            
+            // Karteninfo initialisieren
+            updateMapInfo();
+            
+            // ESC-Taste zum Abbrechen
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    cancelDrawing();
+                    setMode('select');
+                }
+            });
+            
+            // Golfplätze beim Start laden
+            loadGolfCoursesInView();
+            
+            // Event-Listener für Layer-Checkboxen
+            document.getElementById('toggleGolfCourses').addEventListener('change', function() {
+                if (this.checked) {
+                    loadGolfCoursesInView();
+                } else {
+                    clearGolfCourses();
+                }
+            });
+            
+            document.getElementById('toggleWeatherLayer').addEventListener('change', function() {
+                if (this.checked && weatherLayer) {
+                    weatherLayer.addTo(map);
+                    isWeatherLayerActive = true;
+                } else if (weatherLayer) {
+                    map.removeLayer(weatherLayer);
+                    isWeatherLayerActive = false;
+                }
+            });
+            
+            // Wetter-Button Event
+            document.getElementById('weatherBtn').addEventListener('click', function() {
+                getWeatherForCurrentLocation();
+            });
+        }
+        
+        // Home-Button hinzufügen (wird aufgerufen nach erfolgreicher Positionsbestimmung)
+        function addHomeControl(lat, lng) {
+            if (homeControlAdded) return;
+            
+            const homeControl = L.Control.extend({
+                options: {
+                    position: 'topleft'
+                },
+                
+                onAdd: function(map) {
+                    const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                    container.innerHTML = '<button style="background: white; border: none; border-radius: 4px; padding: 5px; cursor: pointer; box-shadow: 0 1px 5px rgba(0,0,0,0.2);"><i class="fas fa-home" style="font-size: 18px; color: #3498db;"></i></button>';
+                    
+                    container.onclick = function() {
+                        if (currentLocationMarker) {
+                            map.setView(currentLocationMarker.getLatLng(), 14);
+                            currentLocationMarker.openPopup();
+                            showInstructions('Zur eigenen Position gesprungen');
+                        } else if (currentLocationLatLng) {
+                            map.setView(currentLocationLatLng, 14);
+                            showInstructions('Zur gespeicherten Position gesprungen');
+                        }
+                    };
+                    
+                    return container;
+                }
+            });
+            
+            new homeControl().addTo(map);
+            homeControlAdded = true;
+        }
+        
+        // Zeichnen abbrechen
+        function cancelDrawing() {
+            if (currentDrawingElement) {
+                map.removeLayer(currentDrawingElement);
+                currentDrawingElement = null;
+                drawingPoints = [];
+                map.off('click');
+                map.off('dblclick');
+            }
+        }
+        
+        // Ersten Marker hinzufügen
+        function addInitialMarker() {
+            const initialPosition = [48.130064, 11.583815];
+            
+            const marker = L.marker(initialPosition, {
+                draggable: true,
+                title: 'Deutsches Museum'
+            })
+            .addTo(map)
+            .bindPopup(`
+                <b>Deutsches Museum</b><br>
+                Museumsinsel 1, 80538 München<br>
+                <button onclick="centerOnMarker(0)" style="background:#3498db;color:white;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;margin-top:5px;">Zentrieren</button>
+            `);
+            
+            marker.on('moveend', function() {
+                updateElementList();
+            });
+            
+            markers.push(marker);
+            updateElementList();
+        }
+        
+        // Aktuelle Position abrufen - KORRIGIERTE VERSION
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        console.log("Position gefunden:", lat, lng);
+                        
+                        // Position speichern
+                        currentLocationLatLng = [lat, lng];
+                        
+                        // Custom Icon für eigene Position
+                        const redIcon = L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background-color: #e74c3c; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><i class="fas fa-user" style="color: white; font-size: 14px;"></i></div>',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        });
+                        
+                        // Marker erstellen
+                        currentLocationMarker = L.marker([lat, lng], {
+                            icon: redIcon,
+                            title: 'Deine Position',
+                            zIndexOffset: 1000
+                        })
+                        .addTo(map)
+                        .bindPopup(`
+                            <b>Deine Position</b><br>
+                            Latitude: ${lat.toFixed(6)}<br>
+                            Longitude: ${lng.toFixed(6)}<br>
+                            <a href="https://dhbw.koch.team" target="_blank" style="color:#3498db;text-decoration:none;">
+                                <i class="fas fa-external-link-alt"></i> Zur DHBW Website
+                            </a>
+                        `);
+                        
+                        // Home-Button hinzufügen
+                        addHomeControl(lat, lng);
+                        
+                        updateElementList();
+                        
+                        // Wetter für diese Position abrufen
+                        getWeatherForLocation(lat, lng);
+                    },
+                    function(error) {
+                        console.error("Geolocation Fehler: ", error.message);
+                        
+                        // Fallback: München als Position verwenden
+                        const lat = 48.130064;
+                        const lng = 11.583815;
+                        currentLocationLatLng = [lat, lng];
+                        
+                        // Fallback Marker erstellen
+                        const fallbackIcon = L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background-color: #95a5a6; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><i class="fas fa-map-marker-alt" style="color: white; font-size: 14px;"></i></div>',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        });
+                        
+                        currentLocationMarker = L.marker([lat, lng], {
+                            icon: fallbackIcon,
+                            title: 'Fallback Position (München)'
+                        })
+                        .addTo(map)
+                        .bindPopup('<b>Fallback Position</b><br>Ihr Standort konnte nicht ermittelt werden.<br>Zeige München (Deutsches Museum).');
+                        
+                        // Home-Button trotzdem hinzufügen
+                        addHomeControl(lat, lng);
+                        
+                        updateElementList();
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                alert("Geolocation wird von diesem Browser nicht unterstützt.");
+            }
+        }
+        
+        // Wetter für aktuelle Position abrufen
+        function getWeatherForCurrentLocation() {
+            if (currentLocationMarker) {
+                const latLng = currentLocationMarker.getLatLng();
+                getWeatherForLocation(latLng.lat, latLng.lng);
+            } else if (currentLocationLatLng) {
+                getWeatherForLocation(currentLocationLatLng[0], currentLocationLatLng[1]);
+            } else {
+                // Fallback: Wetter für München
+                getWeatherForLocation(48.130064, 11.583815);
+            }
+        }
+        
+        // Wetter für spezifische Position abrufen
+        function getWeatherForLocation(lat, lng) {
+            const weatherInfo = document.getElementById('weatherInfo');
+            weatherInfo.classList.add('show');
+            
+            document.getElementById('weatherLocation').textContent = `Lade Wetter für ${lat.toFixed(2)}, ${lng.toFixed(2)}...`;
+            
+            // Open-Meteo API (kostenlos, keine API-Key benötigt)
+            const url = `${WEATHER_API}?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,apparent_temperature&timezone=auto`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.current) {
+                        const current = data.current;
+                        document.getElementById('weatherTemp').textContent = `${current.temperature_2m}°C`;
+                        document.getElementById('weatherWind').textContent = `${current.wind_speed_10m} km/h`;
+                        document.getElementById('weatherHumidity').textContent = `${current.relative_humidity_2m}%`;
+                        document.getElementById('weatherPrecipitation').textContent = `${current.precipitation} mm`;
+                        document.getElementById('weatherFeelsLike').textContent = `${current.apparent_temperature}°C`;
+                        document.getElementById('weatherLocation').textContent = `Aktuelles Wetter`;
+                        
+                        // Wetter-Icon basierend auf Bedingungen
+                        const weatherIcon = document.querySelector('#weatherInfo .fa-cloud-sun');
+                        if (current.precipitation > 5) {
+                            weatherIcon.className = 'fas fa-cloud-rain fa-2x';
+                            weatherIcon.style.color = '#2196f3';
+                        } else if (current.temperature_2m > 25) {
+                            weatherIcon.className = 'fas fa-sun fa-2x';
+                            weatherIcon.style.color = '#ff9800';
+                        } else if (current.temperature_2m < 5) {
+                            weatherIcon.className = 'fas fa-snowflake fa-2x';
+                            weatherIcon.style.color = '#03a9f4';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Wetterdaten Fehler:', error);
+                    document.getElementById('weatherLocation').textContent = 'Wetterdaten nicht verfügbar';
+                    
+                    // Demo-Daten
+                    document.getElementById('weatherTemp').textContent = '18°C';
+                    document.getElementById('weatherWind').textContent = '12 km/h';
+                    document.getElementById('weatherHumidity').textContent = '65%';
+                    document.getElementById('weatherPrecipitation').textContent = '0 mm';
+                    document.getElementById('weatherFeelsLike').textContent = '17°C';
+                });
+        }
+        
+        // Golfplätze im aktuellen Kartenbereich laden
+        function loadGolfCoursesInView() {
+            if (!document.getElementById('toggleGolfCourses').checked) {
+                return;
+            }
+            
+            clearGolfCourses();
+            
+            const bounds = map.getBounds();
+            
+            // Overpass API für OpenStreetMap Daten
+            const overpassUrl = 'https://overpass-api.de/api/interpreter';
+            
+            const query = `
+                [out:json][timeout:25];
+                (
+                    node["leisure"="golf_course"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
+                    way["leisure"="golf_course"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
+                    relation["leisure"="golf_course"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
+                );
+                out center;
+            `;
+            
+            fetch(overpassUrl, {
+                method: 'POST',
+                body: `data=${encodeURIComponent(query)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.elements && data.elements.length > 0) {
+                    data.elements.forEach(element => {
+                        let lat, lon;
+                        
+                        if (element.type === 'node') {
+                            lat = element.lat;
+                            lon = element.lon;
+                        } else if (element.center) {
+                            lat = element.center.lat;
+                            lon = element.center.lon;
+                        } else if (element.lat && element.lon) {
+                            lat = element.lat;
+                            lon = element.lon;
+                        }
+                        
+                        if (lat && lon) {
+                            const golfIcon = L.divIcon({
+                                className: 'golf-course-marker',
+                                html: '<i class="fas fa-golf-ball"></i>',
+                                iconSize: [30, 30],
+                                iconAnchor: [15, 15]
+                            });
+                            
+                            const marker = L.marker([lat, lon], {
+                                icon: golfIcon,
+                                title: element.tags.name || 'Golfplatz'
+                            })
+                            .addTo(map)
+                            .bindPopup(`
+                                <b>${element.tags.name || 'Golfplatz'}</b><br>
+                                ${element.tags.operator ? `Betreiber: ${element.tags.operator}<br>` : ''}
+                                ${element.tags.website ? `<a href="${element.tags.website}" target="_blank">Website</a><br>` : ''}
+                                <small>Quelle: OpenStreetMap</small>
+                            `);
+                            
+                            golfCourseMarkers.push(marker);
+                        }
+                    });
+                    
+                    console.log(`${golfCourseMarkers.length} Golfplätze geladen`);
+                    updateElementList();
+                }
+            })
+            .catch(error => {
+                console.error('Fehler beim Laden der Golfplätze:', error);
+                
+                // Fallback: Beispiel-Golfplätze
+                const munichGolfCourses = [
+                    {name: "Golfclub München Eichenried", lat: 48.2800, lng: 11.7800},
+                    {name: "Münchener Golfclub", lat: 48.1000, lng: 11.5000}
+                ];
+                
+                munichGolfCourses.forEach(course => {
+                    if (bounds.contains([course.lat, course.lng])) {
+                        const golfIcon = L.divIcon({
+                            className: 'golf-course-marker',
+                            html: '<i class="fas fa-golf-ball"></i>',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        });
+                        
+                        const marker = L.marker([course.lat, course.lng], {
+                            icon: golfIcon,
+                            title: course.name
+                        })
+                        .addTo(map)
+                        .bindPopup(`<b>${course.name}</b><br><small>(Beispieldaten)</small>`);
+                        
+                        golfCourseMarkers.push(marker);
+                    }
+                });
+            });
+        }
+        
+        // Golfplatz-Marker löschen
+        function clearGolfCourses() {
+            golfCourseMarkers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            golfCourseMarkers = [];
+            updateElementList();
+        }
+        
+        // Marker bei Klick hinzufügen
+        function addMarkerAtClick(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            const marker = L.marker([lat, lng], {
+                draggable: true,
+                title: 'Neuer Marker'
+            })
+            .addTo(map)
+            .bindPopup(`
+                <b>Marker #${markers.length}</b><br>
+                <button onclick="removeElement('marker', ${markers.length})" style="background:#e74c3c;color:white;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;margin-top:5px;">Löschen</button>
+            `)
+            .openPopup();
+            
+            marker.on('moveend', function() {
+                updateElementList();
+            });
+            
+            markers.push(marker);
+            updateElementList();
+            setMode('select');
+        }
+        
+        // Polygon zeichnen starten
+        function startDrawingPolygon() {
+            drawingPoints = [];
+            
+            map.on('click', function(e) {
+                drawingPoints.push(e.latlng);
+                
+                if (!currentDrawingElement) {
+                    currentDrawingElement = L.polygon([e.latlng], {
+                        color: '#27ae60',
+                        fillColor: '#27ae60',
+                        fillOpacity: 0.3,
+                        weight: 2
+                    }).addTo(map);
+                } else {
+                    currentDrawingElement.setLatLngs(drawingPoints);
+                }
+            });
+            
+            map.on('dblclick', function() {
+                if (drawingPoints.length >= 3) {
+                    drawingPoints.push(drawingPoints[0]);
+                    currentDrawingElement.setLatLngs(drawingPoints);
+                    
+                    const polygon = currentDrawingElement;
+                    polygon.bindPopup(`
+                        <b>Polygon</b><br>
+                        <button onclick="removeElement('polygon', ${polygons.length})" style="background:#e74c3c;color:white;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;margin-top:5px;">Löschen</button>
+                    `);
+                    polygons.push(polygon);
+                    
+                    currentDrawingElement = null;
+                    drawingPoints = [];
+                    updateElementList();
+                    setMode('select');
+                }
+            });
+        }
+        
+        // Kreis bei Klick hinzufügen
+        function addCircleAtClick(e) {
+            const circle = L.circle(e.latlng, {
+                color: '#f39c12',
+                fillColor: '#f39c12',
+                fillOpacity: 0.3,
+                radius: 300
+            })
+            .addTo(map)
+            .bindPopup(`
+                <b>Kreis</b><br>
+                <button onclick="removeElement('circle', ${circles.length})" style="background:#e74c3c;color:white;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;margin-top:5px;">Löschen</button>
+            `);
+            
+            circles.push(circle);
+            updateElementList();
+            setMode('select');
+        }
+        
+        // Route zeichnen starten
+        function startDrawingRoute() {
+            drawingPoints = [];
+            
+            map.on('click', function(e) {
+                drawingPoints.push(e.latlng);
+                
+                if (!currentDrawingElement) {
+                    currentDrawingElement = L.polyline([e.latlng], {
+                        color: '#9b59b6',
+                        weight: 4,
+                        opacity: 0.7
+                    }).addTo(map);
+                } else {
+                    currentDrawingElement.setLatLngs(drawingPoints);
+                }
+            });
+            
+            map.on('dblclick', function() {
+                if (drawingPoints.length >= 2) {
+                    const polyline = currentDrawingElement;
+                    const distance = calculateRouteDistance(drawingPoints);
+                    polyline.bindPopup(`
+                        <b>Route (${distance.toFixed(2)} km)</b><br>
+                        <button onclick="removeElement('polyline', ${polylines.length})" style="background:#e74c3c;color:white;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;margin-top:5px;">Löschen</button>
+                    `);
+                    polylines.push(polyline);
+                    
+                    currentDrawingElement = null;
+                    drawingPoints = [];
+                    updateElementList();
+                    setMode('select');
+                }
+            });
+        }
+        
+        // Routen-Distanz berechnen
+        function calculateRouteDistance(points) {
+            let totalDistance = 0;
+            for (let i = 0; i < points.length - 1; i++) {
+                totalDistance += points[i].distanceTo(points[i + 1]);
+            }
+            return totalDistance / 1000;
+        }
+        
+        // Element entfernen
+        function removeElement(type, index) {
+            if (type === 'marker' && markers[index]) {
+                map.removeLayer(markers[index]);
+                markers.splice(index, 1);
+            } else if (type === 'polygon' && polygons[index]) {
+                map.removeLayer(polygons[index]);
+                polygons.splice(index, 1);
+            } else if (type === 'circle' && circles[index]) {
+                map.removeLayer(circles[index]);
+                circles.splice(index, 1);
+            } else if (type === 'polyline' && polylines[index]) {
+                map.removeLayer(polylines[index]);
+                polylines.splice(index, 1);
+            }
+            updateElementList();
+        }
+        
+        // Alle Elemente löschen
+        function clearAll() {
+            if (markers.length <= 1 && polygons.length === 0 && circles.length === 0 && polylines.length === 0) {
+                alert('Es gibt keine Elemente zum Löschen.');
+                return;
+            }
+            
+            if (confirm('Möchten Sie wirklich alle hinzugefügten Elemente löschen?\n\nAusgenommen: Start-Marker und Ihre Position')) {
+                for (let i = markers.length - 1; i >= 1; i--) {
+                    map.removeLayer(markers[i]);
+                    markers.splice(i, 1);
+                }
+                
+                polygons.forEach(polygon => map.removeLayer(polygon));
+                polygons = [];
+                
+                circles.forEach(circle => map.removeLayer(circle));
+                circles = [];
+                
+                polylines.forEach(polyline => map.removeLayer(polyline));
+                polylines = [];
+                
+                updateElementList();
+                alert('Alle Elemente wurden gelöscht.');
+            }
+        }
+        
+        // Auf Marker zentrieren
+        function centerOnMarker(index) {
+            if (markers[index]) {
+                map.setView(markers[index].getLatLng(), 16);
+                markers[index].openPopup();
+            }
+        }
+        
+        // Karteninfo aktualisieren
+        function updateMapInfo() {
+            const center = map.getCenter();
+            document.getElementById('centerCoords').textContent = 
+                `${center.lat.toFixed(6)}, ${center.lng.toFixed(6)}`;
+            document.getElementById('zoomLevel').textContent = map.getZoom();
+            
+            const totalElements = markers.length + polygons.length + circles.length + polylines.length + golfCourseMarkers.length;
+            document.getElementById('elementCount').textContent = totalElements;
+        }
+        
+        // Elementliste aktualisieren
+        function updateElementList() {
+            const elementList = document.getElementById('elementList');
+            elementList.innerHTML = '';
+            
+            let totalCount = 0;
+            
+            // Start-Marker
+            if (markers.length > 0) {
+                const marker = markers[0];
+                const latLng = marker.getLatLng();
+                const item = document.createElement('div');
+                item.className = 'marker-item';
+                item.innerHTML = `
+                    <span><i class="fas fa-landmark"></i> Deutsches Museum (${latLng.lat.toFixed(5)}, ${latLng.lng.toFixed(5)})</span>
+                    <div class="marker-actions">
+                        <button class="marker-action-btn" onclick="centerOnMarker(0)"><i class="fas fa-crosshairs"></i></button>
+                    </div>
+                `;
+                elementList.appendChild(item);
+                totalCount++;
+            }
+            
+            // Weitere Marker
+            for (let i = 1; i < markers.length; i++) {
+                const marker = markers[i];
+                const latLng = marker.getLatLng();
+                const item = document.createElement('div');
+                item.className = 'marker-item';
+                item.innerHTML = `
+                    <span><i class="fas fa-map-marker-alt" style="color:#3498db"></i> Marker #${i} (${latLng.lat.toFixed(5)}, ${latLng.lng.toFixed(5)})</span>
+                    <div class="marker-actions">
+                        <button class="marker-action-btn" onclick="centerOnMarker(${i})"><i class="fas fa-crosshairs"></i></button>
+                        <button class="marker-action-btn" onclick="removeElement('marker', ${i})"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+                elementList.appendChild(item);
+                totalCount++;
+            }
+            
+            // Eigene Position
+            if (currentLocationMarker) {
+                const latLng = currentLocationMarker.getLatLng();
+                const item = document.createElement('div');
+                item.className = 'marker-item';
+                item.innerHTML = `
+                    <span><i class="fas fa-user-circle" style="color:#e74c3c"></i> Deine Position (${latLng.lat.toFixed(5)}, ${latLng.lng.toFixed(5)})</span>
+                    <div class="marker-actions">
+                        <button class="marker-action-btn" onclick="map.setView([${latLng.lat}, ${latLng.lng}], 14)"><i class="fas fa-crosshairs"></i></button>
+                    </div>
+                `;
+                elementList.appendChild(item);
+                totalCount++;
+            }
+            
+            // Polygone
+            polygons.forEach((polygon, index) => {
+                const item = document.createElement('div');
+                item.className = 'marker-item';
+                item.innerHTML = `
+                    <span><i class="fas fa-draw-polygon" style="color:#27ae60"></i> Polygon #${index + 1}</span>
+                    <div class="marker-actions">
+                        <button class="marker-action-btn" onclick="removeElement('polygon', ${index})"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+                elementList.appendChild(item);
+                totalCount++;
+            });
+            
+            // Kreise
+            circles.forEach((circle, index) => {
+                const item = document.createElement('div');
+                item.className = 'marker-item';
+                item.innerHTML = `
+                    <span><i class="fas fa-circle" style="color:#f39c12"></i> Kreis #${index + 1}</span>
+                    <div class="marker-actions">
+                        <button class="marker-action-btn" onclick="removeElement('circle', ${index})"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+                elementList.appendChild(item);
+                totalCount++;
+            });
+            
+            // Routen
+            polylines.forEach((polyline, index) => {
+                const item = document.createElement('div');
+                item.className = 'marker-item';
+                item.innerHTML = `
+                    <span><i class="fas fa-route" style="color:#9b59b6"></i> Route #${index + 1}</span>
+                    <div class="marker-actions">
+                        <button class="marker-action-btn" onclick="removeElement('polyline', ${index})"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+                elementList.appendChild(item);
+                totalCount++;
+            });
+            
+            // Golfplätze
+            golfCourseMarkers.forEach((marker, index) => {
+                const latLng = marker.getLatLng();
+                const item = document.createElement('div');
+                item.className = 'marker-item';
+                item.innerHTML = `
+                    <span><i class="fas fa-golf-ball" style="color:#27ae60"></i> ${marker.options.title} (${latLng.lat.toFixed(5)}, ${latLng.lng.toFixed(5)})</span>
+                    <div class="marker-actions">
+                        <button class="marker-action-btn" onclick="map.setView([${latLng.lat}, ${latLng.lng}], 14)"><i class="fas fa-crosshairs"></i></button>
+                    </div>
+                `;
+                elementList.appendChild(item);
+                totalCount++;
+            });
+            
+            if (totalCount === 1) {
+                const item = document.createElement('div');
+                item.className = 'marker-item';
+                item.innerHTML = '<span style="color:#7f8c8d"><i class="fas fa-info-circle"></i> Fügen Sie weitere Elemente hinzu</span>';
+                elementList.appendChild(item);
+            }
+            
+            updateMapInfo();
+        }
+        
+        // Event-Listener für Buttons
+        document.getElementById('modeSelectBtn').addEventListener('click', () => setMode('select'));
+        document.getElementById('modeMarkerBtn').addEventListener('click', () => setMode('marker'));
+        document.getElementById('modePolygonBtn').addEventListener('click', () => setMode('polygon'));
+        document.getElementById('modeCircleBtn').addEventListener('click', () => setMode('circle'));
+        document.getElementById('modeRouteBtn').addEventListener('click', () => setMode('route'));
+        document.getElementById('clearBtn').addEventListener('click', clearAll);
+        
+        // Karte initialisieren
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
 </body>
 </html>
