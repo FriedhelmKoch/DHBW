@@ -1,118 +1,945 @@
-<!DOCTYPE html>
+<!--
+ * ============================================================================
+ * Kamerademo mit verschiebbarem Textoverlay und Fotoaufnahme - v1.0.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter 
+ * gleichen Bedingungen 4.0 International Lizenz.
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, müssen Sie Ihre Beiträge unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
+ 
+ <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gesichts- & Emotionserkennung (Vanilla JS)</title>
-    
-    <!-- Externe CSS Datei -->
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- face-api.js von CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.js"></script>
+    <title>Kamera Demo</title>
+    <style>
+        /* 
+         * STYLES - Allgemeine Styles für die Anwendung
+         * Reset, Layout, Farben und Responsive Design
+         */
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        /* Header-Bereich */
+        header {
+            background: linear-gradient(to right, #2c3e50, #4a6491);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* Hauptbereich mit zwei Spalten */
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        /* Linke Spalte: Video und Kamerasteuerung */
+        .video-section {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        /* Rechte Spalte: Text-Einstellungen */
+        .controls-section {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        /* Video-Container für Kameravorschau */
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background-color: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Video-Element für Kamerastream */
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Text-Overlay das über dem Video angezeigt wird */
+        .text-overlay {
+            position: absolute;
+            padding: 12px 15px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 8px;
+            cursor: move;
+            user-select: none;
+            max-width: 80%;
+            word-wrap: break-word;
+            z-index: 10;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .text-overlay:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .text-overlay.dragging {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+        
+        /* Kamerasteuerung - Buttons für Start/Stopp */
+        .camera-controls {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .camera-controls h3 {
+            margin-bottom: 12px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 8px;
+        }
+        
+        .camera-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .camera-buttons button {
+            flex: 1;
+        }
+        
+        /* Button zum Aufnehmen von Fotos */
+        #captureButton {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        #captureButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        #captureButton:active {
+            transform: translateY(1px);
+        }
+        
+        /* Panel für Text-Einstellungen */
+        .controls-panel {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group h3 {
+            margin-bottom: 12px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 8px;
+        }
+        
+        /* Input-Gruppen für verschiedene Einstellungen */
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: #4a6491;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 100, 145, 0.2);
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        /* Container für Range-Inputs mit Wert-Anzeige */
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .range-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            color: #4a6491;
+        }
+        
+        /* Button-Gruppen für Aktionen */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        /* Allgemeine Button-Styles */
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #addTextButton {
+            background: linear-gradient(to right, #3498db, #2c80b9);
+            color: white;
+            flex: 1;
+        }
+        
+        #startButton {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            color: white;
+        }
+        
+        #stopButton {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Galerie für aufgenommene Fotos */
+        .gallery {
+            margin-top: 20px;
+        }
+        
+        .gallery h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .photos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .photo-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s;
+        }
+        
+        .photo-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        /* Aktionen für Fotos (Download, Löschen) */
+        .photo-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: space-around;
+            padding: 5px;
+        }
+        
+        .photo-actions button {
+            padding: 5px;
+            font-size: 12px;
+            background: transparent;
+            color: white;
+            border: none;
+        }
+        
+        /* Anleitungs-Bereich */
+        .instructions {
+            background: linear-gradient(to right, #fff8e1, #fff1c2);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 20px;
+        }
+        
+        .instructions h3 {
+            color: #b06c00;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 15px;
+            background-color: #f1f1f1;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Design für Mobile */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .video-container {
+                height: 300px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="App">
-        <div class="app-container">
-            <!-- Header -->
-            <header class="app-header">
-                <div class="header-content">
-                    <h1>KI Gesichts- & Emotionserkennung</h1>
-                    <p class="app-beschreibung">
-                        Echtzeit-Erkennung von Gesichtslandmarken und Emotionen
-                    </p>
+    <div class="container">
+        <header>
+            <h1>Kamera Demo mit Textoverlay</h1>
+            <p class="subtitle">Fügen Sie einen frei verschiebbaren Text hinzu und machen Sie Fotos</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- LINKE SPALTE: Video und Kamerafunktionen -->
+            <div class="video-section">
+                <!-- Container für Kameravorschau -->
+                <div class="video-container">
+                    <video id="videoElement" autoplay></video>
+                    <!-- Text-Overlay wird hier dynamisch hinzugefügt -->
                 </div>
                 
-                <!-- Status- und Ladebereich -->
-                <div id="status-container">
-                    <div class="lade-anzeige">
-                        <div class="lade-inhalt">
-                            <div class="lade-spinner"></div>
-                            <p class="lade-text">Lade KI-Modelle...</p>
-                            <div class="lade-balken">
-                                <div id="lade-fortschritt" class="lade-fortschritt" style="width: 0%"></div>
-                            </div>
-                            <p id="lade-prozent" class="lade-prozent">0%</p>
-                            <p class="lade-hinweis">
-                                Beim ersten Mal kann dies etwas dauern
-                            </p>
-                        </div>
+                <!-- Kamerasteuerung -->
+                <div class="camera-controls">
+                    <h3>Kamera-Steuerung</h3>
+                    <div class="camera-buttons">
+                        <button id="startButton">Kamera starten</button>
+                        <button id="stopButton" disabled>Kamera stoppen</button>
                     </div>
                 </div>
-            </header>
-            
-            <!-- Hauptinhalt -->
-            <main class="app-main">
-                <div class="erkennungs-container">
-                    <!-- Video Container -->
-                    <div id="video-container" class="video-container">
-                        <video 
-                            id="webcam-video" 
-                            class="webcam-video"
-                            autoplay 
-                            muted
-                            playsinline
-                        ></video>
-                        <canvas id="gesichts-canvas" class="gesichts-canvas"></canvas>
-                        <div id="emotion-overlay" class="emotion-overlay" style="display: none;"></div>
+                
+                <!-- Button zum Aufnehmen von Fotos -->
+                <button id="captureButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Foto aufnehmen
+                </button>
+                
+                <!-- Galerie für aufgenommene Fotos -->
+                <div class="gallery">
+                    <h3>Aufgenommene Fotos</h3>
+                    <div class="photos-container" id="photosContainer">
+                        <!-- Fotos werden hier dynamisch hinzugefügt -->
                     </div>
-                    
-                    <!-- Kontrollbuttons -->
-                    <div class="kontrollen">
-                        <button 
-                            id="reset-historie-button"
-                            class="kontroll-button"
-                            disabled
-                        >
-                            <span class="button-icon">📊</span>
-                            <span class="button-text">Historie zurücksetzen</span>
-                        </button>
+                </div>
+            </div>
+            
+            <!-- RECHTE SPALTE: Text-Einstellungen -->
+            <div class="controls-section">
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <h3>Text-Einstellungen</h3>
                         
-                        <div id="webcam-indicator" class="webcam-indicator">
-                            <span class="indicator-icon">⏳</span>
-                            <span class="indicator-text">Kamera lädt</span>
+                        <!-- Text-Eingabe -->
+                        <div class="input-group">
+                            <label for="textInput">Text für Overlay:</label>
+                            <textarea id="textInput" placeholder="Geben Sie hier Ihren Text ein...">Mein individueller Text</textarea>
+                        </div>
+                        
+                        <!-- Schriftgröße-Einstellung -->
+                        <div class="input-group">
+                            <label for="fontSize">Schriftgröße:</label>
+                            <div class="range-container">
+                                <input type="range" id="fontSize" min="12" max="72" value="24">
+                                <span class="range-value" id="fontSizeValue">24px</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Schriftart-Auswahl -->
+                        <div class="input-group">
+                            <label for="fontFamily">Schriftart:</label>
+                            <select id="fontFamily">
+                                <option value="Arial, sans-serif">Arial</option>
+                                <option value="'Times New Roman', serif">Times New Roman</option>
+                                <option value="'Courier New', monospace">Courier New</option>
+                                <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                                <option value="'Georgia', serif">Georgia</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Textfarbe-Einstellung -->
+                        <div class="input-group">
+                            <label for="textColor">Textfarbe:</label>
+                            <input type="color" id="textColor" value="#ffffff">
+                        </div>
+                        
+                        <!-- Hintergrundfarbe-Einstellung -->
+                        <div class="input-group">
+                            <label for="backgroundColor">Hintergrundfarbe:</label>
+                            <input type="color" id="backgroundColor" value="#000000">
+                        </div>
+                        
+                        <!-- Transparenz-Einstellung -->
+                        <div class="input-group">
+                            <label for="backgroundOpacity">Hintergrund-Transparenz:</label>
+                            <div class="range-container">
+                                <input type="range" id="backgroundOpacity" min="0" max="100" value="70">
+                                <span class="range-value" id="backgroundOpacityValue">70%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Button zum Hinzufügen des Textes -->
+                        <div class="button-group">
+                            <button id="addTextButton">Text hinzufügen</button>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Info-Karten -->
-                <div class="info-container">
-                    <div class="info-card">
-                        <h3 class="info-title">🔬 Funktionsweise</h3>
-                        <ul class="info-list">
-                            <li><strong>68 Gesichtslandmarken</strong> werden erkannt</li>
-                            <li><strong>7 Grundemotionen</strong> nach Paul Ekman</li>
-                            <li><strong>Echtzeit-Emotionserkennung</strong></li>
-                            <li><strong>Lokale Verarbeitung</strong> - keine Server</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="info-card">
-                        <h3 class="info-title">💡 Tipps</h3>
-                        <ul class="info-list">
-                            <li>Gute Beleuchtung verwenden</li>
-                            <li>Direkt in die Kamera schauen</li>
-                            <li>Klar erkennbare Gesichtsausdrücke</li>
-                            <li id="mobile-tip" style="display:none;">Gerät ruhig halten</li>
-                        </ul>
-                    </div>
+                <!-- Anleitungsbereich -->
+                <div class="instructions">
+                    <h3>Anleitung:</h3>
+                    <ul>
+                        <li>Geben Sie Ihren Text ein und passen Sie das Aussehen an</li>
+                        <li>Klicken Sie auf "Text hinzufügen", um den Text im Video anzuzeigen</li>
+                        <li>Ziehen Sie den Text, um ihn an die gewünschte Position zu bewegen</li>
+                        <li>Starten Sie die Kamera, um die Vorschau mit Text zu sehen</li>
+                        <li>Klicken Sie auf "Foto aufnehmen", um ein Bild mit Text zu speichern</li>
+                    </ul>
                 </div>
-                
-                <!-- Statistik Container (werden durch JS befüllt) -->
-                <div id="statistik-container"></div>
-                <div id="mobile-statistik-container"></div>
-            </main>
-            
-            <!-- Footer -->
-            <footer class="app-footer">
-                <p class="footer-text">
-                    Gesichts- und Emotions-Erkennung &copy; 2024 | Verwendet TensorFlow.js und face-api.js
-                </p>
-            </footer>
+            </div>
         </div>
+
+        <footer class="app-footer" style="padding: 15px; text-align: center; font-size: 0.9em;">
+            <p class="footer-text">
+                <span style="vertical-align: middle;">
+                    Kamerademo mit verschiebbarem Textoverlay und Fotoaufnahme<br />
+                    Copyright © <script>document.write(new Date().getFullYear())</script> 
+                    Friedhelm Koch | Lizenz: 
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+                    target="_blank" style="color: rgb(0, 111, 221);">CC BY-NC-SA 4.0</a>
+                </span>
+            </p>
+        </footer>
+
     </div>
-    
-    <!-- Externe JavaScript Datei -->
-    <script src="app.js"></script>
+
+    <script>
+        // =============================================================================
+        // KONSTANTEN UND VARIABLENDEKLARATION
+        // =============================================================================
+        
+        // DOM-Elemente referenzieren
+        const videoElement = document.getElementById('videoElement');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const addTextButton = document.getElementById('addTextButton');
+        const captureButton = document.getElementById('captureButton');
+        const textInput = document.getElementById('textInput');
+        const fontSize = document.getElementById('fontSize');
+        const fontSizeValue = document.getElementById('fontSizeValue');
+        const fontFamily = document.getElementById('fontFamily');
+        const textColor = document.getElementById('textColor');
+        const backgroundColor = document.getElementById('backgroundColor');
+        const backgroundOpacity = document.getElementById('backgroundOpacity');
+        const backgroundOpacityValue = document.getElementById('backgroundOpacityValue');
+        const photosContainer = document.getElementById('photosContainer');
+        
+        // Globale Variablen
+        let stream = null;           // Kamerastream-Objekt
+        let isDragging = false;      // Status ob Text gerade gezogen wird
+        let dragOffsetX, dragOffsetY; // Offset für Drag-Bewegung
+        let currentOverlay = null;   // Referenz zum aktuellen Text-Overlay
+        let photoCount = 0;          // Zähler für aufgenommene Fotos
+        
+        // =============================================================================
+        // EVENT LISTENER FÜR BENUTZERINTERAKTIONEN
+        // =============================================================================
+        
+        // Schriftgröße-Änderung anzeigen
+        fontSize.addEventListener('input', function() {
+            fontSizeValue.textContent = this.value + 'px';
+        });
+        
+        // Hintergrund-Transparenz-Änderung anzeigen
+        backgroundOpacity.addEventListener('input', function() {
+            backgroundOpacityValue.textContent = this.value + '%';
+        });
+        
+        // =============================================================================
+        // TEXT-OVERLAY FUNKTIONALITÄT
+        // =============================================================================
+        
+        /**
+         * Event Handler für das Hinzufügen eines Text-Overlays
+         * Erstellt ein neues Text-Element mit den aktuellen Einstellungen
+         */
+        addTextButton.addEventListener('click', function() {
+            const text = textInput.value.trim();
+            
+            // Validierung: Text darf nicht leer sein
+            if (!text) {
+                alert('Bitte geben Sie einen Text ein!');
+                return;
+            }
+            
+            // Vorherigen Overlay entfernen, falls vorhanden
+            if (currentOverlay) {
+                currentOverlay.remove();
+            }
+            
+            // Neues Text-Overlay erstellen
+            currentOverlay = createTextOverlay(text);
+            
+            // Overlay zum Video-Container hinzufügen
+            const container = document.querySelector('.video-container');
+            container.appendChild(currentOverlay);
+        });
+        
+        /**
+         * Erstellt ein neues Text-Overlay Element mit den aktuellen Einstellungen
+         * @param {string} text - Der anzuzeigende Text
+         * @returns {HTMLElement} Das erstellte Overlay-Element
+         */
+        function createTextOverlay(text) {
+            const overlay = document.createElement('div');
+            overlay.className = 'text-overlay';
+            overlay.textContent = text;
+            
+            // Stile anwenden
+            overlay.style.fontSize = fontSize.value + 'px';
+            overlay.style.fontFamily = fontFamily.value;
+            overlay.style.color = textColor.value;
+            overlay.style.backgroundColor = hexToRgba(backgroundColor.value, backgroundOpacity.value / 100);
+            
+            // Standardposition (zentriert)
+            overlay.style.left = '50%';
+            overlay.style.top = '50%';
+            overlay.style.transform = 'translate(-50%, -50%)';
+            
+            // Drag-Funktionalität hinzufügen
+            overlay.addEventListener('mousedown', startDrag);
+            overlay.addEventListener('touchstart', startDrag);
+            
+            return overlay;
+        }
+        
+        /**
+         * Konvertiert Hex-Farbcode zu RGBA-String
+         * @param {string} hex - Hex-Farbcode (z.B. #ffffff)
+         * @param {number} opacity - Opazität von 0 bis 1
+         * @returns {string} RGBA-Farbstring
+         */
+        function hexToRgba(hex, opacity) {
+            // Hex-Code in RGB-Komponenten zerlegen
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+        
+        // =============================================================================
+        // DRAG & DROP FUNKTIONALITÄT FÜR TEXT-OVERLAY
+        // =============================================================================
+        
+        /**
+         * Startet das Ziehen des Text-Overlays
+         * @param {Event} e - Maus- oder Touch-Event
+         */
+        function startDrag(e) {
+            e.preventDefault();
+            isDragging = true;
+            const overlay = e.target;
+            overlay.classList.add('dragging');
+            
+            // Offset berechnen (Abstand zwischen Mausposition und Overlay-Position)
+            if (e.type === 'mousedown') {
+                dragOffsetX = e.clientX - overlay.getBoundingClientRect().left;
+                dragOffsetY = e.clientY - overlay.getBoundingClientRect().top;
+                
+                // Event Listener für Mausbewegung hinzufügen
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', stopDrag);
+            } else if (e.type === 'touchstart') {
+                const touch = e.touches[0];
+                dragOffsetX = touch.clientX - overlay.getBoundingClientRect().left;
+                dragOffsetY = touch.clientY - overlay.getBoundingClientRect().top;
+                
+                // Event Listener für Touch-Bewegung hinzufügen
+                document.addEventListener('touchmove', drag);
+                document.addEventListener('touchend', stopDrag);
+            }
+        }
+        
+        /**
+         * Bewegt das Text-Overlay während des Ziehens
+         * @param {Event} e - Maus- oder Touch-Event
+         */
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const overlay = currentOverlay;
+            const container = document.querySelector('.video-container');
+            const containerRect = container.getBoundingClientRect();
+            
+            // Aktuelle Maus-/Touch-Position ermitteln
+            let clientX, clientY;
+            
+            if (e.type === 'mousemove') {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            } else if (e.type === 'touchmove') {
+                const touch = e.touches[0];
+                clientX = touch.clientX;
+                clientY = touch.clientY;
+            }
+            
+            // Neue Position berechnen
+            let newX = clientX - containerRect.left - dragOffsetX;
+            let newY = clientY - containerRect.top - dragOffsetY;
+            
+            // Sicherstellen, dass der Text innerhalb des Containers bleibt
+            const overlayRect = overlay.getBoundingClientRect();
+            const maxX = containerRect.width - overlayRect.width;
+            const maxY = containerRect.height - overlayRect.height;
+            
+            newX = Math.max(0, Math.min(newX, maxX));
+            newY = Math.max(0, Math.min(newY, maxY));
+            
+            // Neue Position anwenden
+            overlay.style.left = newX + 'px';
+            overlay.style.top = newY + 'px';
+            overlay.style.transform = 'none';
+        }
+        
+        /**
+         * Beendet das Ziehen des Text-Overlays
+         */
+        function stopDrag() {
+            isDragging = false;
+            if (currentOverlay) {
+                currentOverlay.classList.remove('dragging');
+            }
+            
+            // Event Listener entfernen
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+        
+        // =============================================================================
+        // KAMERA-FUNKTIONALITÄT
+        // =============================================================================
+        
+        /**
+         * Startet die Kamera und zeigt den Stream im Video-Element an
+         */
+        startButton.addEventListener('click', async function() {
+            try {
+                // Kamerazugriff anfordern
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                // Stream zum Video-Element hinzufügen
+                videoElement.srcObject = stream;
+                
+                // Button-Status aktualisieren
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                captureButton.disabled = false;
+            } catch (err) {
+                console.error('Fehler beim Zugriff auf die Kamera:', err);
+                alert('Fehler beim Zugriff auf die Kamera. Bitte stellen Sie sicher, dass Sie die Berechtigung erteilt haben.');
+            }
+        });
+        
+        /**
+         * Stoppt die Kamera und beendet den Stream
+         */
+        stopButton.addEventListener('click', function() {
+            if (stream) {
+                // Alle Stream-Tracks stoppen
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                
+                // Video-Element zurücksetzen
+                videoElement.srcObject = null;
+                
+                // Button-Status aktualisieren
+                startButton.disabled = false;
+                stopButton.disabled = true;
+                captureButton.disabled = true;
+            }
+        });
+        
+        // =============================================================================
+        // FOTO-AUFNAHME FUNKTIONALITÄT
+        // =============================================================================
+        
+        /**
+         * Nimmt ein Foto auf und fügt es zur Galerie hinzu
+         * Das Foto enthält den Kamerastream und das Text-Overlay
+         */
+        captureButton.addEventListener('click', function() {
+            // Validierung: Kamera muss gestartet sein
+            if (!stream) {
+                alert('Bitte starten Sie zuerst die Kamera!');
+                return;
+            }
+            
+            // Canvas für die Foto-Aufnahme erstellen
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const video = videoElement;
+            
+            // Canvas-Größe an Video anpassen
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Video auf Canvas zeichnen
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Text auf Canvas zeichnen, falls vorhanden
+            if (currentOverlay) {
+                drawTextOnCanvas(context, canvas, currentOverlay);
+            }
+            
+            // Foto zur Galerie hinzufügen
+            addPhotoToGallery(canvas.toDataURL('image/png'));
+        });
+        
+        /**
+         * Zeichnet den Text-Overlay auf den Canvas
+         * @param {CanvasRenderingContext2D} context - Canvas Context
+         * @param {HTMLCanvasElement} canvas - Canvas Element
+         * @param {HTMLElement} overlay - Text-Overlay Element
+         */
+        function drawTextOnCanvas(context, canvas, overlay) {
+            const container = document.querySelector('.video-container');
+            const containerRect = container.getBoundingClientRect();
+            const overlayRect = overlay.getBoundingClientRect();
+            
+            // Text-Position relativ zum Video berechnen
+            const textX = (overlayRect.left - containerRect.left) / containerRect.width * canvas.width;
+            const textY = (overlayRect.top - containerRect.top) / containerRect.height * canvas.height;
+            const textWidth = overlayRect.width / containerRect.width * canvas.width;
+            const textHeight = overlayRect.height / containerRect.height * canvas.height;
+            
+            // Text-Stile anwenden
+            context.font = `${overlay.style.fontSize} ${overlay.style.fontFamily}`;
+            context.fillStyle = overlay.style.backgroundColor;
+            context.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+            context.lineWidth = 2;
+            
+            // Text-Hintergrund zeichnen
+            context.fillRect(textX, textY, textWidth, textHeight);
+            
+            // Text zeichnen
+            context.fillStyle = overlay.style.color;
+            context.textBaseline = 'top';
+            
+            // Text umbrechen
+            const words = overlay.textContent.split(' ');
+            let line = '';
+            const lineHeight = parseInt(overlay.style.fontSize) * 1.2;
+            let y = textY + 10;
+            
+            for(let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = context.measureText(testLine);
+                const testWidth = metrics.width;
+                
+                if (testWidth > textWidth - 20 && n > 0) {
+                    context.fillText(line, textX + 10, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            context.fillText(line, textX + 10, y);
+        }
+        
+        /**
+         * Fügt ein aufgenommenes Foto zur Galerie hinzu
+         * @param {string} dataUrl - Data URL des Fotos
+         */
+        function addPhotoToGallery(dataUrl) {
+            photoCount++;
+            
+            // Container für Foto erstellen
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            
+            // Bild-Element erstellen
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.alt = `Aufgenommenes Foto ${photoCount}`;
+            
+            // Aktionen für Foto erstellen (Download, Löschen)
+            const photoActions = document.createElement('div');
+            photoActions.className = 'photo-actions';
+            
+            // Download-Button
+            const downloadBtn = document.createElement('button');
+            downloadBtn.innerHTML = 'Download';
+            downloadBtn.onclick = function() {
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = `foto-${photoCount}.png`;
+                a.click();
+            };
+            
+            // Löschen-Button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = 'Löschen';
+            deleteBtn.onclick = function() {
+                photoItem.remove();
+            };
+            
+            // Elemente zusammenbauen
+            photoActions.appendChild(downloadBtn);
+            photoActions.appendChild(deleteBtn);
+            photoItem.appendChild(img);
+            photoItem.appendChild(photoActions);
+            
+            // Foto zur Galerie hinzufügen
+            photosContainer.appendChild(photoItem);
+        }
+        
+        // =============================================================================
+        // INITIALISIERUNG
+        // =============================================================================
+        
+        // Standardtext vorschlagen
+        textInput.value = "Mein individueller Text";
+    </script>
 </body>
 </html>

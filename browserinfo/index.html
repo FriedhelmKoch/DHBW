@@ -1,59 +1,1112 @@
+<!--
+ * ============================================================================
+ * Browserinformation Dashboard - v1.0.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter 
+ * gleichen Bedingungen 4.0 International Lizenz.
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, müssen Sie Ihre Beiträge unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content:" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover" />
-
-	<meta name="theme-color" content="#000" />
-  <meta name="format-detection" content="telephone=no" />
-	<meta name="msapplication-tap-highlight" content="no" />
-	<meta name="robots" content="noindex,follow">
-		
-	<!-- Wichtig - Cache ausschalten! -->
-	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-	<meta http-equiv="cache-control" content="no-cache">
-	<meta http-equiv="expires" content="0">
-	<meta http-equiv="pragma" content="no-cache">
-
-	<title>Browser-Info</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client & Server Information Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+<body>
+    <div class="container">
+        <header>
+            <div class="online-status">
+                <span class="status-dot" id="online-status"></span>
+                <span id="online-text">Online</span>
+            </div>
+            <h1>Client & Server Information Dashboard</h1>
+            <p class="subtitle">Details zu Client, Netzwerk und Server</p>
+        </header>
+        
+        <div class="card-grid">
+            <!-- Netzwerkinformationen Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🌐</div>
+                    <h2 class="card-title">Netzwerkinformationen</h2>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Öffentliche IP:</span>
+                    <span class="info-value ip-address" id="public-ip">Wird geladen...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Lokale IP:</span>
+                    <span class="info-value">
+                        <span class="local-ip" id="local-ip">Wird ermittelt...</span>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Server Domain:</span>
+                    <span class="info-value server-info" id="server-domain">Wird geladen...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Server IP:</span>
+                    <span class="info-value server-info" id="server-ip">Wird geladen...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Verbindungstyp:</span>
+                    <span class="info-value" id="connection-type">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Download-Geschw.:</span>
+                    <span class="info-value" id="download-speed">-</span>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-success" id="speed-test-btn">Geschwindigkeit testen</button>
+                    <button class="btn btn-info" id="show-network-db">IndexedDB anzeigen</button>
+                </div>
+                <div class="speed-test-progress">
+                    <div class="speed-test-progress-bar" id="speed-test-progress"></div>
+                </div>
+                <div class="note" id="speed-test-note">
+                    Klicken Sie auf "Geschwindigkeit testen" um die Download-Geschwindigkeit zu messen
+                </div>
+                <div class="db-status" id="network-db-status">
+                    IndexedDB: Wird initialisiert...
+                </div>
+                <div class="security-note">
+                    Client-MAC ist aus Sicherheitsgründen nicht verfügbar
+                </div>
+            </div>
+            
+            <!-- Erweiterte Geräteinformationen Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">💻</div>
+                    <h2 class="card-title">Erweiterte Geräteinformationen</h2>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Betriebssystem:</span>
+                    <span class="info-value" id="os-info">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">OS Version:</span>
+                    <span class="info-value" id="os-version">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Browser:</span>
+                    <span class="info-value" id="browser-info">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Browser Version:</span>
+                    <span class="info-value" id="browser-version">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">JavaScript Engine:</span>
+                    <span class="info-value" id="js-engine">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Zeitzone:</span>
+                    <span class="info-value" id="timezone">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">UTC Offset:</span>
+                    <span class="info-value" id="utc-offset">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Browsersprache:</span>
+                    <span class="info-value" id="browser-language">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">GPS Verfügbarkeit:</span>
+                    <span class="info-value" id="gps-availability">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Push Benachrichtigungen:</span>
+                    <span class="info-value" id="push-status">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Bildschirmgröße:</span>
+                    <span class="info-value" id="screen-resolution">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Fenstergröße:</span>
+                    <span class="info-value" id="window-size">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Viewport-Größe:</span>
+                    <span class="info-value" id="viewport-size">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Farbtiefe:</span>
+                    <span class="info-value" id="color-depth">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Pixel-Verhältnis:</span>
+                    <span class="info-value" id="pixel-ratio">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">CPU-Kerne:</span>
+                    <span class="info-value" id="cpu-cores">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Arbeitsspeicher:</span>
+                    <span class="info-value" id="device-memory">-</span>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-info" id="test-gps">GPS testen</button>
+                    <button class="btn btn-warning" id="test-push">Push testen</button>
+                    <button class="btn btn-secondary" id="show-session-storage">Session Storage anzeigen</button>
+                </div>
+                <div class="db-status" id="session-storage-status">
+                    Session Storage: Wird geladen...
+                </div>
+            </div>
+            
+            <!-- Service Worker Status Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">⚙️</div>
+                    <h2 class="card-title">Service Worker</h2>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Aktueller Status:</span>
+                    <span class="info-value" id="sw-status">Wird geprüft...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Anzahl registriert:</span>
+                    <span class="info-value" id="sw-count">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Offline-Funktion:</span>
+                    <span class="info-value" id="offline-status">-</span>
+                </div>
+                <div class="button-group">
+                    <button class="btn" id="install-sw">Service Worker installieren</button>
+                    <button class="btn btn-secondary" id="update-sw">Update prüfen</button>
+                    <button class="btn btn-warning" id="refresh-sw-list">Liste aktualisieren</button>
+                </div>
+                <div class="sw-list" id="sw-list">
+                    Service Worker werden geladen...
+                </div>
+                <div class="note">
+                    Zeigt alle registrierten Service Worker für diese Domain
+                </div>
+            </div>
+            
+            <!-- Cookie-Analyse Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🍪</div>
+                    <h2 class="card-title">Cookie-Analyse</h2>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Domain-Cookies:</span>
+                    <span class="info-value" id="domain-cookie-count">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Alle Cookies:</span>
+                    <span class="info-value" id="all-cookie-count">0</span>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn" id="show-domain-cookies">Domain Cookies</button>
+                    <button class="btn btn-secondary" id="show-all-cookies">Alle Cookies</button>
+                    <button class="btn btn-success" id="create-demo-cookies">Demo Cookies erstellen</button>
+                    <button class="btn btn-danger" id="clear-cookies">Cookies löschen</button>
+                </div>
+                
+                <div class="cookie-warning">
+                    ⚠️ Hinweis: Alle Cookies anzeigen erfordert erweiterte Berechtigungen und funktioniert nur in bestimmten Browsern mit entsprechenden Erweiterungen.
+                </div>
+                
+                <div class="cookie-list" id="cookie-list">
+                    Keine Cookies geladen
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Local Storage:</span>
+                    <span class="info-value" id="local-storage-size">0 KB</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Session Storage:</span>
+                    <span class="info-value" id="session-storage-size">0 KB</span>
+                </div>
+            </div>
+        </div>
+        
+        <button class="refresh-btn" id="refresh-btn">Daten aktualisieren</button>
 
-<body style="margin: 5;">
+        <!-- Footer -->
+        <footer class="footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
+            <p class="footer-text">
+                <span style="vertical-align: middle;">
+                    Browserinformation Dashboard inkl. Netzwerkstatus & ServiceWorker & Cookie Analyse<br />
+                    Copyright © <script>document.write(new Date().getFullYear())</script> 
+                    Friedhelm Koch | Lizenz: 
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+                    target="_blank" style="color: rgb(109, 182, 255);">CC BY-NC-SA 4.0</a>
+                </span>
+            </p>
+        </footer>
 
-	<h2>Browser-Info</h2>
-	<script language="JavaScript">
-		var browserCodename = navigator.appCodeName;
-		var browserLanguage = navigator.language; 
-		var browserPlatform = navigator.platform;
-		var browserCookies = navigator.cookieEnabled;
-		var browserUserAgent = navigator.userAgent;
-
-		document.writeln("<table cellspacing=2 cellpadding=5 width='400px' bgcolor='#ccffff'>");
-			document.writeln("<tr>"); 
-				document.writeln("<td width='200px'>Browser Codename:</td>");
-				document.writeln("<td width='200px'>" + browserCodename + "</td>");
-			document.writeln("</tr><tr>");
-				document.writeln("<td width='200px'>Browser-Sprache: </td>");
-				document.writeln("<td width='200px'>" + browserLanguage + "</td>");
-			document.writeln("</tr><tr>");
-				document.writeln("<td width='200px'>Browser-Plattform: </td>");
-				document.writeln("<td width='200px'>" + browserPlatform + "</td>");
-			document.writeln("</tr><tr>");
-				document.writeln("<td width='200px'>Cookies erlaubt: </td>");
-				document.writeln("<td width='200px'>" + browserCookies + "</td>");	
-			document.writeln("</tr>");
-		document.writeln("</table>");
-		</script>
+    </div>
 
     <script>
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('./sw.js')
-				.then(reg => console.log('Registrierung erfolgreich. Scope ist ' + reg))
-				.catch(err => console.log('Registrierung fehlgeschlagen mit ' + err));
-		}
-	</script>
+        // Erweiterte Session Storage Funktionen
+        const DeviceStorage = {
+            saveDeviceInfo: function(deviceInfo) {
+                const data = {
+                    ...deviceInfo,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                };
+                sessionStorage.setItem('deviceInfo', JSON.stringify(data));
+                return data;
+            },
 
+            getDeviceInfo: function() {
+                const stored = sessionStorage.getItem('deviceInfo');
+                return stored ? JSON.parse(stored) : null;
+            },
+
+            getAllSessionData: function() {
+                const data = {};
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    try {
+                        data[key] = JSON.parse(sessionStorage.getItem(key));
+                    } catch {
+                        data[key] = sessionStorage.getItem(key);
+                    }
+                }
+                return data;
+            },
+
+            clearDeviceInfo: function() {
+                sessionStorage.removeItem('deviceInfo');
+            }
+        };
+
+        // Erweiterte IndexedDB Funktionen
+        const NetworkDB = {
+            dbName: 'ClientDashboardDB',
+            version: 1,
+
+            open: function() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, this.version);
+
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => resolve(request.result);
+
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains('networkInfo')) {
+                            const store = db.createObjectStore('networkInfo', { keyPath: 'id', autoIncrement: true });
+                            store.createIndex('timestamp', 'timestamp', { unique: false });
+                        }
+                        if (!db.objectStoreNames.contains('speedTests')) {
+                            const store = db.createObjectStore('speedTests', { keyPath: 'id', autoIncrement: true });
+                            store.createIndex('timestamp', 'timestamp', { unique: false });
+                        }
+                    };
+                });
+            },
+
+            saveNetworkInfo: async function(data) {
+                try {
+                    const db = await this.open();
+                    const transaction = db.transaction(['networkInfo'], 'readwrite');
+                    const store = transaction.objectStore('networkInfo');
+                    
+                    const networkData = {
+                        timestamp: new Date().toISOString(),
+                        type: 'network_info',
+                        ...data
+                    };
+
+                    await store.add(networkData);
+                    console.log('Netzwerkinfo gespeichert:', networkData);
+                    return true;
+                } catch (error) {
+                    console.error('Fehler beim Speichern der Netzwerkinfo:', error);
+                    return false;
+                }
+            },
+
+            saveSpeedTest: async function(speedMbps) {
+                try {
+                    const db = await this.open();
+                    const transaction = db.transaction(['speedTests'], 'readwrite');
+                    const store = transaction.objectStore('speedTests');
+                    
+                    const speedData = {
+                        timestamp: new Date().toISOString(),
+                        speed: parseFloat(speedMbps),
+                        type: 'speed_test'
+                    };
+
+                    await store.add(speedData);
+                    console.log('Geschwindigkeitstest gespeichert:', speedData);
+                    return true;
+                } catch (error) {
+                    console.error('Fehler beim Speichern des Geschwindigkeitstests:', error);
+                    return false;
+                }
+            },
+
+            getAllNetworkInfo: async function() {
+                try {
+                    const db = await this.open();
+                    const transaction = db.transaction(['networkInfo'], 'readonly');
+                    const store = transaction.objectStore('networkInfo');
+                    
+                    return new Promise((resolve, reject) => {
+                        const request = store.getAll();
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = () => reject(request.error);
+                    });
+                } catch (error) {
+                    console.error('Fehler beim Abrufen der Netzwerkinfo:', error);
+                    return [];
+                }
+            },
+
+            getAllSpeedTests: async function() {
+                try {
+                    const db = await this.open();
+                    const transaction = db.transaction(['speedTests'], 'readonly');
+                    const store = transaction.objectStore('speedTests');
+                    
+                    return new Promise((resolve, reject) => {
+                        const request = store.getAll();
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = () => reject(request.error);
+                    });
+                } catch (error) {
+                    console.error('Fehler beim Abrufen der Geschwindigkeitstests:', error);
+                    return [];
+                }
+            },
+
+            getStats: async function() {
+                try {
+                    const networkInfo = await this.getAllNetworkInfo();
+                    const speedTests = await this.getAllSpeedTests();
+                    
+                    return {
+                        networkRecords: networkInfo.length,
+                        speedTests: speedTests.length,
+                        totalRecords: networkInfo.length + speedTests.length,
+                        lastNetworkRecord: networkInfo.length > 0 ? networkInfo[networkInfo.length - 1].timestamp : null,
+                        lastSpeedTest: speedTests.length > 0 ? speedTests[speedTests.length - 1].timestamp : null
+                    };
+                } catch (error) {
+                    console.error('Fehler beim Abrufen der Statistiken:', error);
+                    return null;
+                }
+            },
+
+            clearAllData: async function() {
+                try {
+                    const db = await this.open();
+                    const transaction = db.transaction(['networkInfo', 'speedTests'], 'readwrite');
+                    const networkStore = transaction.objectStore('networkInfo');
+                    const speedStore = transaction.objectStore('speedTests');
+                    
+                    await networkStore.clear();
+                    await speedStore.clear();
+                    console.log('Alle Daten gelöscht');
+                    return true;
+                } catch (error) {
+                    console.error('Fehler beim Löschen der Daten:', error);
+                    return false;
+                }
+            }
+        };
+
+        // Server Domain und IP ermitteln
+        async function getServerInfo() {
+            const domain = window.location.hostname || 'Unbekannt';
+            let ip = 'Unbekannt';
+            
+            try {
+                // Versuche die Server-IP über die Domain zu ermitteln
+                if (domain !== 'localhost' && domain !== '127.0.0.1') {
+                    const response = await fetch(`https://dns.google/resolve?name=${domain}`);
+                    const data = await response.json();
+                    if (data.Answer && data.Answer.length > 0) {
+                        ip = data.Answer[0].data;
+                    }
+                } else {
+                    ip = '127.0.0.1 (Localhost)';
+                }
+            } catch (error) {
+                console.log('Konnte Server-IP nicht ermitteln:', error);
+                ip = 'Nicht ermittelbar';
+            }
+            
+            return { domain, ip };
+        }
+
+        // Server-Info anzeigen
+        async function displayServerInfo() {
+            const serverInfo = await getServerInfo();
+            document.getElementById('server-domain').textContent = serverInfo.domain;
+            document.getElementById('server-ip').textContent = serverInfo.ip;
+            
+            // In IndexedDB speichern
+            NetworkDB.saveNetworkInfo({
+                serverDomain: serverInfo.domain,
+                serverIP: serverInfo.ip,
+                type: 'server_info'
+            });
+        }
+
+        // Session Storage anzeigen
+        function showSessionStorage() {
+            const sessionData = DeviceStorage.getAllSessionData();
+            let message = '📁 Session Storage Inhalte:\n\n';
+            
+            if (Object.keys(sessionData).length === 0) {
+                message += 'Keine Daten im Session Storage gefunden.';
+            } else {
+                for (const [key, value] of Object.entries(sessionData)) {
+                    message += `🔑 ${key}:\n`;
+                    if (typeof value === 'object' && value !== null) {
+                        message += JSON.stringify(value, null, 2) + '\n\n';
+                    } else {
+                        message += `${value}\n\n`;
+                    }
+                }
+            }
+            
+            // Größe berechnen
+            const size = JSON.stringify(sessionData).length;
+            message += `\n📊 Gesamtgröße: ${size} Bytes`;
+            
+            alert(message);
+        }
+
+        // IndexedDB Netzwerk-Daten anzeigen
+        async function showNetworkDB() {
+            try {
+                const networkInfo = await NetworkDB.getAllNetworkInfo();
+                const speedTests = await NetworkDB.getAllSpeedTests();
+                const stats = await NetworkDB.getStats();
+                
+                let message = '🗄️ IndexedDB - Netzwerk-Daten:\n\n';
+                
+                message += '🌐 Netzwerkinformationen:\n';
+                if (networkInfo.length === 0) {
+                    message += '  Keine Netzwerk-Daten gespeichert\n';
+                } else {
+                    networkInfo.slice(-10).forEach((record, index) => {
+                        const time = new Date(record.timestamp).toLocaleTimeString();
+                        message += `  ${index + 1}. [${time}] ${record.publicIP || record.serverDomain || 'Lokale IP'}\n`;
+                    });
+                }
+                
+                message += '\n🚀 Geschwindigkeitstests:\n';
+                if (speedTests.length === 0) {
+                    message += '  Keine Geschwindigkeitstests gespeichert\n';
+                } else {
+                    speedTests.slice(-10).forEach((test, index) => {
+                        const time = new Date(test.timestamp).toLocaleTimeString();
+                        message += `  ${index + 1}. [${time}] ${test.speed} Mbps\n`;
+                    });
+                }
+                
+                message += '\n📊 Statistiken:\n';
+                message += `  Netzwerk-Einträge: ${stats.networkRecords}\n`;
+                message += `  Geschwindigkeitstests: ${stats.speedTests}\n`;
+                message += `  Gesamt: ${stats.totalRecords} Einträge\n`;
+                
+                if (stats.lastNetworkRecord) {
+                    message += `  Letzte Aktualisierung: ${new Date(stats.lastNetworkRecord).toLocaleString()}\n`;
+                }
+                
+                alert(message);
+            } catch (error) {
+                alert('Fehler beim Abrufen der IndexedDB: ' + error.message);
+            }
+        }
+
+        // Datenbank-Status aktualisieren
+        async function updateNetworkDBStatus() {
+            try {
+                const stats = await NetworkDB.getStats();
+                if (stats) {
+                    document.getElementById('network-db-status').textContent = 
+                        `IndexedDB: ${stats.totalRecords} Einträge (${stats.networkRecords} Netzwerk, ${stats.speedTests} Speed)`;
+                    document.getElementById('network-db-status').style.color = '#4bb543';
+                }
+            } catch (error) {
+                document.getElementById('network-db-status').textContent = 'IndexedDB: Fehler';
+                document.getElementById('network-db-status').style.color = '#dc3545';
+            }
+        }
+
+        // Session Storage Status aktualisieren
+        function updateSessionStorageStatus() {
+            const deviceInfo = DeviceStorage.getDeviceInfo();
+            const sessionData = DeviceStorage.getAllSessionData();
+            const entryCount = Object.keys(sessionData).length;
+            
+            if (deviceInfo) {
+                const time = new Date(deviceInfo.timestamp).toLocaleTimeString();
+                document.getElementById('session-storage-status').textContent = 
+                    `Session Storage: ${entryCount} Einträge (zuletzt: ${time})`;
+                document.getElementById('session-storage-status').style.color = '#4bb543';
+            } else {
+                document.getElementById('session-storage-status').textContent = 
+                    `Session Storage: ${entryCount} Einträge`;
+                document.getElementById('session-storage-status').style.color = '#6c757d';
+            }
+        }
+
+        // UTC Offset berechnen
+        function getUTCOffset() {
+            const date = new Date();
+            const offset = -date.getTimezoneOffset();
+            const sign = offset >= 0 ? '+' : '-';
+            const hours = Math.floor(Math.abs(offset) / 60);
+            const minutes = Math.abs(offset) % 60;
+            
+            return `UTC${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        // Push Benachrichtigungs-Status prüfen
+        async function checkPushNotificationStatus() {
+            if (!('Notification' in window)) return 'Nicht unterstützt';
+            if (!('serviceWorker' in navigator)) return 'Service Worker benötigt';
+            if (!('PushManager' in window)) return 'Push API nicht unterstützt';
+            
+            try {
+                const permission = await Notification.requestPermission();
+                switch(permission) {
+                    case 'granted': return 'Aktiviert';
+                    case 'denied': return 'Abgelehnt';
+                    case 'default': return 'Nicht angefragt';
+                    default: return 'Unbekannt';
+                }
+            } catch (error) {
+                return 'Fehler beim Prüfen';
+            }
+        }
+
+        // OS Version erkennen
+        function getOSVersion() {
+            const userAgent = navigator.userAgent;
+            
+            if (userAgent.indexOf("Windows NT 10.0") != -1) return "Windows 10/11";
+            if (userAgent.indexOf("Windows NT 6.3") != -1) return "Windows 8.1";
+            if (userAgent.indexOf("Windows NT 6.2") != -1) return "Windows 8";
+            if (userAgent.indexOf("Windows NT 6.1") != -1) return "Windows 7";
+            if (userAgent.indexOf("Mac OS X") != -1) {
+                const version = userAgent.match(/Mac OS X ([0-9_]+)/);
+                return version ? "macOS " + version[1].replace(/_/g, '.') : "macOS";
+            }
+            if (userAgent.indexOf("Linux") != -1) return "Linux";
+            if (userAgent.indexOf("Android") != -1) {
+                const version = userAgent.match(/Android ([0-9.]+)/);
+                return version ? "Android " + version[1] : "Android";
+            }
+            if (userAgent.indexOf("like Mac") != -1) {
+                const version = userAgent.match(/OS ([0-9_]+)/);
+                return version ? "iOS " + version[1].replace(/_/g, '.') : "iOS";
+            }
+            
+            return "Unbekannt";
+        }
+
+        // Browser Version
+        function getBrowserVersion() {
+            const userAgent = navigator.userAgent;
+            let temp;
+            
+            if ((temp = userAgent.match(/Chrome\/([0-9.]+)/)) !== null) return temp[1];
+            if ((temp = userAgent.match(/Firefox\/([0-9.]+)/)) !== null) return temp[1];
+            if ((temp = userAgent.match(/Version\/([0-9.]+).*Safari/)) !== null) return temp[1];
+            if ((temp = userAgent.match(/Edg\/([0-9.]+)/)) !== null) return temp[1];
+            if ((temp = userAgent.match(/OPR\/([0-9.]+)/)) !== null) return temp[1];
+            
+            return navigator.appVersion;
+        }
+
+        // JavaScript Engine
+        function getJSEngine() {
+            const userAgent = navigator.userAgent;
+            if (userAgent.indexOf("Chrome") !== -1) return "V8";
+            if (userAgent.indexOf("Firefox") !== -1) return "SpiderMonkey";
+            if (userAgent.indexOf("Safari") !== -1) return "JavaScriptCore";
+            if (userAgent.indexOf("Edge") !== -1) return "Chakra/V8";
+            return "Unbekannt";
+        }
+
+        // Browser Info
+        function getBrowserInfo() {
+            const userAgent = navigator.userAgent;
+            if (userAgent.indexOf("Chrome") !== -1 && userAgent.indexOf("Edg") === -1) return "Chrome";
+            if (userAgent.indexOf("Safari") !== -1 && userAgent.indexOf("Chrome") === -1) return "Safari";
+            if (userAgent.indexOf("Firefox") !== -1) return "Firefox";
+            if (userAgent.indexOf("Edg") !== -1) return "Edge";
+            if (userAgent.indexOf("OPR") !== -1) return "Opera";
+            if (userAgent.indexOf("Trident") !== -1) return "Internet Explorer";
+            return "Unbekannt";
+        }
+
+        // OS Info
+        function getOSInfo() {
+            const userAgent = navigator.userAgent;
+            if (userAgent.indexOf("Win") !== -1) return "Windows";
+            if (userAgent.indexOf("Mac") !== -1) return "MacOS";
+            if (userAgent.indexOf("Linux") !== -1) return "Linux";
+            if (userAgent.indexOf("Android") !== -1) return "Android";
+            if (userAgent.indexOf("like Mac") !== -1) return "iOS";
+            return "Unbekannt";
+        }
+
+        // GPS Verfügbarkeit prüfen
+        function checkGPSAvailability() {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    resolve('Nicht unterstützt');
+                    return;
+                }
+                
+                navigator.permissions?.query({ name: 'geolocation' })
+                    .then(permissionStatus => {
+                        if (permissionStatus.state === 'granted') resolve('Berechtigt');
+                        else if (permissionStatus.state === 'prompt') resolve('Anfrage möglich');
+                        else resolve('Abgelehnt');
+                    })
+                    .catch(() => resolve('Eingeschränkt'));
+            });
+        }
+
+        // GPS testen
+        function testGPS() {
+            if (!navigator.geolocation) {
+                alert('GPS wird nicht unterstützt.');
+                return;
+            }
+            
+            document.getElementById('gps-availability').innerHTML = 'Wird geprüft...';
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    document.getElementById('gps-availability').innerHTML = 
+                        `Verfügbar <span class="status-badge status-available">Aktiv</span>`;
+                    alert(`Position: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+                },
+                (error) => {
+                    document.getElementById('gps-availability').innerHTML = 
+                        `Fehler <span class="status-badge status-unavailable">Fehler</span>`;
+                    alert('GPS Fehler: ' + error.message);
+                }
+            );
+        }
+
+        // Push testen
+        async function testPushNotification() {
+            if (!('Notification' in window)) {
+                alert('Push wird nicht unterstützt.');
+                return;
+            }
+            
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    new Notification('Test', { 
+                        body: 'Push-Benachrichtigung funktioniert!' 
+                    });
+                    updatePushStatus();
+                }
+            } catch (error) {
+                alert('Push Fehler: ' + error.message);
+            }
+        }
+
+        // Push Status aktualisieren
+        async function updatePushStatus() {
+            const status = await checkPushNotificationStatus();
+            const element = document.getElementById('push-status');
+            const badgeClass = status === 'Aktiviert' ? 'status-available' : 
+                             status === 'Abgelehnt' ? 'status-unavailable' : 'status-unknown';
+            element.innerHTML = `${status} <span class="status-badge ${badgeClass}">${status}</span>`;
+        }
+
+        // Service Worker Funktionen
+        async function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.register('./sw.js');
+                    updateSWStatus('Aktiv', 'success');
+                    refreshServiceWorkerList();
+                } catch (error) {
+                    updateSWStatus('Nicht verfügbar', 'error');
+                }
+            } else {
+                updateSWStatus('Nicht unterstützt', 'error');
+            }
+        }
+
+        function updateSWStatus(status, type) {
+            const element = document.getElementById('sw-status');
+            element.textContent = status;
+            element.style.color = type === 'success' ? '#4bb543' : '#dc3545';
+        }
+
+        async function getAllServiceWorkers() {
+            if (!('serviceWorker' in navigator)) return [];
+            try {
+                return await navigator.serviceWorker.getRegistrations();
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function refreshServiceWorkerList() {
+            const workers = await getAllServiceWorkers();
+            document.getElementById('sw-count').textContent = workers.length;
+            
+            const list = document.getElementById('sw-list');
+            if (workers.length === 0) {
+                list.innerHTML = '<div class="sw-item inactive">Keine Service Worker</div>';
+                return;
+            }
+            
+            list.innerHTML = workers.map(sw => {
+                const script = sw.active?.scriptURL || 'Unbekannt';
+                const fileName = script.split('/').pop();
+                return `<div class="sw-item active"><strong>${fileName}</strong><br>${script}</div>`;
+            }).join('');
+        }
+
+        // IP-Adressen Funktionen
+        async function fetchPublicIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                document.getElementById('public-ip').textContent = data.ip;
+                
+                // In IndexedDB speichern
+                await NetworkDB.saveNetworkInfo({ 
+                    publicIP: data.ip, 
+                    type: 'public_ip' 
+                });
+                updateNetworkDBStatus();
+            } catch (error) {
+                document.getElementById('public-ip').textContent = 'Nicht verfügbar';
+            }
+        }
+
+        async function getLocalIP() {
+            return new Promise((resolve) => {
+                const pc = new RTCPeerConnection({ iceServers: [] });
+                pc.createDataChannel('');
+                pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                
+                pc.onicecandidate = (e) => {
+                    if (!e.candidate) {
+                        resolve('Nicht gefunden');
+                        return;
+                    }
+                    const candidate = e.candidate.candidate;
+                    const match = candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+                    if (match && (match[1].startsWith('192.168.') || match[1].startsWith('10.'))) {
+                        pc.close();
+                        resolve(match[1]);
+                    }
+                };
+                
+                setTimeout(() => {
+                    pc.close();
+                    resolve('Timeout');
+                }, 3000);
+            });
+        }
+
+        async function displayLocalIP() {
+            const ip = await getLocalIP();
+            document.getElementById('local-ip').textContent = ip;
+            document.getElementById('local-ip').style.color = ip.includes('Nicht') ? '#dc3545' : '#4cc9f0';
+            
+            // In IndexedDB speichern
+            await NetworkDB.saveNetworkInfo({ 
+                localIP: ip, 
+                type: 'local_ip' 
+            });
+            updateNetworkDBStatus();
+        }
+
+        // Geschwindigkeitstest
+        async function measureDownloadSpeed() {
+            const testUrl = 'https://httpbin.org/bytes/102400'; // 100KB
+            const startTime = performance.now();
+            
+            try {
+                const response = await fetch(testUrl);
+                await response.blob();
+                const endTime = performance.now();
+                
+                const duration = (endTime - startTime) / 1000;
+                const speedMbps = (102400 * 8 / duration / 1000000).toFixed(2);
+                
+                document.getElementById('download-speed').textContent = speedMbps + ' Mbps';
+                document.getElementById('speed-test-progress').style.width = '100%';
+                document.getElementById('speed-test-note').textContent = 'Test abgeschlossen';
+                
+                // In IndexedDB speichern
+                await NetworkDB.saveSpeedTest(speedMbps);
+                updateNetworkDBStatus();
+                
+                return speedMbps;
+            } catch (error) {
+                document.getElementById('download-speed').textContent = 'Fehler';
+                document.getElementById('speed-test-note').textContent = 'Test fehlgeschlagen';
+                return null;
+            }
+        }
+
+        // Geräteinformationen sammeln
+        async function collectExtendedDeviceInfo() {
+            // Basis-Informationen
+            document.getElementById('os-info').textContent = getOSInfo();
+            document.getElementById('os-version').textContent = getOSVersion();
+            document.getElementById('browser-info').textContent = getBrowserInfo();
+            document.getElementById('browser-version').textContent = getBrowserVersion();
+            document.getElementById('js-engine').textContent = getJSEngine();
+            document.getElementById('timezone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.getElementById('utc-offset').textContent = getUTCOffset();
+            document.getElementById('browser-language').textContent = navigator.language;
+            
+            // Display
+            document.getElementById('screen-resolution').textContent = 
+                `${screen.width} × ${screen.height}`;
+            document.getElementById('window-size').textContent = 
+                `${window.outerWidth} × ${window.outerHeight}`;
+            document.getElementById('viewport-size').textContent = 
+                `${window.innerWidth} × ${window.innerHeight}`;
+            document.getElementById('color-depth').textContent = screen.colorDepth + ' Bit';
+            document.getElementById('pixel-ratio').textContent = window.devicePixelRatio;
+            
+            // Hardware
+            document.getElementById('cpu-cores').textContent = navigator.hardwareConcurrency || 'Unbekannt';
+            document.getElementById('device-memory').textContent = navigator.deviceMemory ? navigator.deviceMemory + ' GB' : 'Unbekannt';
+            
+            // Netzwerk
+            if (navigator.connection) {
+                document.getElementById('connection-type').textContent = navigator.connection.effectiveType || 'Unbekannt';
+            }
+            
+            // GPS & Push Status
+            checkGPSAvailability().then(status => {
+                const badgeClass = status === 'Berechtigt' ? 'status-available' : 
+                                status === 'Nicht unterstützt' ? 'status-unavailable' : 'status-unknown';
+                document.getElementById('gps-availability').innerHTML = 
+                    `${status} <span class="status-badge ${badgeClass}">${status}</span>`;
+            });
+            
+            await updatePushStatus();
+            
+            // In Session Storage speichern
+            const deviceInfo = {
+                os: getOSInfo(),
+                osVersion: getOSVersion(),
+                browser: getBrowserInfo(),
+                browserVersion: getBrowserVersion(),
+                jsEngine: getJSEngine(),
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                utcOffset: getUTCOffset(),
+                language: navigator.language,
+                screenResolution: `${screen.width} × ${screen.height}`,
+                windowSize: `${window.outerWidth} × ${window.outerHeight}`,
+                viewportSize: `${window.innerWidth} × ${window.innerHeight}`,
+                colorDepth: screen.colorDepth + ' Bit',
+                pixelRatio: window.devicePixelRatio,
+                cpuCores: navigator.hardwareConcurrency || 'Unbekannt',
+                deviceMemory: navigator.deviceMemory ? navigator.deviceMemory + ' GB' : 'Unbekannt',
+                gpsStatus: document.getElementById('gps-availability').textContent,
+                pushStatus: document.getElementById('push-status').textContent
+            };
+            
+            DeviceStorage.saveDeviceInfo(deviceInfo);
+            updateSessionStorageStatus();
+        }
+
+        // Cookie-Funktionen
+        function analyzeCookies() {
+            const cookies = document.cookie;
+            const cookieArray = cookies ? cookies.split(';') : [];
+            document.getElementById('domain-cookie-count').textContent = cookieArray.length;
+            document.getElementById('all-cookie-count').textContent = cookieArray.length;
+            
+            // Storage Größen
+            let localStorageSize = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                localStorageSize += key.length + localStorage.getItem(key).length;
+            }
+            document.getElementById('local-storage-size').textContent = Math.round(localStorageSize / 1024) + ' KB';
+            
+            let sessionStorageSize = 0;
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                sessionStorageSize += key.length + sessionStorage.getItem(key).length;
+            }
+            document.getElementById('session-storage-size').textContent = Math.round(sessionStorageSize / 1024) + ' KB';
+            
+            // Cookies anzeigen
+            displayCookies(cookieArray, 'Domain-Cookies');
+        }
+
+        function displayCookies(cookies, title) {
+            const list = document.getElementById('cookie-list');
+            if (cookies.length === 0) {
+                list.innerHTML = `<div class="storage-item">Keine ${title}</div>`;
+                return;
+            }
+            list.innerHTML = cookies.map(cookie => 
+                `<div class="storage-item">${cookie.trim()}</div>`
+            ).join('');
+        }
+
+        function createDemoCookies() {
+            const expires = new Date(Date.now() + 10 * 60 * 1000).toUTCString();
+            document.cookie = `demo_user=testuser123; expires=${expires}; path=/`;
+            document.cookie = `demo_session=session_${Date.now()}; expires=${expires}; path=/`;
+            localStorage.setItem('demo_settings', JSON.stringify({ theme: 'dark', lang: 'de' }));
+            alert('Demo-Cookies erstellt!');
+            analyzeCookies();
+        }
+
+        function clearCookies() {
+            if (confirm('Wirklich alle Cookies löschen?')) {
+                document.cookie.split(';').forEach(cookie => {
+                    const name = cookie.split('=')[0].trim();
+                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+                });
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('Cookies gelöscht!');
+                analyzeCookies();
+            }
+        }
+
+        // Online/Offline Status
+        function updateOnlineStatus() {
+            const online = navigator.onLine;
+            const dot = document.getElementById('online-status');
+            const text = document.getElementById('online-text');
+            
+            if (online) {
+                dot.className = 'status-dot';
+                text.textContent = 'Online';
+                document.getElementById('offline-status').textContent = 'Verfügbar';
+            } else {
+                dot.className = 'status-dot offline';
+                text.textContent = 'Offline';
+                document.getElementById('offline-status').textContent = 'Aktiv';
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Service Worker
+            registerServiceWorker();
+            
+            // Online/Offline
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
+            
+            // Service Worker Buttons
+            document.getElementById('install-sw').addEventListener('click', registerServiceWorker);
+            document.getElementById('update-sw').addEventListener('click', () => {
+                navigator.serviceWorker?.ready.then(reg => reg.update());
+                alert('Update geprüft');
+            });
+            document.getElementById('refresh-sw-list').addEventListener('click', refreshServiceWorkerList);
+            
+            // Geschwindigkeitstest
+            document.getElementById('speed-test-btn').addEventListener('click', measureDownloadSpeed);
+            
+            // Cookies
+            document.getElementById('show-domain-cookies').addEventListener('click', () => {
+                const cookies = document.cookie.split(';');
+                displayCookies(cookies, 'Domain-Cookies');
+            });
+            document.getElementById('show-all-cookies').addEventListener('click', () => {
+                const cookies = document.cookie.split(';');
+                displayCookies(cookies, 'Alle Cookies');
+            });
+            document.getElementById('create-demo-cookies').addEventListener('click', createDemoCookies);
+            document.getElementById('clear-cookies').addEventListener('click', clearCookies);
+            
+            // GPS & Push
+            document.getElementById('test-gps').addEventListener('click', testGPS);
+            document.getElementById('test-push').addEventListener('click', testPushNotification);
+            
+            // Session Storage und IndexedDB Buttons
+            document.getElementById('show-session-storage').addEventListener('click', showSessionStorage);
+            document.getElementById('show-network-db').addEventListener('click', showNetworkDB);
+            
+            // Refresh
+            document.getElementById('refresh-btn').addEventListener('click', function() {
+                fetchPublicIP();
+                displayLocalIP();
+                displayServerInfo();
+                collectExtendedDeviceInfo();
+                analyzeCookies();
+                refreshServiceWorkerList();
+                updateNetworkDBStatus();
+                updateSessionStorageStatus();
+                
+                this.textContent = "Aktualisiert!";
+                setTimeout(() => this.textContent = "Daten aktualisieren", 2000);
+            });
+            
+            // Initialisierung
+            fetchPublicIP();
+            displayLocalIP();
+            displayServerInfo();
+            collectExtendedDeviceInfo();
+            analyzeCookies();
+            updateNetworkDBStatus();
+            updateSessionStorageStatus();
+        });
+
+        // Window Resize
+        window.addEventListener('resize', function() {
+            document.getElementById('viewport-size').textContent = 
+                `${window.innerWidth} × ${window.innerHeight}`;
+            document.getElementById('window-size').textContent = 
+                `${window.outerWidth} × ${window.outerHeight}`;
+        });
+    </script>
 </body>
 </html>

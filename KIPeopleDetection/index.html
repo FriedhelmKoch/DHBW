@@ -1,4 +1,34 @@
-<!DOCTYPE html>
+<!--
+ * ============================================================================
+ * KI Personenanalyse & -zähler - v1.0.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter 
+ * gleichen Bedingungen 4.0 International Lizenz.
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, müssen Sie Ihre Beiträge unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
+ 
+ <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +42,7 @@
         <header class="app-header">
             <div class="header-content">
                 <i class="fas fa-users icon-large"></i>
-                <h1>KI Personenzähler</h1>
+                <h1>KI Personenanalyse & -zähler</h1>
                 <p class="subtitle">Echtzeit-Objekterkennung mit TensorFlow.js</p>
             </div>
         </header>
@@ -146,15 +176,23 @@
             </div>
         </main>
 
-        <footer class="app-footer">
-            <p>Personenzähler © 2024 | TensorFlow.js & COCO-SSD Model | 
-                <span id="modelInfo">Model Version: 2.2.2 | 
-                    <button class="btn-storage" id="manageStorage">
-                        <i class="fas fa-cog"></i> Foto-Ablage Einsehen
-                    </button>
+        <footer class="app-footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
+            <p class="footer-text">
+                <span style="vertical-align: middle;">
+                    KI Personenanalyse & -zähler | TensorFlow.js & COCO-SSD | 
+                        <span id="modelInfo">Model Version: 2.2.2 |
+                            <button class="btn-storage" id="manageStorage">
+                                <i class="fas fa-cog"></i> LocalStorage Ablage Ansehen
+                            </button>
+                        </span>
+                    Copyright © <script>document.write(new Date().getFullYear())</script> 
+                    Friedhelm Koch | Lizenz: 
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+                    target="_blank" style="color: rgb(2, 103, 204);">CC BY-NC-SA 4.0</a>
                 </span>
             </p>
         </footer>
+
     </div>
 
     <!-- Modal für Bild-Details -->
