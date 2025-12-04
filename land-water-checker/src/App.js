@@ -24,7 +24,7 @@ class App extends Component {
       { name: "Ostsee (westlich)", lat: 54.5000, lon: 11.5000, zoom: 8 },
       { name: "Ostsee (zentral)", lat: 55.8000, lon: 14.5000, zoom: 8 },
       { name: "Ostsee (nördlich)", lat: 57.8000, lon: 17.5000, zoom: 7 },
-      { name: "Rhein (Köln)", lat: 50.9355, lon: 6.9611, zoom: 12 },
+      { name: "Rhein (Köln)", lat: 50.93552, lon: 6.96620, zoom: 12 },
       { name: "Berlin Mitte", lat: 52.5200, lon: 13.4050, zoom: 12 },
       { name: "Berlin Brandenburger Tor", lat: 52.5163, lon: 13.3777, zoom: 15 },
       { name: "Atlantik (offen)", lat: 47.0000, lon: -20.0000, zoom: 5 },
@@ -178,11 +178,14 @@ class App extends Component {
       mapZoom 
     } = this.state;
 
+    // Das aktuelle Jahr abrufen
+    const currentYear = new Date().getFullYear();
+
     return (
       <div className="App">
         <header className="App-header">
-          <h1>🌊 Land/Wasser Erkennung 🗺️</h1>
-          <p>Ermittle ob sich eine Position auf Land oder Wasser befindet</p>
+          <h1>Land/Wasser Erkennung</h1>
+          <p>Ermittle ob sich eine Geo-Position auf Land oder Wasser befindet</p>
         </header>
 
         <div className="container">
@@ -304,6 +307,23 @@ class App extends Component {
               </ul>
             </div>
           </section>
+
+          <footer style={{padding: '15px', textalign: 'center', fontsize: '0.85em', color: 'rgba(189, 222, 255, 1)'}}>
+            <p class="footer-text">
+                <span style={{verticalalign: 'middle'}}>
+                    Land oder Wasser Erkennung | Unter Verwendung von OpenStreetMap & Leaflet<br /> 
+                    Copyright © {currentYear} Friedhelm Koch | Lizenz:&nbsp; 
+                    <a 
+                      href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+                      target="_blank"
+                      rel="noopener noreferrer" // WICHTIG: Sollte bei target="_blank" verwendet werden!
+                      style={{ color: 'rgba(233, 242, 250, 1)' }}
+                    >
+                      CC BY-NC-SA 4.0
+                    </a>
+                </span>
+            </p>
+          </footer>
 
         </div>
       </div>

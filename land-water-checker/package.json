@@ -1,6 +1,7 @@
 {
   "name": "land-water-checker",
   "version": "0.1.0",
+  "homepage": "/demo/land-water-check",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
