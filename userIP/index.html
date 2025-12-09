@@ -1,26 +1,261 @@
+<!--
+ * ============================================================================
+ * IP Detection Plus - Echtzeit-Informationen zu IP-Adresse, Provider und Standort - v1.0.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter 
+ * gleichen Bedingungen 4.0 International Lizenz.
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, müssen Sie Ihre Beiträge unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de" data-theme="auto">
 <head>
-	<meta charset="UTF-8">
-	<title>IP-Adresse</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 IP Detection Plus</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
 </head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <div class="theme-toggle">
+            <button class="theme-btn" id="themeToggle" aria-label="Theme wechseln">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">🔍</div>
+            <h1 class="title">IP Detection Plus</h1>
+            <p class="tagline">Echtzeit-Informationen zu IP-Adresse, Provider und Standort</p>
+        </header>
+        
+        <!-- IP Display -->
+        <div class="ip-display-container">
+            <div class="ip-display">
+                <div class="ip-label">Deine öffentliche IP-Adresse</div>
+                <div class="ip-address" id="ipAddress">
+                    <span class="loading"></span> Wird geladen...
+                </div>
+                <div class="ip-badges" id="ipBadges">
+                    <!-- Badges werden dynamisch eingefügt -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- GDPR Notice -->
+        <div class="gdpr-notice" id="privacy">
+            <strong><i class="fas fa-shield-alt"></i> Datenschutzhinweis (GDPR/DSGVO)</strong>
+            <p>Persönliche Admin-C Informationen sind aufgrund der Datenschutz-Grundverordnung nicht öffentlich verfügbar. Die angezeigten Informationen beziehen sich ausschließlich auf die organisatorische Zuordnung der IP-Adresse.<br />Im WLAN/LAN wird die IP-Adresse des DSL-Routers angezeigt und die IP-Adresse des jeweiligen Devices aus Security-Gründen maskiert.</p>
+        </div>
+        
+        <!-- Cards Grid -->
+        <div class="cards-grid">
+            <!-- Provider Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon provider">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Provider</h3>
+                        <p class="card-subtitle">Internetanbieter & Netzwerk</p>
+                    </div>
+                </div>
+                <div id="providerContent">
+                    <div class="info-item">
+                        <span class="info-label">Name</span>
+                        <span class="info-value" id="providerName">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">AS-Nummer</span>
+                        <span class="info-value" id="providerASN">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Typ</span>
+                        <span class="info-value" id="providerType">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Land</span>
+                        <span class="info-value" id="providerCountry">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Quelle</span>
+                        <span class="info-value" id="providerSource">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Geolocation Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon geo">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Standort</h3>
+                        <p class="card-subtitle">Geografische Informationen</p>
+                    </div>
+                </div>
+                <div id="geoContent">
+                    <div class="info-item">
+                        <span class="info-label">Land</span>
+                        <span class="info-value" id="geoCountry">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Region</span>
+                        <span class="info-value" id="geoRegion">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Stadt</span>
+                        <span class="info-value" id="geoCity">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">ISP</span>
+                        <span class="info-value" id="geoISP">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Organisation</span>
+                        <span class="info-value" id="geoOrg">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Network Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon network">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Netzwerk</h3>
+                        <p class="card-subtitle">Technische Details</p>
+                    </div>
+                </div>
+                <div id="networkContent">
+                    <div class="info-item">
+                        <span class="info-label">IP-Typ</span>
+                        <span class="info-value" id="ipType">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Protokoll</span>
+                        <span class="info-value" id="protocol">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Privat</span>
+                        <span class="info-value" id="isPrivate">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Proxy</span>
+                        <span class="info-value" id="proxyDetected">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Zeitzone</span>
+                        <span class="info-value" id="timezone">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- API Info Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon api">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">API Informationen</h3>
+                        <p class="card-subtitle">Technische Details</p>
+                    </div>
+                </div>
+                <div id="apiContent">
+                    <div class="info-item">
+                        <span class="info-label">API Version</span>
+                        <span class="info-value" id="apiVersion">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Zeitstempel</span>
+                        <span class="info-value" id="timestamp">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Methode</span>
+                        <span class="info-value" id="method">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Host</span>
+                        <span class="info-value" id="host">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i> Aktualisieren
+            </button>
+            <button class="btn btn-secondary" id="copyIpBtn">
+                <i class="fas fa-copy"></i> IP kopieren
+            </button>
+            <a href="api.php?details=true" target="_blank" class="btn btn-secondary">
+                <i class="fas fa-external-link-alt"></i> API anzeigen
+            </a>
+            <button class="btn btn-secondary" id="exportBtn">
+                <i class="fas fa-download"></i> Exportieren
+            </button>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="api.php" target="_blank" class="footer-link">
+                    <i class="fas fa-code"></i> API
+                </a>
+                <a href="api.php?details=true" target="_blank" class="footer-link">
+                    <i class="fas fa-info-circle"></i> Details
+                </a>
+                <a href="#privacy" class="footer-link">
+                    <i class="fas fa-shield-alt"></i> Datenschutz
+                </a>
+            </div>
+            <p class="mt-2" style="font-size: 0.875rem; color: var(--text-muted);">
+                <p style="vertical-align: middle;">
+										IP Detection Plus | Copyright © <script>document.write(new Date().getFullYear())</script> 
+										Friedhelm Koch | Lizenz: 
+										<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+										target="_blank" style="color: rgb(109, 182, 255);">CC BY-NC-SA 4.0</a><br /><br />
+								</p>
+            </p>
+        </footer>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
 
-<body style="margin: 5;">
-
-	<h2><IP-Adresse></h2>
-	<script language="JavaScript">
-
-		// IP-Adresse über AJAX abfragen
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) { 
-				document.writeln("IP-Adresse: " + this.responseText); 
-				console.log('ÌP-Adresse: ' + this.responseText); } 
-    };
-    xhttp.open("GET", "getIP.php", true);
-    xhttp.send();
-
-	</script>
+		<!-- Externe JavaScript Datei -->
+    <script src="app.js"></script>
 
 </body>
 </html>

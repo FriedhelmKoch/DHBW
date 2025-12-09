@@ -1,0 +1,506 @@
+<!--
+ * ============================================================================
+ * HTML Anker/Hashtag Demo - v1.0.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter 
+ * gleichen Bedingungen 4.0 International Lizenz.
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, müssen Sie Ihre Beiträge unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
+ <!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>HTML Anker Demo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Reset und Basis-Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8fafc;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Container für bessere Lesbarkeit */
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        /* Typographie */
+        h1 {
+            font-size: 2.2rem;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            color: #334155;
+            margin: 2rem 0 1rem;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            color: #475569;
+            margin: 2rem 0 1rem;
+            padding: 1rem 1.5rem;
+            background: #f1f5f9;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        h3:target {
+            background: #dbeafe;
+            border-left-color: #1d4ed8;
+            animation: highlight 2s ease;
+        }
+        
+        @keyframes highlight {
+            0% { background: #dbeafe; }
+            100% { background: #f1f5f9; }
+        }
+        
+        h4 {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin: 1.5rem 0 1rem;
+        }
+        
+        /* Text-Styles */
+        p {
+            margin-bottom: 1.2rem;
+            color: #475569;
+        }
+        
+        .author-highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+        .author-highlight b {
+            color: white;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Code-Block */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .code-block b {
+            color: #60a5fa;
+        }
+        
+        /* Navigation Links */
+        .nav-section {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .nav-list {
+            list-style: none;
+        }
+        
+        .nav-list li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .nav-list a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            color: #475569;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-list a:hover {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+        
+        .nav-list a::before {
+            content: "#";
+            margin-right: 8px;
+            font-weight: bold;
+            color: inherit;
+        }
+        
+        /* EULA Content */
+        .eula-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Links */
+        a:not(.nav-list a) {
+            color: #3b82f6;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        a:not(.nav-list a):hover {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        
+        /* External Links */
+        .external-links {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            h3 {
+                font-size: 1.2rem;
+                padding: 0.75rem 1rem;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .author-highlight {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Visueller Scroll-Indikator */
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #3b82f6;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+            z-index: 100;
+        }
+        
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .scroll-top:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HTML Anker/Hashtag Demo</h1>
+        
+        <div class="author-highlight">
+            <b>Chris Messina (7. Jan 1981</b>
+            <i>(Produkt-Entwickler für Google und Uber, Erfinder des "Hashtags", so wie wir sie heute in Social Media Plattformen kennen.)</i><br><br>
+            Primarily because hashtags are not patentable. The idea is not new; there is 'prior art' dating back more than 20 years. Hashtags are just a modern implementation of an old idea.
+        </div>
+
+        <p>
+            Das <i>a-Tag</i> hat seinen Namen von anchor (deutsch: Seiten-Anker). Ursprünglich war ein a-Tag mit einem name-Attribut ein Sprung-Ziel, -Marke eines Verweises oder Hashtags, dies ist jedoch mittlerweile obsolet. Heute kann jedes beliebige HTML-Tag mit einem id-Attribut als Verweisziel fungieren.
+        </p>
+
+        <div class="code-block">
+            <b>Hyperlink:</b><br>
+            &lt;a href="#law"&gt;CHOICE OF LAW&lt;/a&gt;<br><br>
+            <b>oder URL-Fragment:</b><br>
+            https://dhbw.koch.team/demo/hashtags/#law<br><br>
+            <b>mit Sprung auf:</b><br>
+            &lt;a name="law"&gt;&lt;/a&gt;<br>
+            <b>oder:</b><br>
+            &lt;h3 id="law"&gt;CHOICE OF LAW&lt;/h3&gt;
+        </div>
+
+        <div class="nav-section">
+            <h4>Navigation via Anker/Hashtag</h4>
+            <div class="nav-grid">
+                <div>
+                    <b>Anwahl über Anker/Hashtag:</b>
+                    <ul class="nav-list">
+                        <li><a href="#retail">RETAIL LICENSE TERMS</a></li>
+                        <li><a href="#terms">ADDITIONAL TERMS</a></li>
+                        <li><a href="#law">CHOICE OF LAW</a></li>
+                        <li><a href="#arbitration">BINDING ARBITRATION</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <b>Anwahl über ID:</b>
+                    <ul class="nav-list">
+                        <li><a href="#activation">ACTIVATION</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="external-links">
+            <p><b>Weitere Informationen:</b></p>
+            <p>
+                <a href="https://developer.mozilla.org/de/docs/Web/HTML/Element/a" target="_blank">
+                    ↗ MDN Web Docs: Das Anchor-Element
+                </a><br>
+                <a href="https://en.wikipedia.org/wiki/Chris_Messina_(open-source_advocate)" target="_blank">
+                    ↗ Wikipedia: Chris Messina
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <div class="container">
+        <hr>
+        <h2>Microsoft EULA-Beispiel für Anker/Hashtags</h2>
+        
+        <h1>MICROSOFT SOFTWARE LICENSE AGREEMENT</h1>
+        
+        <div class="eula-section">
+            <h2>MICROSOFT OFFICE 2013 DESKTOP APPLICATION SOFTWARE</h2>
+            
+            <p>
+                To determine which one of the two separate sets of license terms below apply to you, check the license 
+                designation. This is printed either on your product key, or might be shown on your Certificate of 
+                Authenticity, or on the download page if you obtained the software online...
+            </p>
+
+            <h3 id="retail">RETAIL LICENSE TERMS</h3>
+            
+            <p>
+                Thank you for choosing Microsoft Office 2013. This is a license agreement between you and Microsoft 
+                Corporation (or, based on where you live, one of its affiliates) that describes your rights to use the Office 
+                2013 software. For your convenience, we've organized this agreement into two parts...
+            </p>
+
+            <h3 id="terms">ADDITIONAL TERMS</h3>
+            
+            <p>
+                A. LICENSE RIGHTS AND MULTI USER SCENARIOS 
+                1. Computer. In this agreement, "computer" means a hardware system (whether physical or virtual) 
+                with a storage device capable of running the software. A hardware partition or blade is considered to be 
+                a computer.
+            </p>
+
+            <h3 id="arbitration">B. BINDING ARBITRATION AND CLASS ACTION WAIVER</h3>
+            
+            <p>
+                1. Application. This Section B applies to any dispute EXCEPT IT DOES NOT INCLUDE A DISPUTE 
+                RELATING TO THE ENFORCEMENT OR VALIDITY OF YOUR, MICROSOFT'S, OR EITHER OF 
+                OUR LICENSORS' INTELLECTUAL PROPERTY RIGHTS...
+            </p>
+
+            <h3 id="law">C. CHOICE OF LAW</h3>
+            
+            <p>
+                The laws of the state or country where you live govern all claims and disputes under this agreement, 
+                including breach of contact claims and claims under state consumer protection laws, unfair competition 
+                laws, implied warranty laws, for unjust enrichment, and in tort...
+            </p>
+
+            <h3 id="activation">D. ACTIVATION</h3>
+            
+            <p>
+                1. More on How Activation Works. During activation, the software will send information about the 
+                software and your computer to Microsoft. This information includes the version, license version, 
+                language, and product key of the software, the Internet protocol address of the computer, and 
+                information derived from the hardware configuration of the computer...
+            </p>
+
+            <p style="color: #94a3b8; font-style: italic; margin-top: 3rem;">
+                ... Fortsetzung des EULA-Textes ...
+            </p>
+        </div>
+    </div>
+
+		<!-- Footer -->
+		<footer class="app-footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
+				<p class="footer-text">
+						<span style="vertical-align: middle;">
+								HTML Anker/Hashtag Demo<br />
+								Copyright © <script>document.write(new Date().getFullYear())</script> 
+								Friedhelm Koch | Lizenz: 
+								<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+								target="_blank" style="color: rgb(109, 182, 255);">CC BY-NC-SA 4.0</a>
+						</span>
+				</p>
+		</footer>
+
+    <div class="scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        ↑
+    </div>
+
+    <script>
+        // Scroll-to-Top Button Logik
+        const scrollButton = document.querySelector('.scroll-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollButton.classList.add('visible');
+            } else {
+                scrollButton.classList.remove('visible');
+            }
+        });
+        
+        // Sanftes Scrollen für alle Anchor-Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Hervorhebung des aktiven Ankers bei URL-Fragment
+        window.addEventListener('hashchange', highlightTarget);
+        window.addEventListener('load', highlightTarget);
+        
+        function highlightTarget() {
+            if (window.location.hash) {
+                const target = document.querySelector(window.location.hash);
+                if (target) {
+                    target.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    target.style.animation = 'none';
+                    setTimeout(() => {
+                        target.style.animation = 'highlight 2s ease';
+                    }, 10);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
