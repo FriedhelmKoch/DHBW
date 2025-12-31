@@ -1,0 +1,691 @@
+<!--
+ * ============================================================================
+ * Steuertarife (inside JSON) - v1.0.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter 
+ * gleichen Bedingungen 4.0 International Lizenz.
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, müssen Sie Ihre Beiträge unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
+
+ <!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einkommensteuerrechner</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #64748b;
+        }
+
+        .calculator-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .calculator-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .input-section, .results-section {
+            background: var(--card-background);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.75rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
+        .results-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            font-size: 1.5rem;
+        }
+
+        .result-card {
+            background: #f1f5f9;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0.5rem 0;
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .details {
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .details h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .details-content {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .tarif-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .tarif-card {
+            background: #e0f2fe;
+            border-left: 4px solid var(--primary-color);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.9rem;
+        }
+
+        .error {
+            background: #fee2e2;
+            border: 2px solid #dc2626;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #dc2626;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .input-section, .results-section {
+                padding: 1.25rem;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .result-value {
+                font-size: 1.5rem;
+            }
+            
+            .tarif-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Einkommensteuerrechner</h1>
+            <p class="subtitle">Berechnung der Einkommensteuer nach deutschen Steuertarifen</p>
+        </header>
+
+        <div class="calculator-container">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="yearSelect">Steuerjahr</label>
+                    <select id="yearSelect">
+                        <option value="">Lade Tarifdaten...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="incomeInput">Zu versteuerndes Einkommen (€)</label>
+                    <input type="number" id="incomeInput" placeholder="z.B. 85000" min="0" step="1">
+                </div>
+
+                <button id="calculateBtn" disabled>Steuer berechnen</button>
+
+                <div class="details">
+                    <h3>Aktuelle Tarifdaten</h3>
+                    <div id="tarifDisplay">
+                        <p>Tarifdaten werden geladen...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2>Ergebnis</h2>
+                
+                <div id="resultContainer">
+                    <div class="result-card">
+                        <div class="result-label">Jährliche Steuer</div>
+                        <div id="taxResult" class="result-value">- €</div>
+                        <div>Bitte geben Sie das Einkommen ein und wählen Sie ein Jahr aus.</div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">Grenzsteuersatz</div>
+                        <div id="marginalRate" class="result-value">- %</div>
+                        <div>Steuersatz auf den nächsten Euro</div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">Durchschnittssteuersatz</div>
+                        <div id="averageRate" class="result-value">- %</div>
+                        <div>Steuerlast relativ zum Einkommen</div>
+                    </div>
+                </div>
+
+                <div class="details">
+                    <h3>Berechnungsdetails</h3>
+                    <div id="calculationDetails" class="details-content">
+                        Warten auf Eingabe...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="app-footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
+            <p class="footer-text">
+                <span style="vertical-align: middle;">
+                    Einkommensteuerrechner | 
+                    Copyright © <script>document.write(new Date().getFullYear())</script> 
+                    Friedhelm Koch | Lizenz: 
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+                    target="_blank" style="color: #06c;">CC BY-NC-SA 4.0</a>
+                </span>
+            </p>
+        </footer>
+        
+    </div>
+
+    <script>
+        // DOM Elemente
+        const yearSelect = document.getElementById('yearSelect');
+        const incomeInput = document.getElementById('incomeInput');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const taxResult = document.getElementById('taxResult');
+        const marginalRate = document.getElementById('marginalRate');
+        const averageRate = document.getElementById('averageRate');
+        const calculationDetails = document.getElementById('calculationDetails');
+        const tarifDisplay = document.getElementById('tarifDisplay');
+
+        // Globale Variable für Tarifdaten
+        let tarifData = [];
+
+        // JSON-Datei laden
+        async function loadTarifData() {
+            try {
+                calculateBtn.disabled = true;
+                calculateBtn.textContent = 'Lade Tarifdaten...';
+                calculateBtn.classList.add('loading');
+                
+                // Hier kann die externe JSON-Datei geladen werden
+                // Für dieses Beispiel verwenden wir eine simulierte JSON-Datei
+                // In der Praxis: const response = await fetch('steuertarife.json');
+                
+                // Simulierte JSON-Datei (kann durch fetch() ersetzt werden)
+                const response = {
+                    ok: true,
+                    json: async () => [
+                        {
+                            "jahr": "2025",
+                            "grundfreibetrag": "12096",
+                            "tarif1": {
+                                "von": "12097",
+                                "bis": "17443",
+                                "formel": "(932.30 • y + 1400) • y"
+                            },
+                            "tarif2": {
+                                "von": "17444",
+                                "bis": "68480",
+                                "formel": "(176.64 • z + 2397) • z + 1015.13"
+                            },
+                            "tarif3": {
+                                "von": "68481",
+                                "bis": "277825",
+                                "formel": "0.42 • x - 10911.92"
+                            },
+                            "tarif4": {
+                                "von": "277826",
+                                "bis": "999999999",
+                                "formel": "0.45 • x - 19246.67"
+                            }
+                        },
+                        {
+                            "jahr": "2026",
+                            "grundfreibetrag": "12396",
+                            "tarif1": {
+                                "von": "12397",
+                                "bis": "17863",
+                                "formel": "(955.28 • y + 1400) • y"
+                            },
+                            "tarif2": {
+                                "von": "17864",
+                                "bis": "70160",
+                                "formel": "(181.19 • z + 2397) • z + 1041.52"
+                            },
+                            "tarif3": {
+                                "von": "70161",
+                                "bis": "277825",
+                                "formel": "0.42 • x - 11188.72"
+                            },
+                            "tarif4": {
+                                "von": "277826",
+                                "bis": "999999999",
+                                "formel": "0.45 • x - 19726.48"
+                            }
+                        },
+                        {
+                            "jahr": "2027",
+                            "grundfreibetrag": "12696",
+                            "tarif1": {
+                                "von": "12697",
+                                "bis": "18283",
+                                "formel": "(978.26 • y + 1400) • y"
+                            },
+                            "tarif2": {
+                                "von": "18284",
+                                "bis": "71840",
+                                "formel": "(185.74 • z + 2397) • z + 1067.91"
+                            },
+                            "tarif3": {
+                                "von": "71841",
+                                "bis": "277825",
+                                "formel": "0.42 • x - 11465.52"
+                            },
+                            "tarif4": {
+                                "von": "277826",
+                                "bis": "999999999",
+                                "formel": "0.45 • x - 20206.29"
+                            }
+                        }
+                    ]
+                };
+
+                if (!response.ok) {
+                    throw new Error('Fehler beim Laden der Tarifdaten');
+                }
+
+                tarifData = await response.json();
+                
+                // In Session Storage schreiben
+                sessionStorage.setItem('steuerTarife', JSON.stringify(tarifData));
+                
+                // UI aktualisieren
+                populateYearSelect();
+                enableUI();
+                
+                console.log('Tarifdaten erfolgreich geladen:', tarifData.length, 'Jahre verfügbar');
+                
+            } catch (error) {
+                console.error('Fehler beim Laden der Tarifdaten:', error);
+                showError('Tarifdaten konnten nicht geladen werden. Bitte versuchen Sie es später erneut.');
+            }
+        }
+
+        // Jahr Dropdown füllen
+        function populateYearSelect() {
+            yearSelect.innerHTML = '<option value="">Jahr auswählen...</option>';
+            
+            tarifData.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.jahr;
+                option.textContent = item.jahr;
+                yearSelect.appendChild(option);
+            });
+            
+            // Standardmäßig neuestes Jahr auswählen
+            if (tarifData.length > 0) {
+                const latestYear = Math.max(...tarifData.map(item => parseInt(item.jahr)));
+                yearSelect.value = latestYear.toString();
+                updateTarifDisplay(latestYear.toString());
+            }
+        }
+
+        // Tarifdaten anzeigen
+        function updateTarifDisplay(year) {
+            const data = tarifData.find(item => item.jahr === year);
+            if (!data) {
+                tarifDisplay.innerHTML = '<p>Keine Daten für dieses Jahr verfügbar</p>';
+                return;
+            }
+
+            const html = `
+                <div class="tarif-info">
+                    <div class="tarif-card">
+                        <strong>Grundfreibetrag:</strong><br>
+                        ${parseInt(data.grundfreibetrag).toLocaleString('de-DE')} €
+                    </div>
+                    <div class="tarif-card">
+                        <strong>Tarif 1:</strong><br>
+                        ${parseInt(data.tarif1.von).toLocaleString('de-DE')} - ${parseInt(data.tarif1.bis).toLocaleString('de-DE')} €
+                    </div>
+                    <div class="tarif-card">
+                        <strong>Tarif 2:</strong><br>
+                        ${parseInt(data.tarif2.von).toLocaleString('de-DE')} - ${parseInt(data.tarif2.bis).toLocaleString('de-DE')} €
+                    </div>
+                    <div class="tarif-card">
+                        <strong>Tarif 3:</strong><br>
+                        ${parseInt(data.tarif3.von).toLocaleString('de-DE')} - ${parseInt(data.tarif3.bis).toLocaleString('de-DE')} €
+                    </div>
+                    <div class="tarif-card">
+                        <strong>Tarif 4:</strong><br>
+                        ab ${parseInt(data.tarif4.von).toLocaleString('de-DE')} €
+                    </div>
+                </div>
+            `;
+            
+            tarifDisplay.innerHTML = html;
+        }
+
+        // UI aktivieren
+        function enableUI() {
+            calculateBtn.disabled = false;
+            calculateBtn.textContent = 'Steuer berechnen';
+            calculateBtn.classList.remove('loading');
+            incomeInput.disabled = false;
+        }
+
+        // Fehler anzeigen
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `<strong>Fehler:</strong> ${message}`;
+            
+            const container = document.querySelector('.input-section');
+            container.insertBefore(errorDiv, container.firstChild);
+            
+            calculateBtn.disabled = true;
+            calculateBtn.textContent = 'Fehler - Bitte Seite neu laden';
+        }
+
+        // Steuerberechnung
+        function calculateTax(year, income) {
+            // Auf volle Euro abrunden
+            income = Math.floor(income);
+            
+            // Daten für das ausgewählte Jahr finden
+            const yearData = tarifData.find(item => item.jahr === year);
+            
+            if (!yearData) {
+                throw new Error(`Keine Daten für Jahr ${year} gefunden`);
+            }
+
+            const grundfreibetrag = parseFloat(yearData.grundfreibetrag);
+            
+            // Wenn Einkommen unter Grundfreibetrag, keine Steuer
+            if (income <= grundfreibetrag) {
+                return {
+                    tax: 0,
+                    marginalRate: 0,
+                    averageRate: 0,
+                    details: `Einkommen unter Grundfreibetrag (${grundfreibetrag.toLocaleString('de-DE')} €)`
+                };
+            }
+
+            // Variablen definieren
+            const y = (income - grundfreibetrag) / 10000; // Zehntausendstel über Grundfreibetrag
+            const z = (income - 17443) / 10000; // Zehntausendstel über 17.443 €
+            const x = income;
+
+            let tax = 0;
+            let details = '';
+            let marginalRateValue = 0;
+
+            // Tarifberechnung
+            if (income <= parseFloat(yearData.tarif1.bis)) {
+                // Tarifzone 1
+                tax = eval(yearData.tarif1.formel
+                    .replace(/y/g, y)
+                    .replace(/•/g, '*'));
+                marginalRateValue = calculateMarginalRate(yearData.tarif1.formel, 'y', y);
+                details = `Tarif 1: ${yearData.tarif1.formel}<br>y = ${y.toFixed(4)}`;
+            } else if (income <= parseFloat(yearData.tarif2.bis)) {
+                // Tarifzone 2
+                tax = eval(yearData.tarif2.formel
+                    .replace(/z/g, z)
+                    .replace(/•/g, '*'));
+                marginalRateValue = calculateMarginalRate(yearData.tarif2.formel, 'z', z);
+                details = `Tarif 2: ${yearData.tarif2.formel}<br>z = ${z.toFixed(4)}`;
+            } else if (income <= parseFloat(yearData.tarif3.bis)) {
+                // Tarifzone 3
+                tax = eval(yearData.tarif3.formel
+                    .replace(/x/g, x)
+                    .replace(/•/g, '*'));
+                marginalRateValue = 0.42;
+                details = `Tarif 3: ${yearData.tarif3.formel}`;
+            } else {
+                // Tarifzone 4
+                tax = eval(yearData.tarif4.formel
+                    .replace(/x/g, x)
+                    .replace(/•/g, '*'));
+                marginalRateValue = 0.45;
+                details = `Tarif 4: ${yearData.tarif4.formel}`;
+            }
+
+            // Auf volle Euro runden
+            tax = Math.round(tax);
+            if (tax < 0) tax = 0;
+
+            // Durchschnittssteuersatz berechnen
+            const averageRateValue = income > 0 ? (tax / income) * 100 : 0;
+
+            return {
+                tax,
+                marginalRate: marginalRateValue * 100,
+                averageRate: averageRateValue,
+                details: details + `<br>Abgerundetes Einkommen: ${income.toLocaleString('de-DE')} €`
+            };
+        }
+
+        // Grenzsteuersatz berechnen (Ableitung der Formel)
+        function calculateMarginalRate(formel, variable, value) {
+            if (formel.includes('(932.30')) {
+                // Formel für 2025
+                return (2 * 932.30 * value + 1400) / 10000;
+            } else if (formel.includes('(955.28')) {
+                // Formel für 2026
+                return (2 * 955.28 * value + 1400) / 10000;
+            } else if (formel.includes('(978.26')) {
+                // Formel für 2027
+                return (2 * 978.26 * value + 1400) / 10000;
+            } else if (formel.includes('(176.64')) {
+                // Formel für 2025
+                return (2 * 176.64 * value + 2397) / 10000;
+            } else if (formel.includes('(181.19')) {
+                // Formel für 2026
+                return (2 * 181.19 * value + 2397) / 10000;
+            } else if (formel.includes('(185.74')) {
+                // Formel für 2027
+                return (2 * 185.74 * value + 2397) / 10000;
+            }
+            return 0;
+        }
+
+        // Ergebnisse anzeigen
+        function displayResults(results) {
+            taxResult.textContent = `${results.tax.toLocaleString('de-DE')} €`;
+            marginalRate.textContent = `${results.marginalRate.toFixed(2)} %`;
+            averageRate.textContent = `${results.averageRate.toFixed(2)} %`;
+            calculationDetails.innerHTML = results.details;
+        }
+
+        // Event Listener
+        yearSelect.addEventListener('change', (e) => {
+            if (e.target.value) {
+                updateTarifDisplay(e.target.value);
+            }
+        });
+
+        calculateBtn.addEventListener('click', () => {
+            const year = yearSelect.value;
+            const income = parseFloat(incomeInput.value);
+
+            if (!year) {
+                alert('Bitte wählen Sie ein Jahr aus.');
+                return;
+            }
+
+            if (!income || income < 0 || isNaN(income)) {
+                alert('Bitte geben Sie ein gültiges Einkommen ein.');
+                return;
+            }
+
+            try {
+                const results = calculateTax(year, income);
+                displayResults(results);
+            } catch (error) {
+                alert('Fehler bei der Berechnung: ' + error.message);
+            }
+        });
+
+        // Beispiel bei Eingabe von 85000
+        incomeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                calculateBtn.click();
+            }
+        });
+
+        // Beispielwert setzen und automatisch berechnen
+        incomeInput.addEventListener('focus', () => {
+            if (!incomeInput.value) {
+                incomeInput.value = '85000';
+            }
+        });
+
+        // Initialisierung
+        loadTarifData();
+    </script>
+</body>
+</html>
