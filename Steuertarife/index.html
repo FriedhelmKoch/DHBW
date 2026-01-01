@@ -1,5 +1,6 @@
 <!--
  * ============================================================================
+ * Steuer- & Sozialabgabenrechner §32a EStG 
  * Steuertarife with fetching JSON - v1.0.0
  * ============================================================================
  * 
@@ -28,12 +29,12 @@
  *
  -->
 
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Einkommensteuerrechner</title>
+    <title>Steuer- & Sozialabgabenrechner</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -43,6 +44,10 @@
             --text-color: #1e293b;
             --border-color: #e2e8f0;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --east-color: #dc2626;
+            --west-color: #059669;
+            --insurance-color: #7c3aed;
+            --splitting-color: #0d9488;
         }
 
         * {
@@ -63,7 +68,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             width: 100%;
             padding: 1.5rem;
         }
@@ -90,9 +95,9 @@
             gap: 1.5rem;
         }
 
-        @media (min-width: 640px) {
+        @media (min-width: 1024px) {
             .calculator-container {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1.2fr 0.8fr;
             }
         }
 
@@ -128,25 +133,251 @@
             border-color: var(--primary-color);
         }
 
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--splitting-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .region-selector, .tax-class-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .tax-class-selector {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Verbesserte Buttons */
+        .region-btn, .tax-class-btn {
+            padding: 1rem 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .region-btn:hover, .tax-class-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .region-btn::before, .tax-class-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: transparent;
+            transition: background-color 0.3s ease;
+        }
+
+        .region-btn.active, .tax-class-btn.active {
+            border-color: transparent;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .region-btn.west {
+            border-color: var(--west-color);
+            color: var(--west-color);
+        }
+
+        .region-btn.west.active {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border-color: var(--west-color);
+        }
+
+        .region-btn.west.active::before {
+            background-color: var(--west-color);
+        }
+
+        .region-btn.east {
+            border-color: var(--east-color);
+            color: var(--east-color);
+        }
+
+        .region-btn.east.active {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #7f1d1d;
+            border-color: var(--east-color);
+        }
+
+        .region-btn.east.active::before {
+            background-color: var(--east-color);
+        }
+
+        /* Steuerklassen Buttons */
+        .tax-class-btn[data-class="I"] { border-color: #3b82f6; color: #3b82f6; }
+        .tax-class-btn[data-class="II"] { border-color: #8b5cf6; color: #8b5cf6; }
+        .tax-class-btn[data-class="III"] { border-color: #10b981; color: #10b981; }
+        .tax-class-btn[data-class="IV"] { border-color: #f59e0b; color: #f59e0b; }
+        .tax-class-btn[data-class="V"] { border-color: #ef4444; color: #ef4444; }
+        .tax-class-btn[data-class="VI"] { border-color: #6366f1; color: #6366f1; }
+
+        .tax-class-btn[data-class="I"].active { 
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); 
+            color: #1e40af;
+            border-color: #3b82f6;
+        }
+        .tax-class-btn[data-class="II"].active { 
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); 
+            color: #5b21b6;
+            border-color: #8b5cf6;
+        }
+        .tax-class-btn[data-class="III"].active { 
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); 
+            color: #065f46;
+            border-color: #10b981;
+        }
+        .tax-class-btn[data-class="IV"].active { 
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
+            color: #92400e;
+            border-color: #f59e0b;
+        }
+        .tax-class-btn[data-class="V"].active { 
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); 
+            color: #991b1b;
+            border-color: #ef4444;
+        }
+        .tax-class-btn[data-class="VI"].active { 
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); 
+            color: #3730a3;
+            border-color: #6366f1;
+        }
+
+        .tax-class-btn.active::before {
+            background-color: currentColor;
+        }
+
+        .region-indicator {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px currentColor;
+        }
+
+        .region-indicator.west {
+            background-color: var(--west-color);
+            color: var(--west-color);
+        }
+
+        .region-indicator.east {
+            background-color: var(--east-color);
+            color: var(--east-color);
+        }
+
+        .button-container {
+            margin-top: 1rem;
+        }
+
         button {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             border: none;
-            padding: 0.875rem 1.75rem;
-            border-radius: 0.5rem;
+            padding: 1rem 1.75rem;
+            border-radius: 0.75rem;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
             width: 100%;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
         }
 
         button:hover {
-            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         button:disabled {
-            background-color: #94a3b8;
+            background: #94a3b8;
+            transform: none;
+            box-shadow: none;
             cursor: not-allowed;
         }
 
@@ -161,20 +392,48 @@
             padding-bottom: 0.5rem;
             border-bottom: 2px solid var(--border-color);
             font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
         }
 
         .result-card {
             background: #f1f5f9;
-            border-radius: 0.5rem;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: transform 0.2s ease;
         }
 
-        .result-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 0.5rem 0;
+        .result-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .result-card.total {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .result-card.insurance {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            border-left: 4px solid var(--insurance-color);
+        }
+
+        .result-card.splitting {
+            background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+            border-left: 4px solid var(--splitting-color);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
         }
 
         .result-label {
@@ -182,6 +441,76 @@
             color: #64748b;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .splitting-value {
+            color: var(--splitting-color);
+        }
+
+        .result-subvalue {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        .income-inputs {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .income-inputs {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .insurance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .insurance-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border-left: 3px solid var(--insurance-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .insurance-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+            line-height: 1.3;
+            min-height: 2.6em;
+            display: flex;
+            align-items: center;
+        }
+
+        .insurance-value {
+            font-weight: 700;
+            color: var(--text-color);
+            margin-top: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .insurance-rate {
+            font-size: 0.7rem;
+            color: var(--insurance-color);
+            font-weight: 600;
+            margin-top: 0.125rem;
         }
 
         .details {
@@ -199,37 +528,104 @@
         .details-content {
             background: #f8fafc;
             border-radius: 0.5rem;
-            padding: 1rem;
-            font-family: 'Monaco', 'Courier New', monospace;
+            padding: 1.25rem;
             font-size: 0.85rem;
-            overflow-x: auto;
+            line-height: 1.5;
+            border: 1px solid var(--border-color);
         }
 
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 0.25rem;
+            font-size: 1.1rem;
+        }
+
+        /* Verbesserte Tarif-Info Anzeige */
         .tarif-info {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 0.75rem;
             margin-top: 1rem;
         }
 
         .tarif-card {
-            background: #e0f2fe;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
             border-left: 4px solid var(--primary-color);
-            padding: 0.75rem;
-            border-radius: 0.375rem;
-            font-size: 0.9rem;
+            padding: 0.875rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .tarif-card strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: #1e40af;
+            font-size: 0.8rem;
+        }
+
+        .tarif-card .tarif-line {
+            font-size: 0.75rem;
+            color: #475569;
+            line-height: 1.3;
+            margin: 0.125rem 0;
         }
 
         .error {
-            background: #fee2e2;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
             border: 2px solid #dc2626;
             border-radius: 0.5rem;
             padding: 1rem;
             margin: 1rem 0;
-            color: #dc2626;
+            color: #7f1d1d;
         }
 
-        @media (max-width: 480px) {
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .info-badge.splitting {
+            background: var(--splitting-color);
+        }
+
+        @media (max-width: 640px) {
             .container {
                 padding: 1rem;
             }
@@ -246,17 +642,67 @@
                 font-size: 1.5rem;
             }
             
+            .region-selector, .tax-class-selector {
+                grid-template-columns: 1fr;
+            }
+            
             .tarif-info {
                 grid-template-columns: 1fr;
             }
+            
+            .insurance-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .insurance-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tax-class-selector {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .tarif-card {
+                min-height: 70px;
+                padding: 0.75rem;
+            }
+            
+            .tarif-card strong {
+                font-size: 0.75rem;
+            }
+            
+            .tarif-card .tarif-line {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Tooltip für abgeschnittenen Text */
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Verbesserte Darstellung für längere Texte */
+        .multi-line {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .spouse-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px dashed var(--border-color);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Einkommensteuerrechner</h1>
-            <p class="subtitle">Berechnung der Einkommensteuer nach deutschen Steuertarifen §32a EStG</p>
+            <h1>Steuer- & Sozialabgabenrechner</h1>
+            <p class="subtitle">Berechnung der Einkommensteuer §32a EStG & Sozialabgaben in Deutschland</p>
         </header>
 
         <div class="calculator-container">
@@ -269,40 +715,175 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="incomeInput">Zu versteuerndes Einkommen (€)</label>
-                    <input type="number" id="incomeInput" placeholder="z.B. 85000" min="0" step="1">
+                    <label>Steuerklasse & Splitting</label>
+                    <div class="toggle-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="splittingToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label" id="splittingLabel">Splittingtarif</span>
+                    </div>
+                    
+                    <div class="tax-class-selector" id="singleTaxClass">
+                        <button type="button" class="tax-class-btn active" data-class="I">Klasse I</button>
+                        <button type="button" class="tax-class-btn" data-class="II">Klasse II</button>
+                        <button type="button" class="tax-class-btn" data-class="III">Klasse III</button>
+                        <button type="button" class="tax-class-btn" data-class="IV">Klasse IV</button>
+                        <button type="button" class="tax-class-btn" data-class="V">Klasse V</button>
+                        <button type="button" class="tax-class-btn" data-class="VI">Klasse VI</button>
+                    </div>
+                    
+                    <div class="tax-class-selector" id="splittingTaxClasses" style="display: none;">
+                        <button type="button" class="tax-class-btn active" data-class="III">Klasse III/V</button>
+                        <button type="button" class="tax-class-btn" data-class="IV">Klasse IV/IV</button>
+                    </div>
                 </div>
 
-                <button id="calculateBtn" disabled>Steuer berechnen</button>
+                <div class="form-group">
+                    <label>Einkommen</label>
+                    <div class="income-inputs">
+                        <div>
+                            <label for="incomeInput1" id="incomeLabel1">Bruttoeinkommen Person 1 (€)</label>
+                            <input type="number" id="incomeInput1" placeholder="z.B. 85000" min="0" step="1">
+                        </div>
+                        <div id="spouseSection" style="display: none;">
+                            <label for="incomeInput2">Bruttoeinkommen Person 2 (€)</label>
+                            <input type="number" id="incomeInput2" placeholder="z.B. 45000" min="0" step="1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Region</label>
+                    <div class="region-selector">
+                        <button type="button" class="region-btn west active" data-region="west">
+                            <span class="region-indicator west"></span>
+                            Westdeutschland
+                        </button>
+                        <button type="button" class="region-btn east" data-region="east">
+                            <span class="region-indicator east"></span>
+                            Ostdeutschland
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Versicherungen</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="kvCheckbox" checked>
+                        <label for="kvCheckbox">Krankenversicherung</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="pvCheckbox" checked>
+                        <label for="pvCheckbox">Pflegeversicherung</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="rvCheckbox" checked>
+                        <label for="rvCheckbox">Rentenversicherung</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="avCheckbox" checked>
+                        <label for="avCheckbox">Arbeitslosenversicherung</label>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button id="calculateBtn" disabled>Berechnen</button>
+                </div>
 
                 <div class="details">
-                    <h3>Aktuelle Tarifdaten</h3>
-                    <div id="tarifDisplay">
-                        <p>Tarifdaten werden geladen...</p>
+                    <h3>Steuerklassen Info</h3>
+                    <div id="taxClassInfo">
+                        <p>Steuerklassen werden geladen...</p>
                     </div>
                 </div>
             </div>
 
             <div class="results-section">
-                <h2>Ergebnis</h2>
+                <h2>Ergebnis 
+                    <span id="regionBadge" class="region-indicator west"></span>
+                    <span id="taxClassBadge" class="info-badge">I</span>
+                    <span id="splittingBadge" class="info-badge splitting" style="display: none;">Splitting</span>
+                </h2>
                 
-                <div id="resultContainer">
+                <div class="results-grid">
                     <div class="result-card">
-                        <div class="result-label">Jährliche Steuer</div>
-                        <div id="taxResult" class="result-value">- €</div>
-                        <div>Bitte geben Sie das Einkommen ein und wählen Sie ein Jahr aus.</div>
+                        <div class="result-header">
+                            <div class="result-label" id="grossIncomeLabel">Bruttoeinkommen</div>
+                        </div>
+                        <div id="grossIncome" class="result-value">- €</div>
+                        <div class="result-subvalue" id="incomeDetails">jährlich</div>
+                    </div>
+
+                    <div id="splittingResult" class="result-card splitting" style="display: none;">
+                        <div class="result-header">
+                            <div class="result-label">Splittingvorteil</div>
+                            <div id="splittingAdvantage" class="result-value splitting-value">- €</div>
+                        </div>
+                        <div class="result-subvalue">Ersparnis durch Ehegattensplitting</div>
+                    </div>
+
+                    <div class="result-card insurance">
+                        <div class="result-header">
+                            <div class="result-label">Sozialabgaben</div>
+                            <div id="totalInsurance" class="result-value">- €</div>
+                        </div>
+                        <div id="insuranceDetails" class="insurance-grid">
+                            <div class="insurance-item">
+                                <div class="insurance-label multi-line">Krankenversicherung</div>
+                                <div id="kvAmount" class="insurance-value">- €</div>
+                                <div id="kvRate" class="insurance-rate">- %</div>
+                            </div>
+                            <div class="insurance-item">
+                                <div class="insurance-label multi-line">Pflegeversicherung</div>
+                                <div id="pvAmount" class="insurance-value">- €</div>
+                                <div id="pvRate" class="insurance-rate">- %</div>
+                            </div>
+                            <div class="insurance-item">
+                                <div class="insurance-label multi-line">Rentenversicherung</div>
+                                <div id="rvAmount" class="insurance-value">- €</div>
+                                <div id="rvRate" class="insurance-rate">- %</div>
+                            </div>
+                            <div class="insurance-item">
+                                <div class="insurance-label multi-line">Arbeitslosenversicherung</div>
+                                <div id="avAmount" class="insurance-value">- €</div>
+                                <div id="avRate" class="insurance-rate">- %</div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="result-card">
-                        <div class="result-label">Grenzsteuersatz</div>
-                        <div id="marginalRate" class="result-value">- %</div>
-                        <div>Steuersatz auf den nächsten Euro</div>
+                        <div class="result-header">
+                            <div class="result-label">Einkommensteuer</div>
+                            <div id="taxResult" class="result-value">- €</div>
+                        </div>
+                        <div class="result-subvalue">
+                            Grenzsteuersatz: <span id="marginalRate">- %</span> | 
+                            Durchschnitt: <span id="averageRate">- %</span>
+                        </div>
                     </div>
 
-                    <div class="result-card">
-                        <div class="result-label">Durchschnittssteuersatz</div>
-                        <div id="averageRate" class="result-value">- %</div>
-                        <div>Steuerlast relativ zum Einkommen</div>
+                    <div class="result-card total">
+                        <div class="result-header">
+                            <div class="result-label">Nettoeinkommen</div>
+                            <div id="netIncome" class="result-value">- €</div>
+                        </div>
+                        <div class="result-subvalue">Jährlich nach Abgaben</div>
+                        
+                        <div class="summary-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Abgabenquote</div>
+                                <div id="taxBurden" class="stat-value">- %</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Monatlich netto</div>
+                                <div id="monthlyNet" class="stat-value">- €</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Sozialabgaben</div>
+                                <div id="insurancePercentage" class="stat-value">- %</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -318,7 +899,7 @@
         <footer class="app-footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
             <p class="footer-text">
                 <span style="vertical-align: middle;">
-                    Einkommensteuerrechner | 
+                    Steuer & Sozialabgabenrechner §32a EStG | 
                     Copyright © <script>document.write(new Date().getFullYear())</script> 
                     Friedhelm Koch | Lizenz: 
                     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
@@ -332,26 +913,68 @@
     <script>
         // DOM Elemente
         const yearSelect = document.getElementById('yearSelect');
-        const incomeInput = document.getElementById('incomeInput');
+        const incomeInput1 = document.getElementById('incomeInput1');
+        const incomeInput2 = document.getElementById('incomeInput2');
         const calculateBtn = document.getElementById('calculateBtn');
         const taxResult = document.getElementById('taxResult');
         const marginalRate = document.getElementById('marginalRate');
         const averageRate = document.getElementById('averageRate');
         const calculationDetails = document.getElementById('calculationDetails');
-        const tarifDisplay = document.getElementById('tarifDisplay');
+        const taxClassInfo = document.getElementById('taxClassInfo');
+        const regionButtons = document.querySelectorAll('.region-btn');
+        const taxClassButtons = document.querySelectorAll('.tax-class-btn');
+        const singleTaxClassDiv = document.getElementById('singleTaxClass');
+        const splittingTaxClassesDiv = document.getElementById('splittingTaxClasses');
+        const splittingToggle = document.getElementById('splittingToggle');
+        const splittingLabel = document.getElementById('splittingLabel');
+        const spouseSection = document.getElementById('spouseSection');
+        const regionBadge = document.getElementById('regionBadge');
+        const taxClassBadge = document.getElementById('taxClassBadge');
+        const splittingBadge = document.getElementById('splittingBadge');
+        const grossIncomeLabel = document.getElementById('grossIncomeLabel');
+        const incomeDetails = document.getElementById('incomeDetails');
+        const splittingResult = document.getElementById('splittingResult');
+        const splittingAdvantage = document.getElementById('splittingAdvantage');
+        
+        // Versicherungs-Checkboxes
+        const kvCheckbox = document.getElementById('kvCheckbox');
+        const pvCheckbox = document.getElementById('pvCheckbox');
+        const rvCheckbox = document.getElementById('rvCheckbox');
+        const avCheckbox = document.getElementById('avCheckbox');
+        
+        // Ergebnis-Elemente
+        const grossIncome = document.getElementById('grossIncome');
+        const netIncome = document.getElementById('netIncome');
+        const totalInsurance = document.getElementById('totalInsurance');
+        const insurancePercentage = document.getElementById('insurancePercentage');
+        const taxBurden = document.getElementById('taxBurden');
+        const monthlyNet = document.getElementById('monthlyNet');
+        
+        // Versicherungsdetails
+        const kvAmount = document.getElementById('kvAmount');
+        const kvRate = document.getElementById('kvRate');
+        const pvAmount = document.getElementById('pvAmount');
+        const pvRate = document.getElementById('pvRate');
+        const rvAmount = document.getElementById('rvAmount');
+        const rvRate = document.getElementById('rvRate');
+        const avAmount = document.getElementById('avAmount');
+        const avRate = document.getElementById('avRate');
 
         // Globale Variable für Tarifdaten
         let tarifData = [];
+        let currentRegion = 'west';
+        let currentTaxClass = 'I';
+        let isSplitting = false;
 
-        // JSON-Datei laden
+        // JSON-Datei laden (einheitlich mit allen Daten)
         async function loadTarifData() {
             try {
                 calculateBtn.disabled = true;
-                calculateBtn.textContent = 'Lade Tarifdaten...';
+                calculateBtn.textContent = 'Lade Daten...';
                 calculateBtn.classList.add('loading');
                 
                 // Externe JSON-Datei laden
-                const response = await fetch('./steuertarife.json');
+                const response = await fetch('steuertarife.json');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP-Fehler: ${response.status}`);
@@ -365,13 +988,39 @@
                 }
                 
                 if (tarifData.length === 0) {
-                    throw new Error('Keine Tarifdaten in der Datei gefunden');
+                    throw new Error('Keine Daten in der Datei gefunden');
                 }
                 
                 // Datenstruktur validieren
                 tarifData.forEach((item, index) => {
-                    if (!item.jahr || !item.grundfreibetrag || !item.tarif1 || !item.tarif2 || !item.tarif3 || !item.tarif4) {
-                        throw new Error(`Ungültige Datenstruktur in Jahr ${item.jahr || 'unbekannt'} (Index ${index})`);
+                    // Pflichtfelder für Steuerberechnung
+                    const steuerFields = ['jahr', 'grundfreibetrag', 'tarif1', 'tarif2', 'tarif3', 'tarif4'];
+                    steuerFields.forEach(field => {
+                        if (!item[field]) {
+                            throw new Error(`Fehlendes Steuerfeld ${field} in Jahr ${item.jahr || 'unbekannt'}`);
+                        }
+                    });
+                    
+                    // Prüfe ob Sozialabgaben existieren
+                    if (!item.sozialabgaben) {
+                        console.warn(`Keine Sozialabgaben für Jahr ${item.jahr}, setze Standardwerte`);
+                        item.sozialabgaben = {
+                            krankenversicherung: { west: "0.073", ost: "0.073", zusatzbeitrag: "0.014" },
+                            pflegeversicherung: { west: "0.0185", ost: "0.0325" },
+                            rentenversicherung: { west: "0.094", ost: "0.094" },
+                            arbeitslosenversicherung: { west: "0.012", ost: "0.012" },
+                            beitragsbemessungsgrenze: { west: "62400", ost: "60000" }
+                        };
+                    }
+                    
+                    // Prüfe ob Steuerklassen existieren
+                    if (!item.steuerklassen) {
+                        console.warn(`Keine Steuerklassen-Daten für Jahr ${item.jahr}, setze Standardwerte`);
+                        item.steuerklassen = {
+                            freibetraege: { I: "0", II: "1308", III: "2000", IV: "0", V: "0", VI: "0" },
+                            vorsorgepauschale: { I: "0.12", II: "0.12", III: "0.12", IV: "0.12", V: "0.12", VI: "0.12" },
+                            sonderausgaben: { I: "36", II: "36", III: "36", IV: "36", V: "36", VI: "36" }
+                        };
                     }
                 });
                 
@@ -382,102 +1031,28 @@
                 populateYearSelect();
                 enableUI();
                 
-                console.log('Tarifdaten erfolgreich geladen:', tarifData.length, 'Jahre verfügbar');
+                console.log('Daten erfolgreich geladen:', tarifData.length, 'Jahre verfügbar');
                 
-                // Automatisch Beispiel berechnen, wenn Daten geladen sind
+                // Automatisch Beispiel berechnen
                 setTimeout(() => {
-                    if (yearSelect.value && !incomeInput.value) {
-                        incomeInput.value = '85000';
+                    if (yearSelect.value) {
+                        incomeInput1.value = '85000';
                         calculateBtn.click();
                     }
                 }, 500);
                 
             } catch (error) {
-                console.error('Fehler beim Laden der Tarifdaten:', error);
-                
-                // Fallback: Versuche aus Session Storage zu laden
-                const storedData = sessionStorage.getItem('steuertarife');
-                if (storedData) {
-                    try {
-                        tarifData = JSON.parse(storedData);
-                        populateYearSelect();
-                        enableUI();
-                        showError('Offline-Daten verwendet. ' + error.message);
-                        return;
-                    } catch (parseError) {
-                        console.error('Fehler beim Laden aus Session Storage:', parseError);
-                    }
-                }
-                
-                // Vollständiger Fallback mit eingebetteten Daten
-                showError(`${error.message}. Verwende Standarddaten.`);
-                useFallbackData();
+                console.error('Fehler beim Laden der Daten:', error);
+                showError(`${error.message}. Bitte laden Sie die Seite neu.`);
             }
-        }
-
-        // Fallback-Daten verwenden, wenn JSON nicht geladen werden kann
-        function useFallbackData() {
-            tarifData = [
-                {
-                    "jahr": "2025",
-                    "grundfreibetrag": "12096",
-                    "tarif1": {
-                        "von": "12097",
-                        "bis": "17443",
-                        "formel": "(932.30 • y + 1400) • y"
-                    },
-                    "tarif2": {
-                        "von": "17444",
-                        "bis": "68480",
-                        "formel": "(176.64 • z + 2397) • z + 1015.13"
-                    },
-                    "tarif3": {
-                        "von": "68481",
-                        "bis": "277825",
-                        "formel": "0.42 • x - 10911.92"
-                    },
-                    "tarif4": {
-                        "von": "277826",
-                        "bis": "999999999",
-                        "formel": "0.45 • x - 19246.67"
-                    }
-                },
-                {
-                    "jahr": "2026",
-                    "grundfreibetrag": "12396",
-                    "tarif1": {
-                        "von": "12397",
-                        "bis": "17863",
-                        "formel": "(955.28 • y + 1400) • y"
-                    },
-                    "tarif2": {
-                        "von": "17864",
-                        "bis": "70160",
-                        "formel": "(181.19 • z + 2397) • z + 1041.52"
-                    },
-                    "tarif3": {
-                        "von": "70161",
-                        "bis": "277825",
-                        "formel": "0.42 • x - 11188.72"
-                    },
-                    "tarif4": {
-                        "von": "277826",
-                        "bis": "999999999",
-                        "formel": "0.45 • x - 19726.48"
-                    }
-                }
-            ];
-            
-            populateYearSelect();
-            enableUI();
-            
-            // In Session Storage speichern für später
-            sessionStorage.setItem('steuertarife', JSON.stringify(tarifData));
         }
 
         // Jahr Dropdown füllen
         function populateYearSelect() {
             yearSelect.innerHTML = '<option value="">Jahr auswählen...</option>';
+            
+            // Nach Jahr sortieren (absteigend)
+            tarifData.sort((a, b) => parseInt(b.jahr) - parseInt(a.jahr));
             
             tarifData.forEach(item => {
                 const option = document.createElement('option');
@@ -488,54 +1063,143 @@
             
             // Standardmäßig neuestes Jahr auswählen
             if (tarifData.length > 0) {
-                const latestYear = Math.max(...tarifData.map(item => parseInt(item.jahr)));
-                yearSelect.value = latestYear.toString();
-                updateTarifDisplay(latestYear.toString());
+                yearSelect.value = tarifData[0].jahr;
+                updateTaxClassInfo(tarifData[0].jahr);
             }
         }
 
-        // Tarifdaten anzeigen
-        function updateTarifDisplay(year) {
+        // Steuerklassen Info anzeigen
+        function updateTaxClassInfo(year) {
             const data = tarifData.find(item => item.jahr === year);
-            if (!data) {
-                tarifDisplay.innerHTML = '<p>Keine Daten für dieses Jahr verfügbar</p>';
+            if (!data || !data.steuerklassen) {
+                taxClassInfo.innerHTML = '<p>Keine Steuerklassen-Daten für dieses Jahr</p>';
                 return;
             }
 
+            const steuerklassen = data.steuerklassen;
             const html = `
                 <div class="tarif-info">
                     <div class="tarif-card">
-                        <strong>Grundfreibetrag:</strong><br>
-                        ${parseInt(data.grundfreibetrag).toLocaleString('de-DE')} €
+                        <strong>Freibeträge</strong>
+                        <div class="tarif-line">I: ${parseFloat(steuerklassen.freibetraege.I).toLocaleString('de-DE')} €</div>
+                        <div class="tarif-line">II: ${parseFloat(steuerklassen.freibetraege.II).toLocaleString('de-DE')} €</div>
+                        <div class="tarif-line">III: ${parseFloat(steuerklassen.freibetraege.III).toLocaleString('de-DE')} €</div>
                     </div>
                     <div class="tarif-card">
-                        <strong>Tarif 1:</strong><br>
-                        ${parseInt(data.tarif1.von).toLocaleString('de-DE')} - ${parseInt(data.tarif1.bis).toLocaleString('de-DE')} €
+                        <strong>Vorsorgepauschale</strong>
+                        <div class="tarif-line">${(parseFloat(steuerklassen.vorsorgepauschale.I) * 100).toFixed(0)}% für alle Klassen</div>
                     </div>
                     <div class="tarif-card">
-                        <strong>Tarif 2:</strong><br>
-                        ${parseInt(data.tarif2.von).toLocaleString('de-DE')} - ${parseInt(data.tarif2.bis).toLocaleString('de-DE')} €
-                    </div>
-                    <div class="tarif-card">
-                        <strong>Tarif 3:</strong><br>
-                        ${parseInt(data.tarif3.von).toLocaleString('de-DE')} - ${parseInt(data.tarif3.bis).toLocaleString('de-DE')} €
-                    </div>
-                    <div class="tarif-card">
-                        <strong>Tarif 4:</strong><br>
-                        ab ${parseInt(data.tarif4.von).toLocaleString('de-DE')} €
+                        <strong>Sonderausgaben</strong>
+                        <div class="tarif-line">${parseFloat(steuerklassen.sonderausgaben.I).toLocaleString('de-DE')} € Pauschale</div>
                     </div>
                 </div>
             `;
             
-            tarifDisplay.innerHTML = html;
+            taxClassInfo.innerHTML = html;
+        }
+
+        // Splitting Toggle einrichten
+        function setupSplittingToggle() {
+            splittingToggle.addEventListener('change', function() {
+                isSplitting = this.checked;
+                
+                if (isSplitting) {
+                    singleTaxClassDiv.style.display = 'none';
+                    splittingTaxClassesDiv.style.display = 'grid';
+                    spouseSection.style.display = 'block';
+                    splittingBadge.style.display = 'inline-flex';
+                    grossIncomeLabel.textContent = 'Haushaltseinkommen';
+                    splittingLabel.textContent = 'Splittingtarif (aktiv)';
+                    
+                    // Setze default Splitting-Kombination
+                    currentTaxClass = 'III';
+                    updateTaxClassButtons();
+                } else {
+                    singleTaxClassDiv.style.display = 'grid';
+                    splittingTaxClassesDiv.style.display = 'none';
+                    spouseSection.style.display = 'none';
+                    splittingBadge.style.display = 'none';
+                    grossIncomeLabel.textContent = 'Bruttoeinkommen';
+                    splittingLabel.textContent = 'Splittingtarif';
+                    incomeInput2.value = '';
+                    
+                    // Setze default Einzel-Klasse
+                    currentTaxClass = 'I';
+                    updateTaxClassButtons();
+                }
+                
+                // Bei bestehender Berechnung neu rechnen
+                if (incomeInput1.value && yearSelect.value) {
+                    calculateBtn.click();
+                }
+            });
+        }
+
+        // Region auswählen
+        function setupRegionSelector() {
+            regionButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    regionButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentRegion = btn.dataset.region;
+                    regionBadge.className = `region-indicator ${currentRegion}`;
+                    regionBadge.style.color = currentRegion === 'west' ? '#059669' : '#dc2626';
+                    
+                    // Bei bestehender Berechnung neu rechnen
+                    if (incomeInput1.value && yearSelect.value) {
+                        calculateBtn.click();
+                    }
+                });
+            });
+        }
+
+        // Steuerklassen auswählen
+        function setupTaxClassSelector() {
+            taxClassButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Deaktiviere alle Buttons in der entsprechenden Gruppe
+                    if (isSplitting) {
+                        splittingTaxClassesDiv.querySelectorAll('.tax-class-btn').forEach(b => b.classList.remove('active'));
+                    } else {
+                        singleTaxClassDiv.querySelectorAll('.tax-class-btn').forEach(b => b.classList.remove('active'));
+                    }
+                    
+                    btn.classList.add('active');
+                    currentTaxClass = btn.dataset.class;
+                    taxClassBadge.textContent = currentTaxClass;
+                    
+                    // Bei bestehender Berechnung neu rechnen
+                    if (incomeInput1.value && yearSelect.value) {
+                        calculateBtn.click();
+                    }
+                });
+            });
+        }
+
+        // Steuerklassen-Buttons aktualisieren
+        function updateTaxClassButtons() {
+            taxClassBadge.textContent = currentTaxClass;
+            
+            // Aktiviere den entsprechenden Button
+            taxClassButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.class === currentTaxClass) {
+                    // Prüfe ob Button in der sichtbaren Gruppe ist
+                    if ((isSplitting && btn.closest('#splittingTaxClasses')) || 
+                        (!isSplitting && btn.closest('#singleTaxClass'))) {
+                        btn.classList.add('active');
+                    }
+                }
+            });
         }
 
         // UI aktivieren
         function enableUI() {
             calculateBtn.disabled = false;
-            calculateBtn.textContent = 'Steuer berechnen';
+            calculateBtn.textContent = 'Berechnen';
             calculateBtn.classList.remove('loading');
-            incomeInput.disabled = false;
+            incomeInput1.disabled = false;
         }
 
         // Fehler anzeigen
@@ -551,162 +1215,408 @@
             calculateBtn.textContent = 'Fehler - Bitte Seite neu laden';
         }
 
-        // Steuerberechnung
-        function calculateTax(year, income) {
-            // Auf volle Euro abrunden
-            income = Math.floor(income);
-            
-            // Daten für das ausgewählte Jahr finden
-            const yearData = tarifData.find(item => item.jahr === year);
-            
-            if (!yearData) {
-                throw new Error(`Keine Daten für Jahr ${year} gefunden`);
+        // Sozialabgaben berechnen
+        function calculateSocialInsurance(year, income) {
+            const data = tarifData.find(item => item.jahr === year);
+            if (!data || !data.sozialabgaben) {
+                throw new Error(`Keine Sozialabgaben-Daten für Jahr ${year}`);
             }
 
-            const grundfreibetrag = parseFloat(yearData.grundfreibetrag);
+            const social = data.sozialabgaben;
+            const region = currentRegion === 'west' ? 'west' : 'ost';
             
-            // Wenn Einkommen unter Grundfreibetrag, keine Steuer
-            if (income <= grundfreibetrag) {
-                return {
-                    tax: 0,
-                    marginalRate: 0,
-                    averageRate: 0,
-                    details: `Einkommen unter Grundfreibetrag (${grundfreibetrag.toLocaleString('de-DE')} €)`
-                };
+            // Beitragsbemessungsgrenze
+            const bbmg = parseFloat(social.beitragsbemessungsgrenze[region]);
+            const taxableIncome = Math.min(income, bbmg);
+            
+            // Sätze (inkl. Zusatzbeitrag bei Krankenversicherung)
+            const kvRate = parseFloat(social.krankenversicherung[region]) + 
+                          parseFloat(social.krankenversicherung.zusatzbeitrag || 0);
+            const pvRate = parseFloat(social.pflegeversicherung[region]);
+            const rvRate = parseFloat(social.rentenversicherung[region]);
+            const avRate = parseFloat(social.arbeitslosenversicherung[region]);
+            
+            // Berechnungen (nur wenn Checkbox aktiviert)
+            let kvAmount = 0, pvAmount = 0, rvAmount = 0, avAmount = 0;
+            
+            if (kvCheckbox.checked) {
+                kvAmount = taxableIncome * kvRate;
             }
-
-            // Variablen definieren
-            const y = (income - grundfreibetrag) / 10000; // Zehntausendstel über Grundfreibetrag
-            const z = (income - 17443) / 10000; // Zehntausendstel über 17.443 €
-            const x = income;
-
-            let tax = 0;
-            let details = '';
-            let marginalRateValue = 0;
-
-            // Tarifberechnung
-            if (income <= parseFloat(yearData.tarif1.bis)) {
-                // Tarifzone 1
-                tax = eval(yearData.tarif1.formel
-                    .replace(/y/g, y)
-                    .replace(/•/g, '*'));
-                marginalRateValue = calculateMarginalRate(yearData.tarif1.formel, 'y', y);
-                details = `Tarif 1: ${yearData.tarif1.formel}<br>y = ${y.toFixed(4)}`;
-            } else if (income <= parseFloat(yearData.tarif2.bis)) {
-                // Tarifzone 2
-                tax = eval(yearData.tarif2.formel
-                    .replace(/z/g, z)
-                    .replace(/•/g, '*'));
-                marginalRateValue = calculateMarginalRate(yearData.tarif2.formel, 'z', z);
-                details = `Tarif 2: ${yearData.tarif2.formel}<br>z = ${z.toFixed(4)}`;
-            } else if (income <= parseFloat(yearData.tarif3.bis)) {
-                // Tarifzone 3
-                tax = eval(yearData.tarif3.formel
-                    .replace(/x/g, x)
-                    .replace(/•/g, '*'));
-                marginalRateValue = 0.42;
-                details = `Tarif 3: ${yearData.tarif3.formel}`;
-            } else {
-                // Tarifzone 4
-                tax = eval(yearData.tarif4.formel
-                    .replace(/x/g, x)
-                    .replace(/•/g, '*'));
-                marginalRateValue = 0.45;
-                details = `Tarif 4: ${yearData.tarif4.formel}`;
+            
+            if (pvCheckbox.checked) {
+                pvAmount = taxableIncome * pvRate;
             }
-
-            // Auf volle Euro runden
-            tax = Math.round(tax);
-            if (tax < 0) tax = 0;
-
-            // Durchschnittssteuersatz berechnen
-            const averageRateValue = income > 0 ? (tax / income) * 100 : 0;
-
+            
+            if (rvCheckbox.checked) {
+                rvAmount = taxableIncome * rvRate;
+            }
+            
+            if (avCheckbox.checked) {
+                avAmount = taxableIncome * avRate;
+            }
+            
+            const totalInsurance = kvAmount + pvAmount + rvAmount + avAmount;
+            
             return {
-                tax,
-                marginalRate: marginalRateValue * 100,
-                averageRate: averageRateValue,
-                details: details + `<br>Abgerundetes Einkommen: ${income.toLocaleString('de-DE')} €`
+                kvAmount: Math.round(kvAmount),
+                kvRate: kvRate * 100,
+                pvAmount: Math.round(pvAmount),
+                pvRate: pvRate * 100,
+                rvAmount: Math.round(rvAmount),
+                rvRate: rvRate * 100,
+                avAmount: Math.round(avAmount),
+                avRate: avRate * 100,
+                totalInsurance: Math.round(totalInsurance),
+                bbmg: bbmg,
+                taxableIncome: taxableIncome,
+                details: `Berechnungsbasis: ${taxableIncome.toLocaleString('de-DE')} € von ${income.toLocaleString('de-DE')} € (${region === 'west' ? 'West' : 'Ost'})`
             };
         }
 
-        // Grenzsteuersatz berechnen (Ableitung der Formel)
-        function calculateMarginalRate(formel, variable, value) {
-            if (formel.includes('(932.30')) {
-                // Formel für 2025
-                return (2 * 932.30 * value + 1400) / 10000;
-            } else if (formel.includes('(955.28')) {
-                // Formel für 2026
-                return (2 * 955.28 * value + 1400) / 10000;
-            } else if (formel.includes('(978.26')) {
-                // Formel für 2027
+        // Einkommensteuer mit Steuerklasse und Splitting berechnen
+        function calculateTax(year, income1, income2 = 0) {
+            const data = tarifData.find(item => item.jahr === year);
+            if (!data) {
+                throw new Error(`Keine Daten für Jahr ${year} gefunden`);
+            }
+
+            let totalTax = 0;
+            let details = '';
+            let marginalRateValue = 0;
+            let splittingAdvantageValue = 0;
+
+            if (isSplitting) {
+                // Splittingtarif Berechnung
+                const totalIncome = income1 + income2;
+                const splittingIncome = totalIncome / 2;
+                
+                // Steuer für halbes Einkommen berechnen (zweimal)
+                const taxSingle = calculateBasicTax(year, splittingIncome);
+                const splittingTax = taxSingle * 2;
+                
+                // Normale Steuer ohne Splitting berechnen
+                const taxWithoutSplitting = calculateBasicTax(year, income1) + calculateBasicTax(year, income2);
+                
+                // Splittingvorteil
+                splittingAdvantageValue = taxWithoutSplitting - splittingTax;
+                if (splittingAdvantageValue < 0) splittingAdvantageValue = 0;
+                
+                totalTax = splittingTax;
+                details = `Splittingtarif: Gesamteinkommen ${totalIncome.toLocaleString('de-DE')} €<br>` +
+                         `Hälftiges Einkommen: ${splittingIncome.toLocaleString('de-DE')} €<br>` +
+                         `Steuer pro Person: ${taxSingle.toLocaleString('de-DE')} €<br>` +
+                         `Gesamtsteuer: ${splittingTax.toLocaleString('de-DE')} €`;
+                
+                // Grenzsteuersatz basierend auf Gesamteinkommen
+                const taxData = calculateBasicTaxData(year, totalIncome);
+                marginalRateValue = taxData.marginalRate;
+                
+            } else {
+                // Normale Steuerberechnung mit Steuerklasse
+                totalTax = calculateTaxWithClass(year, income1, currentTaxClass);
+                const taxData = calculateBasicTaxData(year, income1);
+                marginalRateValue = taxData.marginalRate;
+                
+                details = `Steuerklasse ${currentTaxClass}<br>` +
+                         `Freibetrag: ${getTaxClassAllowance(year, currentTaxClass).toLocaleString('de-DE')} €<br>` +
+                         `Zu versteuerndes Einkommen: ${(income1 - getTaxClassAllowance(year, currentTaxClass)).toLocaleString('de-DE')} €`;
+            }
+
+            // Durchschnittssteuersatz berechnen
+            const totalIncome = isSplitting ? (income1 + income2) : income1;
+            const averageRateValue = totalIncome > 0 ? (totalTax / totalIncome) * 100 : 0;
+
+            return {
+                tax: Math.round(totalTax),
+                marginalRate: marginalRateValue * 100,
+                averageRate: averageRateValue,
+                splittingAdvantage: Math.round(splittingAdvantageValue),
+                details: details
+            };
+        }
+
+        // Grundlegende Steuerberechnung (ohne Steuerklasse)
+        function calculateBasicTax(year, income) {
+            const data = tarifData.find(item => item.jahr === year);
+            if (!data) return 0;
+
+            const grundfreibetrag = parseFloat(data.grundfreibetrag);
+            
+            // Wenn Einkommen unter Grundfreibetrag, keine Steuer
+            if (income <= grundfreibetrag) {
+                return 0;
+            }
+
+            // Variablen definieren
+            const y = (income - grundfreibetrag) / 10000;
+            const z = (income - 14926) / 10000;
+            const x = income;
+
+            let tax = 0;
+
+            // Tarifberechnung
+            if (income <= parseFloat(data.tarif1.bis)) {
+                tax = eval(data.tarif1.formel.replace(/y/g, y).replace(/\•/g, '*'));
+            } else if (income <= parseFloat(data.tarif2.bis)) {
+                tax = eval(data.tarif2.formel.replace(/z/g, z).replace(/\•/g, '*'));
+            } else if (income <= parseFloat(data.tarif3.bis)) {
+                tax = eval(data.tarif3.formel.replace(/x/g, x).replace(/\•/g, '*'));
+            } else {
+                tax = eval(data.tarif4.formel.replace(/x/g, x).replace(/\•/g, '*'));
+            }
+
+            return Math.max(0, Math.round(tax));
+        }
+
+        // Grundlegende Steuerberechnung mit Daten
+        function calculateBasicTaxData(year, income) {
+            const data = tarifData.find(item => item.jahr === year);
+            if (!data) return { tax: 0, marginalRate: 0 };
+
+            const grundfreibetrag = parseFloat(data.grundfreibetrag);
+            
+            if (income <= grundfreibetrag) {
+                return { tax: 0, marginalRate: 0 };
+            }
+
+            const y = (income - grundfreibetrag) / 10000;
+            const z = (income - 14926) / 10000;
+
+            let marginalRateValue = 0;
+
+            // Grenzsteuersatz berechnen
+            if (income <= parseFloat(data.tarif1.bis)) {
+                marginalRateValue = calculateMarginalRate(data.tarif1.formel, y);
+            } else if (income <= parseFloat(data.tarif2.bis)) {
+                marginalRateValue = calculateMarginalRate(data.tarif2.formel, z, true);
+            } else if (income <= parseFloat(data.tarif3.bis)) {
+                marginalRateValue = 0.42;
+            } else {
+                marginalRateValue = 0.45;
+            }
+
+            const tax = calculateBasicTax(year, income);
+
+            return { tax, marginalRate: marginalRateValue };
+        }
+
+        // Steuer mit Steuerklasse berechnen
+        function calculateTaxWithClass(year, income, taxClass) {
+            const data = tarifData.find(item => item.jahr === year);
+            if (!data) return 0;
+
+            // Freibetrag basierend auf Steuerklasse
+            const allowance = getTaxClassAllowance(year, taxClass);
+            const taxableIncome = Math.max(0, income - allowance);
+            
+            // Grundsteuer berechnen
+            const basicTax = calculateBasicTax(year, taxableIncome);
+            
+            // Vorsorgepauschale abziehen (vereinfacht)
+            const vorsorgeRate = getVorsorgeRate(year, taxClass);
+            const vorsorgeAbzug = taxableIncome * vorsorgeRate;
+            
+            // Sonderausgabenpauschale
+            const sonderausgaben = getSonderausgaben(year, taxClass);
+            
+            const finalTax = Math.max(0, basicTax - vorsorgeAbzug - sonderausgaben);
+            
+            return Math.round(finalTax);
+        }
+
+        // Freibetrag für Steuerklasse
+        function getTaxClassAllowance(year, taxClass) {
+            const data = tarifData.find(item => item.jahr === year);
+            if (!data || !data.steuerklassen) return 0;
+            
+            return parseFloat(data.steuerklassen.freibetraege[taxClass] || "0");
+        }
+
+        // Vorsorgepauschale Rate
+        function getVorsorgeRate(year, taxClass) {
+            const data = tarifData.find(item => item.jahr === year);
+            if (!data || !data.steuerklassen) return 0.12;
+            
+            return parseFloat(data.steuerklassen.vorsorgepauschale[taxClass] || "0.12");
+        }
+
+        // Sonderausgabenpauschale
+        function getSonderausgaben(year, taxClass) {
+            const data = tarifData.find(item => item.jahr === year);
+            if (!data || !data.steuerklassen) return 36;
+            
+            return parseFloat(data.steuerklassen.sonderausgaben[taxClass] || "36");
+        }
+
+        // Grenzsteuersatz berechnen
+        function calculateMarginalRate(formel, value, isZ = false) {
+            if (formel.includes('1088.67')) {
+                return (2 * 1088.67 * value + 1400) / 10000;
+            } else if (formel.includes('978.26')) {
                 return (2 * 978.26 * value + 1400) / 10000;
-            } else if (formel.includes('(176.64')) {
-                // Formel für 2025
-                return (2 * 176.64 * value + 2397) / 10000;
-            } else if (formel.includes('(181.19')) {
-                // Formel für 2026
+            } else if (formel.includes('954.80')) {
+                return (2 * 954.80 * value + 1400) / 10000;
+            } else if (formel.includes('932.30')) {
+                return (2 * 932.30 * value + 1400) / 10000;
+            } else if (formel.includes('955.28')) {
+                return (2 * 955.28 * value + 1400) / 10000;
+            } else if (formel.includes('206.43')) {
+                return (2 * 206.43 * value + 2397) / 10000;
+            } else if (formel.includes('192.59')) {
+                return (2 * 192.59 * value + 2397) / 10000;
+            } else if (formel.includes('181.19')) {
                 return (2 * 181.19 * value + 2397) / 10000;
-            } else if (formel.includes('(185.74')) {
-                // Formel für 2027
-                return (2 * 185.74 * value + 2397) / 10000;
+            } else if (formel.includes('176.64')) {
+                return (2 * 176.64 * value + 2397) / 10000;
             }
             return 0;
         }
 
-        // Ergebnisse anzeigen
-        function displayResults(results) {
-            taxResult.textContent = `${results.tax.toLocaleString('de-DE')} €`;
-            marginalRate.textContent = `${results.marginalRate.toFixed(2)} %`;
-            averageRate.textContent = `${results.averageRate.toFixed(2)} %`;
-            calculationDetails.innerHTML = results.details;
-        }
-
-        // Event Listener
-        yearSelect.addEventListener('change', (e) => {
-            if (e.target.value) {
-                updateTarifDisplay(e.target.value);
-            }
-        });
-
-        calculateBtn.addEventListener('click', () => {
+        // Gesamtberechnung durchführen
+        function calculateTotal() {
             const year = yearSelect.value;
-            const income = parseFloat(incomeInput.value);
+            const income1 = parseFloat(incomeInput1.value) || 0;
+            const income2 = isSplitting ? (parseFloat(incomeInput2.value) || 0) : 0;
 
             if (!year) {
                 alert('Bitte wählen Sie ein Jahr aus.');
                 return;
             }
 
-            if (!income || income < 0 || isNaN(income)) {
+            if (income1 <= 0) {
                 alert('Bitte geben Sie ein gültiges Einkommen ein.');
                 return;
             }
 
+            if (isSplitting && income2 <= 0) {
+                alert('Bitte geben Sie auch das Einkommen der zweiten Person ein.');
+                return;
+            }
+
             try {
-                const results = calculateTax(year, income);
-                displayResults(results);
+                // Gesamteinkommen
+                const totalGrossIncome = isSplitting ? (income1 + income2) : income1;
+                grossIncome.textContent = `${totalGrossIncome.toLocaleString('de-DE')} €`;
+                
+                if (isSplitting) {
+                    incomeDetails.textContent = `Person 1: ${income1.toLocaleString('de-DE')} €, Person 2: ${income2.toLocaleString('de-DE')} €`;
+                } else {
+                    incomeDetails.textContent = 'jährlich';
+                }
+                
+                // Steuern berechnen
+                const taxResult = calculateTax(year, income1, income2);
+                
+                // Sozialabgaben berechnen (vereinfacht: nur für Hauptverdiener)
+                const socialResult = calculateSocialInsurance(year, income1);
+                
+                // Nettoeinkommen
+                const totalDeductions = taxResult.tax + socialResult.totalInsurance;
+                const netto = totalGrossIncome - totalDeductions;
+                
+                // Prozentuale Anteile
+                const taxBurdenPercent = (totalDeductions / totalGrossIncome) * 100;
+                const insurancePercent = (socialResult.totalInsurance / totalGrossIncome) * 100;
+                
+                // Ergebnisse anzeigen
+                displayResults(taxResult, socialResult, netto, taxBurdenPercent, insurancePercent, totalGrossIncome);
+                
             } catch (error) {
                 alert('Fehler bei der Berechnung: ' + error.message);
             }
+        }
+
+        // Ergebnisse anzeigen
+        function displayResults(taxResult, socialResult, netto, taxBurdenPercent, insurancePercent, totalGrossIncome) {
+            // Steuerergebnisse
+            document.getElementById('taxResult').textContent = `${taxResult.tax.toLocaleString('de-DE')} €`;
+            marginalRate.textContent = `${taxResult.marginalRate.toFixed(2)}%`;
+            averageRate.textContent = `${taxResult.averageRate.toFixed(2)}%`;
+            
+            // Splittingvorteil anzeigen
+            if (isSplitting && taxResult.splittingAdvantage > 0) {
+                splittingResult.style.display = 'block';
+                splittingAdvantage.textContent = `${taxResult.splittingAdvantage.toLocaleString('de-DE')} €`;
+            } else {
+                splittingResult.style.display = 'none';
+            }
+            
+            // Sozialabgaben
+            totalInsurance.textContent = `${socialResult.totalInsurance.toLocaleString('de-DE')} €`;
+            insurancePercentage.textContent = `${insurancePercent.toFixed(1)}%`;
+            
+            // Versicherungsdetails
+            kvAmount.textContent = `${socialResult.kvAmount.toLocaleString('de-DE')} €`;
+            kvRate.textContent = `${socialResult.kvRate.toFixed(2)}%`;
+            pvAmount.textContent = `${socialResult.pvAmount.toLocaleString('de-DE')} €`;
+            pvRate.textContent = `${socialResult.pvRate.toFixed(2)}%`;
+            rvAmount.textContent = `${socialResult.rvAmount.toLocaleString('de-DE')} €`;
+            rvRate.textContent = `${socialResult.rvRate.toFixed(2)}%`;
+            avAmount.textContent = `${socialResult.avAmount.toLocaleString('de-DE')} €`;
+            avRate.textContent = `${socialResult.avRate.toFixed(2)}%`;
+            
+            // Netto und Statistiken
+            netIncome.textContent = `${netto.toLocaleString('de-DE')} €`;
+            taxBurden.textContent = `${taxBurdenPercent.toFixed(1)}%`;
+            monthlyNet.textContent = `${Math.round(netto / 12).toLocaleString('de-DE')} €`;
+            
+            // Details
+            calculationDetails.innerHTML = `
+                <strong>Steuerberechnung${isSplitting ? ' (Splitting)' : ''}:</strong><br>
+                ${taxResult.details}<br><br>
+                ${isSplitting && taxResult.splittingAdvantage > 0 ? 
+                    `<strong>Splittingvorteil:</strong><br>Ersparnis: ${taxResult.splittingAdvantage.toLocaleString('de-DE')} €<br><br>` : ''}
+                <strong>Sozialabgaben (${currentRegion === 'west' ? 'West' : 'Ost'}):</strong><br>
+                ${socialResult.details}<br>
+                Beitragsbemessungsgrenze: ${socialResult.bbmg.toLocaleString('de-DE')} €<br><br>
+                <strong>Zusammenfassung:</strong><br>
+                Brutto: ${totalGrossIncome.toLocaleString('de-DE')} €<br>
+                - Einkommensteuer: ${taxResult.tax.toLocaleString('de-DE')} €<br>
+                - Sozialabgaben: ${socialResult.totalInsurance.toLocaleString('de-DE')} €<br>
+                = Netto: ${netto.toLocaleString('de-DE')} € (${Math.round(netto / 12).toLocaleString('de-DE')} € monatlich)
+            `;
+        }
+
+        // Event Listener
+        yearSelect.addEventListener('change', (e) => {
+            if (e.target.value) {
+                updateTaxClassInfo(e.target.value);
+            }
         });
 
-        // Beispiel bei Eingabe von 85000
-        incomeInput.addEventListener('keypress', (e) => {
+        calculateBtn.addEventListener('click', calculateTotal);
+
+        incomeInput1.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                calculateBtn.click();
+                calculateTotal();
             }
         });
 
-        // Beispielwert setzen und automatisch berechnen
-        incomeInput.addEventListener('focus', () => {
-            if (!incomeInput.value) {
-                incomeInput.value = '85000';
+        incomeInput2.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                calculateTotal();
             }
+        });
+
+        // Bei Änderung der Checkboxes neu berechnen
+        [kvCheckbox, pvCheckbox, rvCheckbox, avCheckbox].forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                if (incomeInput1.value && yearSelect.value) {
+                    calculateTotal();
+                }
+            });
         });
 
         // Initialisierung
-        loadTarifData();
+        function init() {
+            setupRegionSelector();
+            setupTaxClassSelector();
+            setupSplittingToggle();
+            loadTarifData();
+        }
+
+        // Start
+        init();
     </script>
 </body>
 </html>

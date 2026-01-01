@@ -1,4 +1,5 @@
-[{
+[
+  {
     "jahr": "2022",
     "grundfreibetrag": "10347",
     "tarif1": {
@@ -12,109 +13,355 @@
       "formel": "(206.43 * z + 2397) * z + 869.32"
     },
     "tarif3": {
-      "von": "585967",
+      "von": "58597",
       "bis": "277825",
-      "formel": "0.42 • x - 9336.45"
+      "formel": "0.42 * x - 9336.45"
     },
     "tarif4": {
       "von": "277826",
       "bis": "999999999",
-      "formel": "0.45 • x - 17671.20"
+      "formel": "0.45 * x - 17671.20"
+    },
+    "sozialabgaben": {
+      "krankenversicherung": {
+        "west": "0.073",
+        "ost": "0.073",
+        "zusatzbeitrag": "0.011"
+      },
+      "pflegeversicherung": {
+        "west": "0.0175",
+        "ost": "0.0305"
+      },
+      "rentenversicherung": {
+        "west": "0.093",
+        "ost": "0.093"
+      },
+      "arbeitslosenversicherung": {
+        "west": "0.012",
+        "ost": "0.012"
+      },
+      "beitragsbemessungsgrenze": {
+        "west": "58350",
+        "ost": "56250"
+      }
+    },
+    "steuerklassen": {
+      "freibetraege": {
+        "I": "0",
+        "II": "1308",
+        "III": "2000",
+        "IV": "0",
+        "V": "0",
+        "VI": "0"
+      },
+      "vorsorgepauschale": {
+        "I": "0.12",
+        "II": "0.12",
+        "III": "0.12",
+        "IV": "0.12",
+        "V": "0.12",
+        "VI": "0.12"
+      },
+      "sonderausgaben": {
+        "I": "36",
+        "II": "36",
+        "III": "36",
+        "IV": "36",
+        "V": "36",
+        "VI": "36"
+      }
     }
   },
-{
+  {
     "jahr": "2023",
     "grundfreibetrag": "10908",
     "tarif1": {
       "von": "10909",
       "bis": "15999",
-      "formel": "(978.26 • y + 1400) • y"
+      "formel": "(978.26 * y + 1400) * y"
     },
     "tarif2": {
       "von": "16000",
       "bis": "62809",
-      "formel": "(192.59 • z + 2397) • z + 966.53"
+      "formel": "(192.59 * z + 2397) * z + 966.53"
     },
     "tarif3": {
       "von": "62810",
       "bis": "277825",
-      "formel": "0.42 • x - 9972.98"
+      "formel": "0.42 * x - 9972.98"
     },
     "tarif4": {
       "von": "277826",
       "bis": "999999999",
-      "formel": "0.45 • x - 18307.73"
+      "formel": "0.45 * x - 18307.73"
+    },
+    "sozialabgaben": {
+      "krankenversicherung": {
+        "west": "0.073",
+        "ost": "0.073",
+        "zusatzbeitrag": "0.013"
+      },
+      "pflegeversicherung": {
+        "west": "0.0175",
+        "ost": "0.032"
+      },
+      "rentenversicherung": {
+        "west": "0.093",
+        "ost": "0.093"
+      },
+      "arbeitslosenversicherung": {
+        "west": "0.012",
+        "ost": "0.012"
+      },
+      "beitragsbemessungsgrenze": {
+        "west": "59850",
+        "ost": "57600"
+      }
+    },
+    "steuerklassen": {
+      "freibetraege": {
+        "I": "0",
+        "II": "1368",
+        "III": "2000",
+        "IV": "0",
+        "V": "0",
+        "VI": "0"
+      },
+      "vorsorgepauschale": {
+        "I": "0.12",
+        "II": "0.12",
+        "III": "0.12",
+        "IV": "0.12",
+        "V": "0.12",
+        "VI": "0.12"
+      },
+      "sonderausgaben": {
+        "I": "36",
+        "II": "36",
+        "III": "36",
+        "IV": "36",
+        "V": "36",
+        "VI": "36"
+      }
     }
   },
-{
+  {
     "jahr": "2024",
     "grundfreibetrag": "11784",
     "tarif1": {
       "von": "11785",
       "bis": "17005",
-      "formel": "(954.80 • y + 1400) • y"
+      "formel": "(954.80 * y + 1400) * y"
     },
     "tarif2": {
       "von": "17006",
       "bis": "66760",
-      "formel": "(181.19 • z + 2397) • z + 991.21"
+      "formel": "(181.19 * z + 2397) * z + 991.21"
     },
     "tarif3": {
       "von": "66761",
       "bis": "277825",
-      "formel": "0.42 • x - 10636.31"
+      "formel": "0.42 * x - 10636.31"
     },
     "tarif4": {
       "von": "277826",
       "bis": "999999999",
-      "formel": "0.45 • x - 18971.06"
+      "formel": "0.45 * x - 18971.06"
+    },
+    "sozialabgaben": {
+      "krankenversicherung": {
+        "west": "0.073",
+        "ost": "0.073",
+        "zusatzbeitrag": "0.014"
+      },
+      "pflegeversicherung": {
+        "west": "0.0185",
+        "ost": "0.0325"
+      },
+      "rentenversicherung": {
+        "west": "0.094",
+        "ost": "0.094"
+      },
+      "arbeitslosenversicherung": {
+        "west": "0.012",
+        "ost": "0.012"
+      },
+      "beitragsbemessungsgrenze": {
+        "west": "62400",
+        "ost": "60000"
+      }
+    },
+    "steuerklassen": {
+      "freibetraege": {
+        "I": "0",
+        "II": "1432",
+        "III": "2000",
+        "IV": "0",
+        "V": "0",
+        "VI": "0"
+      },
+      "vorsorgepauschale": {
+        "I": "0.12",
+        "II": "0.12",
+        "III": "0.12",
+        "IV": "0.12",
+        "V": "0.12",
+        "VI": "0.12"
+      },
+      "sonderausgaben": {
+        "I": "36",
+        "II": "36",
+        "III": "36",
+        "IV": "36",
+        "V": "36",
+        "VI": "36"
+      }
     }
   },
   {
     "jahr": "2025",
     "grundfreibetrag": "12096",
     "tarif1": {
-      "von": "12397",
+      "von": "12097",
       "bis": "17443",
-      "formel": "(932.30 • y + 1400) • y"
+      "formel": "(932.30 * y + 1400) * y"
     },
     "tarif2": {
       "von": "17444",
       "bis": "68480",
-      "formel": "(176.64 • z + 2397) • z + 1015.13"
+      "formel": "(176.64 * z + 2397) * z + 1015.13"
     },
     "tarif3": {
       "von": "68481",
       "bis": "277825",
-      "formel": "0.42 • x - 10311.92"
+      "formel": "0.42 * x - 10911.92"
     },
     "tarif4": {
       "von": "277826",
       "bis": "999999999",
-      "formel": "0.45 • x - 19246.67"
+      "formel": "0.45 * x - 19246.67"
+    },
+    "sozialabgaben": {
+      "krankenversicherung": {
+        "west": "0.073",
+        "ost": "0.073",
+        "zusatzbeitrag": "0.015"
+      },
+      "pflegeversicherung": {
+        "west": "0.0195",
+        "ost": "0.0335"
+      },
+      "rentenversicherung": {
+        "west": "0.095",
+        "ost": "0.095"
+      },
+      "arbeitslosenversicherung": {
+        "west": "0.012",
+        "ost": "0.012"
+      },
+      "beitragsbemessungsgrenze": {
+        "west": "64500",
+        "ost": "61500"
+      }
+    },
+    "steuerklassen": {
+      "freibetraege": {
+        "I": "0",
+        "II": "1476",
+        "III": "2000",
+        "IV": "0",
+        "V": "0",
+        "VI": "0"
+      },
+      "vorsorgepauschale": {
+        "I": "0.12",
+        "II": "0.12",
+        "III": "0.12",
+        "IV": "0.12",
+        "V": "0.12",
+        "VI": "0.12"
+      },
+      "sonderausgaben": {
+        "I": "36",
+        "II": "36",
+        "III": "36",
+        "IV": "36",
+        "V": "36",
+        "VI": "36"
+      }
     }
   },
   {
     "jahr": "2026",
-    "grundfreibetrag": "12096",
+    "grundfreibetrag": "12396",
     "tarif1": {
-      "von": "12097",
-      "bis": "17443",
-      "formel": "(932.30 • y + 1400) • y"
+      "von": "12397",
+      "bis": "17863",
+      "formel": "(955.28 * y + 1400) * y"
     },
     "tarif2": {
-      "von": "17444",
-      "bis": "68480",
-      "formel": "(176.64 • z + 2397) • z + 1015.13"
+      "von": "17864",
+      "bis": "70160",
+      "formel": "(181.19 * z + 2397) * z + 1041.52"
     },
     "tarif3": {
-      "von": "68481",
+      "von": "70161",
       "bis": "277825",
-      "formel": "0.42 • x - 10911.92"
+      "formel": "0.42 * x - 11188.72"
     },
     "tarif4": {
       "von": "277826",
       "bis": "999999999",
-      "formel": "0.45 • x - 19246.67"
+      "formel": "0.45 * x - 19726.48"
+    },
+    "sozialabgaben": {
+      "krankenversicherung": {
+        "west": "0.073",
+        "ost": "0.073",
+        "zusatzbeitrag": "0.016"
+      },
+      "pflegeversicherung": {
+        "west": "0.0205",
+        "ost": "0.0345"
+      },
+      "rentenversicherung": {
+        "west": "0.096",
+        "ost": "0.096"
+      },
+      "arbeitslosenversicherung": {
+        "west": "0.012",
+        "ost": "0.012"
+      },
+      "beitragsbemessungsgrenze": {
+        "west": "66600",
+        "ost": "63000"
+      }
+    },
+    "steuerklassen": {
+      "freibetraege": {
+        "I": "0",
+        "II": "1520",
+        "III": "2000",
+        "IV": "0",
+        "V": "0",
+        "VI": "0"
+      },
+      "vorsorgepauschale": {
+        "I": "0.12",
+        "II": "0.12",
+        "III": "0.12",
+        "IV": "0.12",
+        "V": "0.12",
+        "VI": "0.12"
+      },
+      "sonderausgaben": {
+        "I": "36",
+        "II": "36",
+        "III": "36",
+        "IV": "36",
+        "V": "36",
+        "VI": "36"
+      }
     }
-}]
+  }
+]
