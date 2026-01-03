@@ -1,0 +1,2199 @@
+<!--
+ * ============================================================================
+ * Kredit & Hypothekenrechner - v2.0.7
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Keine Weitergabe und Bearbeitung
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-ND 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - KEINE WEITERGABE UND BEARBEITUNG — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, dürfen Sie Ihre Beiträge nicht weitergeben oder bearbeiten
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
+ 
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+    <title>Kredit & Hypothekenrechner</title>
+    
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta name="keywords" content="Annuität, Prozentannuität, Hypothek, Tilgungsplan, Nominalzins, Tilgungsrechner" />
+    
+    <!-- Canonical link to original -->
+    <link rel="canonical" href="https://kredit.koch.team/" />
+
+    <meta name="application-name" content="Finanzrechner" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Finanzrechner von Koch.Team" />
+    <meta name="description" content="Annuitäten und Tilgungspläne mit Nominalzinsen" />
+    <meta name="theme-color" content="#2c3e50" />
+    <meta name="msapplication-TileColor" content="#2c3e50" />
+    
+    <!-- Home Icons -->
+    <link rel="apple-touch-icon" href="./icons/icon-57.png" />
+    <link rel="apple-touch-icon" href="./icons/icon-57.png" sizes="57x57" />
+    <link rel="apple-touch-icon" href="./icons/icon-76.png" sizes="76x76" />
+    <link rel="apple-touch-icon" href="./icons/icon-120.png" sizes="120x120" />
+    
+    <!-- Favicon Icon -->
+    <link rel="icon" type="image/png" sizes="100x100" href="./icons/favicon.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="./icons/favicon.ico" />
+
+    <!--[if IE]>
+      <link rel="shortcut icon" type="image/x-icon" href="./icons/favicon.ico" />
+    <![endif]--><!-- Internet Explorer-->
+
+    <link rel="manifest" href="kredit.webmanifest" />
+    
+    <!-- Chart.js für Visualisierung -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- jsPDF für PDF-Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --header-gradient: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ============================= */
+        /* PROFESSIONELLER HEADER */
+        /* ============================= */
+        header {
+            background: var(--header-gradient);
+            color: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+            border-bottom: 3px solid #2980b9;
+        }
+
+        /* Subtiler Hintergrund-Effekt */
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 65%, rgba(255, 255, 255, 0.05) 65%, rgba(255, 255, 255, 0.05) 70%, transparent 70%),
+                        linear-gradient(-45deg, transparent 65%, rgba(255, 255, 255, 0.05) 65%, rgba(255, 255, 255, 0.05) 70%, transparent 70%);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 15px;
+        }
+
+        .logo h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo .subtitle {
+            font-size: 1.1rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .logo p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Header-Badge für Nominalzinsen */
+        .header-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 6px 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 12px;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive Header */
+        @media (max-width: 768px) {
+            header {
+                padding: 25px 20px;
+            }
+            
+            .logo h1 {
+                font-size: 1.8rem;
+            }
+            
+            .logo .subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 20px 15px;
+                border-radius: 6px;
+            }
+            
+            .logo h1 {
+                font-size: 1.6rem;
+            }
+            
+            .logo .subtitle {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* ============================= */
+        /* RESTLICHES DESIGN */
+        /* ============================= */
+        .noscript-warning {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            color: #c62828;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #e74c3c;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Info/Erklärungsbereich */
+        .info-section {
+            background: #ffffff;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid #e9ecef;
+        }
+
+        .info-section h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+
+        .info-section h3 i {
+            font-style: normal;
+            font-size: 1.3em;
+        }
+
+        .info-toggle {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .info-toggle:hover {
+            background: #2980b9;
+        }
+
+        .info-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-content.show {
+            display: block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid #e0e0e0;
+            transition: var(--transition);
+        }
+
+        .info-card:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card h4 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* Verbesserte Tab-Navigation */
+        .nav-tabs {
+            display: flex;
+            background-color: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: var(--box-shadow);
+            border: 1px solid #e0e0e0;
+        }
+
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background-color: var(--light-color);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            border-right: 1px solid #ddd;
+            position: relative;
+            color: #555;
+        }
+
+        .nav-tab:last-child {
+            border-right: none;
+        }
+
+        .nav-tab:hover {
+            background-color: #e3e8ed;
+            color: #2c3e50;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: white;
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .calculator-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid #e9ecef;
+        }
+
+        .calculator-card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: white;
+            padding: 18px 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: var(--transition);
+            font-family: 'Courier New', monospace;
+            background: #fafbfc;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            outline: none;
+            background: white;
+        }
+
+        .input-with-suffix {
+            position: relative;
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+            font-weight: 500;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #2573a7 100%);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #27ae60 0%, #219653 100%);
+            box-shadow: 0 2px 4px rgba(39, 174, 96, 0.2);
+        }
+
+        .btn-export:hover {
+            background: linear-gradient(135deg, #219653 0%, #1e8449 100%);
+            box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-pdf {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+        }
+
+        .btn-pdf:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+
+        .result-group {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .result-label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .result-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .percentage-inputs {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .percentage-input-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .percentage-result {
+            display: flex;
+            gap: 15px;
+        }
+
+        .info-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        .calculator-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .calculator-section.active {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #777;
+            font-size: 0.85rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9ecef;
+        }
+
+        /* Deutsche Zahlenformatierung für Ausgabefelder */
+        .result-display {
+            font-family: 'Courier New', monospace;
+            text-align: right;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: var(--primary-color);
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        /* --- Tilgungsplan Modernes Design --- */
+        .tilgungsplan-modern h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+        }
+
+        .tilgungsplan-modern h3 {
+            color: #34495e;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Summary Box (oben) */
+        .summary-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: var(--border-radius);
+            border: 1px solid #bdc3c7;
+        }
+
+        .summary-item {
+            padding: 12px;
+            border-left: 3px solid #3498db;
+            background: white;
+            border-radius: 4px;
+        }
+
+        .summary-label {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .summary-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* ZWEIZEILIGE DARSTELLUNG für große Beträge */
+        .two-line-value {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .amount-line {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .currency-line {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* Highlights */
+        .highlight-primary { color: #2980b9; }
+        .highlight-secondary { color: #27ae60; }
+        .highlight-tertiary { color: #e67e22; }
+        .highlight-info { color: #9b59b6; }
+
+        /* Tabelle */
+        .table-scroll-wrapper {
+            overflow-x: auto;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .tiltable-modern {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .tiltable-modern th, .tiltable-modern td {
+            padding: 10px 12px;
+            text-align: right;
+            border: 1px solid #ddd;
+        }
+
+        .tiltable-modern th {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            border-color: #2980b9;
+            font-size: 0.9rem;
+        }
+
+        .tiltable-modern tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Spezielle Spaltenausrichtung */
+        .tiltable-modern .col-jahr {
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .tiltable-modern .col-restschuld {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .tiltable-modern .col-tilg-anteil {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Break-Even Hervorhebung */
+        .tiltable-modern .break-even-row {
+            background: #fcf8e3 !important;
+            border: 2px solid #f39c12;
+        }
+
+        /* Zwischenbilanz & Finale Zusammenfassung - ZWEIZEILIG */
+        .intermediate-summary, .final-summary {
+            background: #ecf0f1;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: var(--border-radius);
+            border: 1px solid #bdc3c7;
+        }
+
+        .summary-data {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .summary-data span {
+            flex: 1 1 200px;
+            font-size: 1rem;
+        }
+
+        /* --- Visualisierung --- */
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .chart-btn {
+            padding: 8px 16px;
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            color: #555;
+        }
+
+        .chart-btn.active {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+        }
+
+        .chart-info {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .color-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Export-Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                max-width: 100%;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .nav-tab {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding: 12px;
+            }
+            
+            .nav-tab:last-child {
+                border-bottom: none;
+            }
+            
+            .summary-box {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .chart-container {
+                height: 350px;
+                padding: 10px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .export-buttons {
+                flex-direction: column;
+            }
+            
+            /* Bessere zweizeilige Darstellung auf Mobile */
+            .two-line-value .amount-line {
+                font-size: 1rem;
+            }
+            
+            .two-line-value .currency-line {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 12px 15px;
+            }
+            
+            .info-section {
+                padding: 15px;
+            }
+            
+            .tiltable-modern th, 
+            .tiltable-modern td {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+            
+            .percentage-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .percentage-input-wrapper {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .percentage-result {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .summary-data span {
+                flex: 1 1 100%;
+            }
+        }
+
+        /* --- Verbesserte Druckeranpassungen --- */
+        @media print {
+            body {
+                font-size: 11pt;
+                line-height: 1.4;
+                background: white !important;
+            }
+            
+            .container {
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                padding: 10mm;
+            }
+            
+            /* Alles ausblenden außer dem Tilgungsplan */
+            header,
+            .nav-tabs,
+            footer,
+            .btn,
+            .calculator-card .card-footer,
+            .chart-controls,
+            .export-buttons,
+            #visualizationContainer,
+            .app-footer,
+            .chart-info,
+            .info-section,
+            #annuitaet,
+            #prozent-annuitaet,
+            .card-header,
+            .info-text,
+            .info-toggle {
+                display: none !important;
+            }
+            
+            /* Nur den aktiven Tilgungsplan anzeigen */
+            .calculator-section.active {
+                display: block !important;
+                page-break-before: avoid;
+                margin: 0;
+                padding: 0;
+            }
+            
+            /* Optimierung des Tilgungsplans */
+            .tilgungsplan-modern {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .tilgungsplan-modern h2 {
+                font-size: 16pt;
+                margin-top: 0;
+                margin-bottom: 12pt;
+                padding-bottom: 6pt;
+                page-break-after: avoid;
+            }
+            
+            .tilgungsplan-modern h3 {
+                font-size: 13pt;
+                margin-top: 18pt;
+                margin-bottom: 10pt;
+                page-break-after: avoid;
+            }
+            
+            .summary-box {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 8pt !important;
+                margin-bottom: 15pt !important;
+                padding: 10pt !important;
+                border: 1pt solid #000 !important;
+                background-color: #f8f8f8 !important;
+                page-break-inside: avoid;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .summary-item {
+                padding: 6pt !important;
+                border-left: 2pt solid #3498db !important;
+            }
+            
+            .summary-label {
+                font-size: 9pt !important;
+            }
+            
+            .summary-value {
+                font-size: 10pt !important;
+            }
+            
+            .tiltable-modern {
+                font-size: 9pt !important;
+                page-break-inside: auto;
+            }
+            
+            .tiltable-modern th {
+                background-color: #ddd !important;
+                color: black !important;
+                font-weight: bold !important;
+                padding: 8pt 10pt !important;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .tiltable-modern td {
+                padding: 6pt 8pt !important;
+            }
+            
+            .tiltable-modern tr:nth-child(even) {
+                background-color: #f5f5f5 !important;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .break-even-row {
+                background-color: #fffacd !important;
+                border: 1pt solid #ffcc00 !important;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .intermediate-summary, 
+            .final-summary {
+                border: 1pt solid #000 !important;
+                background-color: #f0f0f0 !important;
+                padding: 12pt !important;
+                margin: 15pt 0 !important;
+                page-break-inside: avoid;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .plan-footer {
+                font-size: 8pt !important;
+                color: #666 !important;
+                margin-top: 20pt !important;
+            }
+            
+            /* Bessere Seitenumbrüche */
+            h2, h3 {
+                page-break-after: avoid;
+            }
+            
+            table {
+                page-break-inside: auto;
+            }
+            
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            
+            /* Keine Links im Druck */
+            a[href]:after {
+                content: none !important;
+            }
+            
+            /* Wasserzeichen */
+            body:after {
+                content: "© kredit.koch.team - Nominalzinsen";
+                position: fixed;
+                bottom: 10mm;
+                right: 10mm;
+                opacity: 0.2;
+                font-size: 9pt;
+                color: #666;
+                transform: rotate(-45deg);
+                transform-origin: bottom right;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- PROFESSIONELLER HEADER -->
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Kredit & Hypothekenrechner</h1>
+                    <div class="subtitle">Professionelle Finanzplanung</div>
+                    <p>Nominalzinssätze - Annuitäten und Tilgungspläne</p>
+                    <!-- <div class="header-badge">Berechnung mit Nominalzinssätzen</div> -->
+                </div>
+            </div>
+        </header>
+        
+        <noscript>
+            <div class="noscript-warning">
+                Sie haben JavaScript in Ihrem Browser ausgeschaltet! Dadurch ist es nicht möglich die Berechnungen durchzuführen.
+            </div>
+        </noscript>
+        
+        <!-- Erklärungsbereich -->
+        <div class="info-section">
+            <h3><i>💡</i> Wichtige Information: Zinsarten und Tilgungsformen</h3>
+            <p>Dieser Rechner arbeitet mit <strong>Nominalzinsen</strong> (nicht Effektivzinsen). Nominalzinsen sind die vereinbarten Zinsen ohne Berücksichtigung von Gebühren oder unterjähriger Verzinsung.</p>
+            
+            <button class="info-toggle" onclick="toggleInfo()">
+                <span>Mehr erfahren über Annuität vs. Prozentannuität</span>
+                <span>▼</span>
+            </button>
+            
+            <div class="info-content" id="infoContent">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>Annuität (laufzeitgebundene Tilgung)</h4>
+                        <p><strong>Definition:</strong> Die jährliche Gesamtzahlung (Zinsen + Tilgung) bleibt über die gesamte Laufzeit konstant.</p>
+                        <p><strong>Eigenschaften:</strong></p>
+                        <ul style="margin-left: 20px; margin-top: 8px; font-size: 0.9rem;">
+                            <li>Feste jährliche Rate</li>
+                            <li>Tilgung steigt mit der Zeit</li>
+                            <li>Zinsanteil sinkt mit der Zeit</li>
+                            <li>Laufzeit wird vorgegeben</li>
+                        </ul>
+                        <p><strong>Typisch für:</strong> Konsumentenkredite, Autokredite, Ratenkredite</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>Prozentannuität (Hypotheken-Tilgung)</h4>
+                        <p><strong>Definition:</strong> Die Tilgung beginnt mit einem festen Prozentsatz der Ursprungsschuld, die Annuität sinkt mit der Zeit.</p>
+                        <p><strong>Eigenschaften:</strong></p>
+                        <ul style="margin-left: 20px; margin-top: 8px; font-size: 0.9rem;">
+                            <li>Anfangstilgung in Prozent festgelegt</li>
+                            <li>Annuität sinkt leicht jährlich</li>
+                            <li>Laufzeit ergibt sich aus den Eingaben</li>
+                            <li>Oft mit Sondertilgungsoptionen</li>
+                        </ul>
+                        <p><strong>Typisch für:</strong> Hypothekendarlehen, Baufinanzierungen, Immobilienkredite</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>Vergleich</h4>
+                        <table style="width:100%; margin-top: 10px; font-size: 0.85rem; border-collapse: collapse;">
+                            <tr style="background-color: #f8f9fa;">
+                                <th style="padding: 6px; text-align: left; border: 1px solid #dee2e6;"></th>
+                                <th style="padding: 6px; text-align: left; border: 1px solid #dee2e6;">Annuität</th>
+                                <th style="padding: 6px; text-align: left; border: 1px solid #dee2e6;">Prozentannuität</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;"><strong>Rate</strong></td>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;">Konstant</td>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;">Leicht fallend</td>
+                            </tr>
+                            <tr style="background-color: #f8f9fa;">
+                                <td style="padding: 6px; border: 1px solid #dee2e6;"><strong>Tilgung</strong></td>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;">Steigend</td>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;">Anfangs % fest</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;"><strong>Laufzeit</strong></td>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;">Vorgegeben</td>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;">Errechnet</td>
+                            </tr>
+                            <tr style="background-color: #f8f9fa;">
+                                <td style="padding: 6px; border: 1px solid #dee2e6;"><strong>Break-Even</strong></td>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;">Später</td>
+                                <td style="padding: 6px; border: 1px solid #dee2e6;">Früher möglich</td>
+                            </tr>
+                        </table>
+                        <p style="margin-top: 10px; font-size: 0.8rem; color: #666;"><em>Tipp: Für Immobilienfinanzierungen wird meist die Prozentannuität verwendet!</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-tabs" id="navTabs">
+            <button class="nav-tab active" data-tab="annuitaet">Annuität (laufzeitgebunden)</button>
+            <button class="nav-tab" data-tab="prozent-annuitaet">Prozentannuität (Hypothek)</button>
+            <button class="nav-tab" data-tab="tilgungsplan" id="TilgungsplanTab" style="display:none;">Tilgungsplan & Ergebnis</button>
+        </div>
+        
+        <section id="annuitaet" class="calculator-section active">
+            <div class="calculator-card">
+                <div class="card-header">Annuitätenrechnung (laufzeitgebundene Tilgung)</div>
+                <div class="card-body">
+                    <form name="Annuitaet">
+                        <div class="form-group">
+                            <label for="schuldbetrag">Schuldbetrag (€):</label>
+                            <div class="input-with-suffix">
+                                <input type="text" name="Schuldbetrag" id="schuldbetrag" placeholder="z.B. 350.000,00" value="">
+                                <span class="input-suffix">€</span>
+                            </div>
+                            <p class="info-text">Geben Sie den Betrag ein (z.B. 350000 oder 350.000,00)</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="zinssatz">Nominalzinssatz:</label>
+                            <div class="input-with-suffix">
+                                <input type="text" name="Zinssatz" id="zinssatz" placeholder="z.B. 3,50">
+                                <span class="input-suffix">% p.a.</span>
+                            </div>
+                            <p class="info-text">Jahreszinssatz ohne Effektivzinsberechnung (z.B. 3,5 oder 3.50)</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tilgungsdauer">Tilgungsdauer:</label>
+                            <div class="input-with-suffix">
+                                <input type="text" name="Tilgungsdauer" id="tilgungsdauer" placeholder="z.B. 20">
+                                <span class="input-suffix">Jahre</span>
+                            </div>
+                            <p class="info-text">Gesamte Laufzeit des Kredits in Jahren</p>
+                        </div>
+                        
+                        <button type="button" class="btn" onclick="BerechneAnnuitaetMitKonvertierung()">Annuität berechnen und Tilgungsplan erstellen</button>
+                        
+                        <div class="result-group">
+                            <div class="result-label">Jährliche Annuität (konstant):</div>
+                            <div class="result-value">
+                                <input type="text" name="AnnuitaetImJahr" readonly class="result-display">
+                            </div>
+                        </div>
+                        
+                        <div class="result-group">
+                            <div class="result-label">Monatliche Rate (ca.):</div>
+                            <div class="result-value">
+                                <input type="text" name="MonatlicheRate" readonly class="result-display">
+                            </div>
+                        </div>
+                        
+                        <div class="result-group">
+                            <div class="result-label">Zinsen im 1. Jahr:</div>
+                            <div class="result-value">
+                                <input type="text" name="ZinsenErstesJahr" readonly class="result-display">
+                            </div>
+                        </div>
+                        
+                        <div class="result-group">
+                            <div class="result-label">Tilgung im 1. Jahr:</div>
+                            <div class="result-value percentage-result">
+                                <input type="text" name="TilgungErstesJahr" readonly class="result-display">
+                                <input type="text" name="TilgungProzent" readonly class="result-display percentage-field">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        
+        <section id="prozent-annuitaet" class="calculator-section">
+            <div class="calculator-card">
+                <div class="card-header">Prozentannuitätenrechnung (Hypothekendarlehen)</div>
+                <div class="card-body">
+                    <form name="ProzentAnnuitaet">
+                        <div class="form-group">
+                            <label for="prozent-schuldbetrag">Darlehenssumme (€):</label>
+                            <div class="input-with-suffix">
+                                <input type="text" name="Schuldbetrag" id="prozent-schuldbetrag" placeholder="z.B. 350.000,00" value="">
+                                <span class="input-suffix">€</span>
+                            </div>
+                            <p class="info-text">Geben Sie den Hypothekarbetrag ein (z.B. 350000 oder 350.000,00)</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="prozent-zinssatz">Nominalzinssatz:</label>
+                            <div class="input-with-suffix">
+                                <input type="text" name="Zinssatz" id="prozent-zinssatz" placeholder="z.B. 3,50">
+                                <span class="input-suffix">% p.a.</span>
+                            </div>
+                            <p class="info-text">Jahreszinssatz für die Baufinanzierung</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tilgungssatz">Anfangstilgung:</label>
+                            <div class="input-with-suffix">
+                                <input type="text" name="Tilgungssatz" id="tilgungssatz" placeholder="z.B. 2,00">
+                                <span class="input-suffix">% p.a.</span>
+                            </div>
+                            <p class="info-text">Tilgung in % der Ursprungsschuld (üblich: 1-5%)</p>
+                        </div>
+                        
+                        <button type="button" class="btn" onclick="BerechneProzentAnnuitaetMitKonvertierung()">Hypothek berechnen und Tilgungsplan erstellen</button>
+                        
+                        <div class="result-group">
+                            <div class="result-label">Erste Jahresannuität:</div>
+                            <div class="result-value">
+                                <input type="text" name="AnnuitaetImJahr" readonly class="result-display">
+                            </div>
+                        </div>
+                        
+                        <div class="result-group">
+                            <div class="result-label">Erste Monatsrate (ca.):</div>
+                            <div class="result-value">
+                                <input type="text" name="MonatlicheRate" readonly class="result-display">
+                            </div>
+                        </div>
+                        
+                        <div class="result-group">
+                            <div class="result-label">Gesamtlaufzeit:</div>
+                            <div class="result-value">
+                                <input type="text" name="LaufzeitInJahren" readonly class="result-display">
+                            </div>
+                        </div>
+                        
+                        <div class="result-group">
+                            <div class="result-label">Restschuld nach 10 Jahren:</div>
+                            <div class="result-value">
+                                <input type="text" name="Restschuld10Jahre" readonly class="result-display">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="tilgungsplan" class="calculator-section">
+            <div class="calculator-card">
+                <div class="card-header">Tilgungsplan-Ergebnis</div>
+                <div class="card-body" id="TilgungsplanContainer">
+                    <p>Führen Sie eine Annuitäten- oder Prozentannuitätenrechnung durch, um den Tilgungsplan zu generieren.</p>
+                </div>
+                <div class="card-body" id="visualizationContainer" style="display:none;">
+                    <div class="chart-controls">
+                        <button class="chart-btn active" data-chart="stacked">Gestapelte Ansicht</button>
+                        <button class="chart-btn" data-chart="line">Verlaufslinien</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="tiltChart" width="800" height="400"></canvas>
+                    </div>
+                    <div class="chart-info">
+                        <div class="info-item">
+                            <span class="color-indicator" style="background-color: #e74c3c;"></span>
+                            <span>Zinsanteil</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="color-indicator" style="background-color: #2ecc71;"></span>
+                            <span>Tilgungsanteil</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="color-indicator" style="background-color: #3498db;"></span>
+                            <span>Restschuld</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="export-buttons">
+                        <button type="button" class="btn btn-export" onclick="exportToCSV()">Als CSV exportieren</button>
+                        <button type="button" class="btn btn-pdf" onclick="generatePDF()">Als PDF speichern</button>
+                        <button type="button" class="btn" onclick="window.print()">Tilgungsplan drucken</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="app-footer">
+            <p class="footer-text">
+                <span style="vertical-align: middle;">
+                    Kredit- und Hypothekenrechner |
+                    Copyright © <script>document.write(new Date().getFullYear())</script> 
+                    Friedhelm Koch | Lizenz: 
+                    <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.de" 
+                    target="_blank" style="color: rgb(2, 103, 204);">CC BY-NC-ND 4.0</a>
+                </span>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // ============================================
+        // GLOBALE VARIABLEN
+        // ============================================
+        let tiltChart = null;
+        let currentTilgungsplanData = [];
+        let currentSummaryData = [];
+        let currentCalculationType = '';
+        let currentRestschuld10Jahre = 0;
+        let breakEvenYear = 0;
+
+        // ============================================
+        // HILFSFUNKTIONEN FÜR FORMATIERUNG
+        // ============================================
+
+        // Prüfen eines Feldes auf leeren Inhalt
+        function FeldLeer(FeldBezeichnung, Feld) {
+            if (!Feld || Feld.trim().length == 0) {
+                alert("Bitte geben Sie einen Wert im Feld '" + FeldBezeichnung + "' ein!");
+                return false;
+            }
+            return true;
+        }
+
+        // Prüfen des Feldes auf numerische Eingabe
+        function IstDMBetrag(FeldBezeichnung, Wert) {
+            const bereinigterWert = parseGermanNumber(Wert);
+            
+            if (isNaN(bereinigterWert)) {
+                alert("'" + Wert + "' ist kein gültiger Betrag im Feld '" + FeldBezeichnung + "'!\n\nBitte geben Sie eine Zahl ein (z.B. 350000 oder 350.000,00).");
+                return false;
+            }
+            
+            if (bereinigterWert <= 0) {
+                alert("Der Betrag im Feld '" + FeldBezeichnung + "' muss größer als 0 sein!");
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Prüfen des Feldes auf numerische Eingabe
+        function NumEingabe(FeldBezeichnung, Wert) {
+            const bereinigterWert = parseGermanNumber(Wert);
+            
+            if (isNaN(bereinigterWert)) {
+                alert("'" + Wert + "' ist kein gültiger numerischer Wert im Feld '" + FeldBezeichnung + "'!");
+                return false;
+            }
+            
+            if (bereinigterWert <= 0) {
+                alert("Der Wert im Feld '" + FeldBezeichnung + "' muss größer als 0 sein!");
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Prüfen eines Feldes auf nur ganze Zahlen (für Jahre)
+        function NurZahlen(FeldBezeichnung, Feld) {
+            const nurZiffern = Feld.replace(/[^0-9]/g, '');
+            
+            if (nurZiffern.length === 0) {
+                alert("Bitte geben Sie eine gültige Zahl im Feld '" + FeldBezeichnung + "' ein!");
+                return false;
+            }
+            
+            const zahl = parseInt(nurZiffern);
+            if (zahl <= 0) {
+                alert("Die Tilgungsdauer muss größer als 0 sein!");
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Formatierung mit Tausenderpunkt und Dezimalkomma
+        function formatGermanCurrency(amount) {
+            if (isNaN(amount)) return '0,00';
+            
+            const rounded = Math.round(amount * 100) / 100;
+            
+            return rounded.toLocaleString('de-DE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Runden und als String mit Komma zurückgeben (für Prozent)
+        function DMrunden(value) {
+            if (isNaN(value)) return '0,00';
+            
+            const rounded = Math.round(value * 100) / 100;
+            const formatted = rounded.toFixed(2).replace('.', ',');
+            
+            let [integerPart, decimalPart] = formatted.split(',');
+            integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            
+            return `${integerPart},${decimalPart}`;
+        }
+
+        // Einfache Eingabe-Konvertierung
+        function parseGermanNumber(input) {
+            if (!input) return NaN;
+            
+            let cleaned = input.toString()
+                .replace(/\s/g, '')
+                .replace(/\./g, '')
+                .replace(/,/g, '.')
+                .replace('%', '')
+                .trim();
+            
+            if (cleaned === '' || cleaned === '.') return NaN;
+                
+            const result = parseFloat(cleaned);
+            return isNaN(result) ? NaN : result;
+        }
+
+        // Hilfsfunktion zur Konvertierung von Komma zu Punkt (für Berechnungen)
+        function convertToDecimal(input) {
+            if (typeof input === 'string') {
+                return input.replace(/\./g, '').replace(',', '.').replace(/\s/g, '');
+            }
+            return input;
+        }
+
+        // ============================================
+        // UI HELPER FUNCTIONS
+        // ============================================
+
+        function toggleInfo() {
+            const content = document.getElementById('infoContent');
+            const toggleBtn = document.querySelector('.info-toggle');
+            
+            content.classList.toggle('show');
+            if (content.classList.contains('show')) {
+                toggleBtn.innerHTML = '<span>Weniger anzeigen</span> <span>▲</span>';
+            } else {
+                toggleBtn.innerHTML = '<span>Mehr erfahren über Annuität vs. Prozentannuität</span> <span>▼</span>';
+            }
+        }
+
+        // ============================================
+        // KORRIGIERTE HAUPTBERECHNUNGSFUNKTIONEN
+        // ============================================
+
+        // Annuitätenrechnung
+        function BerechneAnnuitaet(Schuldbetrag, Zinssatz, Tilgungsdauer) {
+            if (!IstDMBetrag("Schuldbetrag", Schuldbetrag) ||
+                !NumEingabe("Zinssatz", Zinssatz) ||
+                !NurZahlen("Tilgungsdauer", Tilgungsdauer) ||
+                !FeldLeer("Schuldbetrag", Schuldbetrag) ||
+                !FeldLeer("Zinssatz", Zinssatz) ||
+                !FeldLeer("Tilgungsdauer", Tilgungsdauer)) {
+                return;
+            }
+                
+            Schuldbetrag = parseGermanNumber(Schuldbetrag);
+            Zinssatz = parseGermanNumber(Zinssatz);
+            Tilgungsdauer = parseInt(convertToDecimal(Tilgungsdauer));
+
+            const ZinsProzent = Zinssatz / 100;   
+            const q = 1 + ZinsProzent;
+            const qhochn = Math.pow(q, Tilgungsdauer);
+            const Annu = (ZinsProzent * qhochn) / (qhochn - 1) * Schuldbetrag;
+            const Tilg = (ZinsProzent * Schuldbetrag) / (qhochn - 1);
+            const TilgProzent = Tilg * 100 / Schuldbetrag;
+            const TilgProzentPlan = TilgProzent / 100;
+            const Zinsen = Annu - Tilg;
+            const MonatlicheRate = Annu / 12;
+
+            document.Annuitaet.AnnuitaetImJahr.value = formatGermanCurrency(Annu) + ' €';
+            document.Annuitaet.MonatlicheRate.value = formatGermanCurrency(MonatlicheRate) + ' €';
+            document.Annuitaet.TilgungErstesJahr.value = formatGermanCurrency(Tilg) + ' €';
+            document.Annuitaet.TilgungProzent.value = DMrunden(TilgProzent) + ' %';
+            document.Annuitaet.ZinsenErstesJahr.value = formatGermanCurrency(Zinsen) + ' €';
+
+            currentCalculationType = 'AnnuitaetenRechnung';
+            
+            GeneriereUndZeigeTilgungsplan(ZinsProzent, TilgProzentPlan, Annu, Tilgungsdauer, Schuldbetrag, "AnnuitaetenRechnung");
+
+            return Annu;
+        }
+
+        // KORRIGIERTE Prozentannuitätenrechnung
+        function BerechneProzentAnnuitaet(Schuldbetrag, Zinssatz, Tilgungssatz) {
+            if (!IstDMBetrag("Schuldbetrag", Schuldbetrag) ||
+                !NumEingabe("Zinssatz", Zinssatz) ||
+                !NumEingabe("Tilgungssatz", Tilgungssatz) ||
+                !FeldLeer("Schuldbetrag", Schuldbetrag) ||
+                !FeldLeer("Zinssatz", Zinssatz) ||
+                !FeldLeer("Tilgungssatz", Tilgungssatz)) {
+                return;
+            }
+            
+            Schuldbetrag = parseGermanNumber(Schuldbetrag);
+            Zinssatz = parseGermanNumber(Zinssatz);
+            Tilgungssatz = parseGermanNumber(Tilgungssatz);
+                
+            const ZinsProzent = Zinssatz / 100;
+            const TilgungsProzent = Tilgungssatz / 100;   
+            const q = 1 + ZinsProzent;
+            const Annuitaet = (ZinsProzent + TilgungsProzent) * Schuldbetrag;
+            
+            // Berechnung der Laufzeit
+            let Laufzeit = 0;
+            if (TilgungsProzent > 0) {
+                Laufzeit = Math.log((ZinsProzent + TilgungsProzent) / TilgungsProzent) / Math.log(q);
+            }
+            
+            const MonatlicheRate = Annuitaet / 12;
+            
+            // Restschuld nach 10 Jahren berechnen
+            let Restschuld10Jahre = 0;
+            if (Laufzeit >= 10) {
+                const q10 = Math.pow(q, 10);
+                Restschuld10Jahre = Schuldbetrag * q10 - (Annuitaet / ZinsProzent * (q10 - 1));
+                if (Restschuld10Jahre < 0) Restschuld10Jahre = 0;
+            }
+            currentRestschuld10Jahre = Restschuld10Jahre;
+
+            // Ausgabe
+            document.ProzentAnnuitaet.AnnuitaetImJahr.value = formatGermanCurrency(Annuitaet) + ' €';
+            document.ProzentAnnuitaet.MonatlicheRate.value = formatGermanCurrency(MonatlicheRate) + ' €';
+            document.ProzentAnnuitaet.LaufzeitInJahren.value = DMrunden(Laufzeit) + ' Jahre';
+            document.ProzentAnnuitaet.Restschuld10Jahre.value = formatGermanCurrency(Restschuld10Jahre) + ' €';
+
+            currentCalculationType = 'ProzentAnnuitaetenRechnung';
+            
+            // WICHTIG: Tilgungsplan aufrufen
+            GeneriereUndZeigeTilgungsplan(ZinsProzent, TilgungsProzent, Annuitaet, Laufzeit, Schuldbetrag, "ProzentAnnuitaetenRechnung");
+            
+            return Annuitaet;
+        }
+
+        // ============================================
+        // KORRIGIERTE TILGUNGSPLAN GENERIERUNG
+        // ============================================
+
+        function GeneriereUndZeigeTilgungsplan(ZinsProzent, TilgungsProzent, Annuitaet, Laufzeit, Schuldbetrag, Rechnungstyp) {
+            const SchuldbetragStart = Number(Schuldbetrag);
+            const Laufende = Math.ceil(Laufzeit);
+            const AnnuitaetJahr = Number(Annuitaet);
+            const ZinsSatz = ZinsProzent * 100;
+            const TilgungsSatz = TilgungsProzent * 100;
+            const AnnuitaetMonat = AnnuitaetJahr / 12;
+            
+            let output = '';
+            currentTilgungsplanData = [];
+            currentSummaryData = [];
+            breakEvenYear = 0;
+
+            output += '<div class="tilgungsplan-modern">';
+
+            // Header und Zusammenfassung
+            output += '<div class="plan-header">';
+            output += '<h2>Tilgungsplan: ' + (Rechnungstyp === "AnnuitaetenRechnung" ? 'Annuitätenrechnung' : 'Prozentannuitätenrechnung') + '</h2>';
+            output += '</div>';
+
+            // Summary Box
+            output += '<div class="summary-box">';
+            
+            const summaryItems = [
+                { label: 'Schuldbetrag (Start)', value: formatGermanCurrency(SchuldbetragStart) + ' €' },
+                { label: 'Nominalzinssatz', value: DMrunden(ZinsSatz) + ' % p.a.' },
+                { label: 'Jährliche Annuität', value: formatGermanCurrency(AnnuitaetJahr) + ' €' },
+                { label: 'Monatliche Rate', value: formatGermanCurrency(AnnuitaetMonat) + ' €' },
+                { label: 'Gesamtlaufzeit', value: DMrunden(Laufzeit) + ' Jahre' }
+            ];
+            
+            if (TilgungsSatz > 0) {
+                summaryItems.push({ label: 'Anfangstilgung', value: DMrunden(TilgungsSatz) + ' %' });
+            }
+            
+            if (currentCalculationType === 'ProzentAnnuitaetenRechnung' && currentRestschuld10Jahre > 0) {
+                summaryItems.push({ label: 'Restschuld nach 10 Jahren', value: formatGermanCurrency(currentRestschuld10Jahre) + ' €' });
+            }
+            
+            summaryItems.forEach(item => {
+                currentSummaryData.push(item);
+                output += `<div class="summary-item">
+                    <div class="summary-label">${item.label}</div>
+                    <div class="summary-value highlight-primary">${item.value}</div>
+                </div>`;
+            });
+            
+            output += '</div>';
+
+            output += '<h3>Detailübersicht</h3>';
+            
+            // Tilgungsplan Tabelle starten
+            output += '<div class="table-scroll-wrapper">';
+            output += '<table class="tiltable-modern">';
+            output += '<thead><tr>';
+            output += '<th class="col-jahr">Jahr</th>';
+            output += '<th class="col-restschuld">Restschuld €</th>';
+            output += '<th class="col-zinsen">Zinsen €</th>';
+            output += '<th class="col-tilgung">Tilgung €</th>';
+            output += '<th class="col-tilg-anteil">Tilgung %</th>';
+            output += '</tr></thead>';
+            output += '<tbody>';
+
+            let GesTilgung = 0;
+            let GesZinsen = 0;
+            let Restschuld = SchuldbetragStart;
+            let j = 0;
+            let breakEvenFound = false;
+
+            for(let i = 1; i <= Laufende; i++) {
+                j++;
+
+                // --- Berechnung ---
+                let Zinsen = Restschuld * ZinsProzent;
+                let Tilgung = 0;
+                let AnnuitaetJahr_aktuell = AnnuitaetJahr;
+                
+                const istLetzteRate = (i === Laufende && Restschuld > 0);
+                
+                // KORREKTUR: Tippfehler behoben
+                if (istLetzteRate && Laufzeit % 1 !== 0) {
+                    // Bei ungerader Laufzeit
+                    const Teiljahre = Laufzeit - Math.floor(Laufzeit);
+                    Zinsen = Restschuld * ZinsProzent * Teiljahre; 
+                    Tilgung = Restschuld; // KORREKTUR: Hier war der Tippfehler
+                    AnnuitaetJahr_aktuell = Zinsen + Tilgung;
+                } else if (istLetzteRate) {
+                    // Bei glatter Laufzeit als letzte Rate
+                    Zinsen = Restschuld * ZinsProzent;
+                    Tilgung = Restschuld;
+                    AnnuitaetJahr_aktuell = Zinsen + Tilgung;
+                } else {
+                    // Normale Rate
+                    Tilgung = AnnuitaetJahr - Zinsen;
+                    if (Tilgung > Restschuld) {
+                        Tilgung = Restschuld;
+                        Zinsen = AnnuitaetJahr - Tilgung;
+                    }
+                }
+
+                GesZinsen += Zinsen;
+                GesTilgung += Tilgung;
+                
+                let RestschuldAmEnde = Restschuld - Tilgung;
+                if (RestschuldAmEnde < 0) RestschuldAmEnde = 0;
+
+                // Break-Even Erkennung (Tilgung > Zinsen)
+                if (!breakEvenFound && Tilgung > Zinsen) {
+                    breakEvenYear = i;
+                    breakEvenFound = true;
+                }
+                
+                const TilgungProz = (Number(Tilgung) * 100) / SchuldbetragStart;
+                
+                currentTilgungsplanData.push({
+                    jahr: i,
+                    restschuld: Restschuld,
+                    zinsen: Zinsen,
+                    tilgung: Tilgung,
+                    tilgungProzent: TilgungProz,
+                    annuitaet: AnnuitaetJahr_aktuell
+                });
+
+                const rowClass = (i === breakEvenYear) ? 'break-even-row' : '';
+                output += `<tr class="${rowClass}">
+                    <td class="col-jahr">${i}</td>
+                    <td class="col-restschuld">${formatGermanCurrency(Restschuld)}</td>
+                    <td class="col-zinsen">${formatGermanCurrency(Zinsen)}</td>
+                    <td class="col-tilgung">${formatGermanCurrency(Tilgung)}</td>
+                    <td class="col-tilg-anteil">${DMrunden(TilgungProz)}%</td>
+                </tr>`;
+
+                Restschuld = RestschuldAmEnde;
+
+                // Zwischenbilanz nach 5 Jahren
+                if(j === 5 && i < Laufende) {
+                    output += '</tbody></table></div>';
+                    
+                    // ZWEIZEILIGE DARSTELLUNG für große Beträge
+                    output += `<div class="intermediate-summary">
+                        <h4>Zwischenbilanz nach ${i} Jahren</h4>
+                        <div class="summary-data">
+                            <span>
+                                <div class="two-line-value">
+                                    <div class="amount-line">Restschuld:</div>
+                                    <div class="currency-line"><strong class="highlight-info">${formatGermanCurrency(Restschuld)} €</strong></div>
+                                </div>
+                            </span>
+                            <span>
+                                <div class="two-line-value">
+                                    <div class="amount-line">Gezahlte Zinsen:</div>
+                                    <div class="currency-line"><strong class="highlight-secondary">${formatGermanCurrency(GesZinsen)} €</strong></div>
+                                </div>
+                            </span>
+                            <span>
+                                <div class="two-line-value">
+                                    <div class="amount-line">Gezahlte Tilgung:</div>
+                                    <div class="currency-line"><strong class="highlight-secondary">${formatGermanCurrency(GesTilgung)} €</strong></div>
+                                </div>
+                            </span>
+                        </div>
+                    </div>`;
+                    
+                    output += '<h3>Detailübersicht (Fortsetzung)</h3>';
+                    output += '<div class="table-scroll-wrapper">';
+                    output += '<table class="tiltable-modern">';
+                    output += '<thead><tr><th class="col-jahr">Jahr</th><th class="col-restschuld">Restschuld €</th><th class="col-zinsen">Zinsen €</th><th class="col-tilgung">Tilgung €</th><th class="col-tilg-anteil">Tilgung %</th></tr></thead>';
+                    output += '<tbody>';
+                    j = 0;
+                }
+            }
+
+            output += '</tbody></table></div>';
+
+            // Gesamtzusammenfassung
+            GesZinsen = Math.round(GesZinsen * 100) / 100;
+            const GesZinsenProz = (GesZinsen * 100) / SchuldbetragStart;
+
+            output += `<div class="final-summary">
+                <h3>Gesamtergebnis</h3>
+                <div class="summary-data">
+                    <span>
+                        <div class="two-line-value">
+                            <div class="amount-line">Gesamtzinsen:</div>
+                            <div class="currency-line"><strong class="highlight-tertiary">${formatGermanCurrency(GesZinsen)} €</strong></div>
+                        </div>
+                    </span>
+                    <span>
+                        <div class="two-line-value">
+                            <div class="amount-line">Zinsanteil:</div>
+                            <div class="currency-line"><strong class="highlight-tertiary">${DMrunden(GesZinsenProz)}%</strong> vom Schuldbetrag</div>
+                        </div>
+                    </span>
+                    <span>
+                        <div class="two-line-value">
+                            <div class="amount-line">Break-Even:</div>
+                            <div class="currency-line"><strong class="highlight-tertiary">${breakEvenYear === 0 ? 'Nicht erreicht' : breakEvenYear + '. Jahr'}</strong></div>
+                        </div>
+                    </span>
+                </div>
+            </div>`;
+
+            output += `<div class="plan-footer">
+                <p><center>Erstellt am ${new Date().toLocaleDateString('de-DE')} | www.kredit.koch.team | © 1999 - ${new Date().getFullYear()}, by Friedhelm Koch</center></p>
+            </div>`;
+            
+            output += '</div>';
+
+            // Inhalt in den Container einfügen
+            document.getElementById('TilgungsplanContainer').innerHTML = output;
+
+            // Visualisierung anzeigen und erstellen
+            document.getElementById('visualizationContainer').style.display = 'block';
+            createVisualization();
+
+            // Tab sichtbar machen und zum Tab wechseln
+            const newTabButton = document.getElementById('TilgungsplanTab');
+            const targetSection = document.getElementById('tilgungsplan');
+            
+            if (newTabButton && targetSection) {
+                newTabButton.style.display = 'inline-block';
+                
+                document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.calculator-section').forEach(section => section.classList.remove('active'));
+
+                newTabButton.classList.add('active');
+                targetSection.classList.add('active');
+                
+                setTimeout(() => {
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
+        }
+
+        // ============================================
+        // VISUALISIERUNG MIT CHART.JS UND BREAK-EVEN LINIE
+        // ============================================
+
+        function createVisualization() {
+            if (!currentTilgungsplanData.length) return;
+            
+            const ctx = document.getElementById('tiltChart').getContext('2d');
+            
+            if (tiltChart) {
+                tiltChart.destroy();
+            }
+            
+            const years = currentTilgungsplanData.map(item => item.jahr);
+            const zinsen = currentTilgungsplanData.map(item => item.zinsen);
+            const tilgungen = currentTilgungsplanData.map(item => item.tilgung);
+            const restschulden = currentTilgungsplanData.map(item => item.restschuld);
+            
+            // Break-Even Jahr aus globaler Variable holen
+            const breakEvenIndex = breakEvenYear > 0 ? breakEvenYear - 1 : -1;
+            
+            tiltChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'Zinsanteil',
+                            data: zinsen,
+                            backgroundColor: '#e74c3c',
+                            stack: 'stack_0'
+                        },
+                        {
+                            label: 'Tilgungsanteil',
+                            data: tilgungen,
+                            backgroundColor: '#2ecc71',
+                            stack: 'stack_0'
+                        },
+                        {
+                            label: 'Restschuld',
+                            data: restschulden,
+                            type: 'line',
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { 
+                            title: { display: true, text: 'Jahre' },
+                            grid: {
+                                drawOnChartArea: true
+                            }
+                        },
+                        y: { 
+                            title: { display: true, text: 'Betrag in €' },
+                            beginAtZero: true,
+                            stacked: true
+                        },
+                        y1: {
+                            position: 'right',
+                            title: { display: true, text: 'Restschuld in €' },
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    label += formatGermanCurrency(context.parsed.y) + ' €';
+                                    return label;
+                                }
+                            }
+                        },
+                        annotation: {
+                            annotations: {}
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'breakEvenLine',
+                    afterDraw: function(chart) {
+                        if (breakEvenIndex >= 0 && breakEvenIndex < years.length) {
+                            const ctx = chart.ctx;
+                            const xAxis = chart.scales.x;
+                            const yAxis = chart.scales.y;
+                            
+                            const xPos = xAxis.getPixelForValue(breakEvenIndex);
+                            
+                            // Vertikale Linie zeichnen
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(xPos, yAxis.top);
+                            ctx.lineTo(xPos, yAxis.bottom);
+                            ctx.lineWidth = 2;
+                            ctx.strokeStyle = '#f39c12';
+                            ctx.setLineDash([5, 5]);
+                            ctx.stroke();
+                            
+                            // Label zeichnen
+                            ctx.fillStyle = '#f39c12';
+                            ctx.font = 'bold 12px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('Break-Even', xPos, yAxis.top - 10);
+                            ctx.restore();
+                        }
+                    }
+                }]
+            });
+            
+            setupChartControls();
+        }
+
+        function setupChartControls() {
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    updateChart(this.dataset.chart);
+                });
+            });
+        }
+
+        function updateChart(chartType) {
+            if (!tiltChart || !currentTilgungsplanData.length) return;
+            
+            const zinsen = currentTilgungsplanData.map(item => item.zinsen);
+            const tilgungen = currentTilgungsplanData.map(item => item.tilgung);
+            const restschulden = currentTilgungsplanData.map(item => item.restschuld);
+            
+            if (chartType === 'line') {
+                tiltChart.data.datasets = [
+                    {
+                        label: 'Zinsanteil',
+                        data: zinsen,
+                        type: 'line',
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Tilgungsanteil',
+                        data: tilgungen,
+                        type: 'line',
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Restschuld',
+                        data: restschulden,
+                        type: 'line',
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ];
+                tiltChart.options.scales.y.stacked = false;
+            } else {
+                tiltChart.data.datasets = [
+                    {
+                        label: 'Zinsanteil',
+                        data: zinsen,
+                        backgroundColor: '#e74c3c',
+                        stack: 'stack_0'
+                    },
+                    {
+                        label: 'Tilgungsanteil',
+                        data: tilgungen,
+                        backgroundColor: '#2ecc71',
+                        stack: 'stack_0'
+                    },
+                    {
+                        label: 'Restschuld',
+                        data: restschulden,
+                        type: 'line',
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ];
+                tiltChart.options.scales.y.stacked = true;
+            }
+            
+            tiltChart.update();
+        }
+
+        // ============================================
+        // EXPORT-FUNKTIONEN (PDF & CSV)
+        // ============================================
+
+        async function generatePDF() {
+            try {
+                if (!currentTilgungsplanData.length) {
+                    alert('Bitte erst einen Tilgungsplan berechnen.');
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                doc.setFontSize(16);
+                doc.setTextColor(44, 62, 80);
+                doc.text('Tilgungsplan - Kredit & Hypothekenrechner', 20, 20);
+                
+                doc.setFontSize(11);
+                doc.setTextColor(100);
+                doc.text('Erstellt am: ' + new Date().toLocaleDateString('de-DE'), 20, 30);
+                doc.text('Berechnung mit Nominalzinssätzen', 20, 36);
+                
+                doc.setFontSize(12);
+                doc.setTextColor(0);
+                
+                let yPos = 45;
+                currentSummaryData.forEach(item => {
+                    doc.text(item.label + ': ' + item.value, 20, yPos);
+                    yPos += 7;
+                });
+                
+                const tableData = currentTilgungsplanData.map(item => [
+                    item.jahr.toString(),
+                    formatGermanCurrency(item.restschuld) + ' €',
+                    formatGermanCurrency(item.zinsen) + ' €',
+                    formatGermanCurrency(item.tilgung) + ' €',
+                    DMrunden(item.tilgungProzent) + ' %'
+                ]);
+                
+                doc.autoTable({
+                    startY: yPos + 10,
+                    head: [['Jahr', 'Restschuld (€)', 'Zinsen (€)', 'Tilgung (€)', 'Tilgung %']],
+                    body: tableData,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [52, 152, 219],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    alternateRowStyles: {
+                        fillColor: [245, 245, 245]
+                    },
+                    margin: { left: 15, right: 15 },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 3,
+                        overflow: 'linebreak'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 15 },
+                        1: { cellWidth: 40 },
+                        2: { cellWidth: 35 },
+                        3: { cellWidth: 35 },
+                        4: { cellWidth: 25 }
+                    },
+                    didDrawPage: function(data) {
+                        doc.setFontSize(8);
+                        doc.setTextColor(150);
+                        doc.text('© ' + new Date().getFullYear() + ' - kredit.koch.team | CC BY-NC-ND 4.0', 
+                            data.settings.margin.left, 
+                            doc.internal.pageSize.height - 10);
+                    }
+                });
+                
+                const fileName = 'Tilgungsplan_' + new Date().toISOString().slice(0,10) + '.pdf';
+                doc.save(fileName);
+                
+            } catch (error) {
+                console.error('PDF-Generierung fehlgeschlagen:', error);
+                alert('PDF-Export ist momentan nicht verfügbar. Bitte nutzen Sie die Druckfunktion oder CSV-Export.');
+            }
+        }
+
+        function exportToCSV() {
+            if (!currentTilgungsplanData.length) {
+                alert('Bitte erst einen Tilgungsplan berechnen.');
+                return;
+            }
+            
+            let csv = 'Jahr;Restschuld (€);Zinsen (€);Tilgung (€);Tilgung (%)\n';
+            
+            currentTilgungsplanData.forEach(item => {
+                const row = [
+                    item.jahr,
+                    item.restschuld.toFixed(2).replace('.', ','),
+                    item.zinsen.toFixed(2).replace('.', ','),
+                    item.tilgung.toFixed(2).replace('.', ','),
+                    item.tilgungProzent.toFixed(2).replace('.', ',')
+                ];
+                csv += row.join(';') + '\n';
+            });
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Tilgungsplan_' + new Date().toISOString().slice(0,10) + '.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ============================================
+        // UI-STEUERUNG UND EREIGNISBEHANDLUNG
+        // ============================================
+
+        // Tab Navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.calculator-section').forEach(s => s.classList.remove('active'));
+                
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Wrapper-Funktionen für Annuitätenrechnung
+        function BerechneAnnuitaetMitKonvertierung() {
+            const schuldbetragInput = document.Annuitaet.Schuldbetrag.value;
+            const zinssatzInput = document.Annuitaet.Zinssatz.value;
+            const tilgungsdauerInput = document.Annuitaet.Tilgungsdauer.value;
+            
+            if (!schuldbetragInput || !zinssatzInput || !tilgungsdauerInput) {
+                alert('Bitte füllen Sie alle Felder aus.');
+                return;
+            }
+            
+            BerechneAnnuitaet(schuldbetragInput, zinssatzInput, tilgungsdauerInput);
+        }
+
+        // Wrapper-Funktionen für Prozentannuitätenrechnung
+        function BerechneProzentAnnuitaetMitKonvertierung() {
+            const schuldbetragInput = document.ProzentAnnuitaet.Schuldbetrag.value;
+            const zinssatzInput = document.ProzentAnnuitaet.Zinssatz.value;
+            const tilgungssatzInput = document.ProzentAnnuitaet.Tilgungssatz.value;
+            
+            if (!schuldbetragInput || !zinssatzInput || !tilgungssatzInput) {
+                alert('Bitte füllen Sie alle Felder aus.');
+                return;
+            }
+            
+            BerechneProzentAnnuitaet(schuldbetragInput, zinssatzInput, tilgungssatzInput);
+        }
+
+        // Eingabe-Helper für bessere UX
+        function setupInputHelpers() {
+            document.querySelectorAll('input[name$="betrag"], input[name$="Betrag"]').forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value) {
+                        const num = parseGermanNumber(this.value);
+                        if (!isNaN(num)) {
+                            this.value = formatGermanCurrency(num);
+                        }
+                    }
+                });
+            });
+            
+            document.querySelectorAll('input[name$="satz"]').forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value) {
+                        const num = parseGermanNumber(this.value);
+                        if (!isNaN(num)) {
+                            this.value = num.toFixed(2).replace('.', ',') + ' %';
+                        }
+                    }
+                });
+            });
+        }
+
+        // Initialisierung
+        document.addEventListener('DOMContentLoaded', function() {
+            setupInputHelpers();
+            
+            // Event für Enter-Taste
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const form = this.closest('form');
+                        if (form.name === 'Annuitaet') {
+                            BerechneAnnuitaetMitKonvertierung();
+                        } else if (form.name === 'ProzentAnnuitaet') {
+                            BerechneProzentAnnuitaetMitKonvertierung();
+                        }
+                    }
+                });
+            });
+        });
+
+        // Demo-Funktion
+        function demoBerechnung() {
+            document.Annuitaet.Schuldbetrag.value = '350000';
+            document.Annuitaet.Zinssatz.value = '3,50';
+            document.Annuitaet.Tilgungsdauer.value = '20';
+            BerechneAnnuitaetMitKonvertierung();
+        }
+    </script>
+</body>
+</html>

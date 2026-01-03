@@ -1,0 +1,58 @@
+{
+  "name": "Kredit- & Hypothekenrechner ",
+  "short_name": "Kredit- & Hypothekenrechner",
+  "description": "Professioneller Kreditrechner für Annuitäten, Prozentannuitäten und Tilgungspläne",
+  "version": "2.0.7",
+  "author": "Friedhelm Koch",
+  "start_url": "/",
+  "id": "/",
+  "isolated_storage": true,
+  "display": "standalone",
+  "background_color": "#2c3e50",
+  "theme_color": "#3498db",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "de-DE",
+  "launch_handler": { "client_mode": "credit-calculator" },
+  "window_controls_overlay": { "enabled": true },
+  "permissions_policy": {
+    "cross-origin-isolated": ["self"],
+    "direct-sockets": ["self"],
+    "controlled-frame": ["self"],
+    "window-management": ["self"],
+    "display-capture": ["self"],
+    "all-screens-capture": ["self"]
+  },
+  "icons": [
+    {
+      "src": "./icons/icon-57.png",
+      "sizes": "57x57",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-76.png",
+      "sizes": "76x76",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-120.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity", "utilities"],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=testid",
+      "id": "com.example.app1"
+    },
+    {
+      "platform": "amazon",
+      "url": "https://www.amazon.com/product/dp/B000XA1000"
+    }
+  ]
+}
