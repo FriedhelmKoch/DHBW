@@ -1,0 +1,1610 @@
+<!--
+ * ============================================================================
+ * Intelligente Strompreis-Optimierung - v1.0.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Keine Weitergabe und Bearbeitung
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-ND 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - KEINE WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, dürfen Sie Ihre Beiträge nicht unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Intelligente Strompreis-Optimierung</title>
+    <style>
+        /* Mobile-First Design - nur minimal angepasst */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        }
+        
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            padding: 10px;
+        }
+        
+        .container { 
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto; 
+            background: rgba(255,255,255,0.98); 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            overflow: hidden;
+        }
+        
+        header { 
+            background: linear-gradient(135deg, #00b894 0%, #0984e3 100%); 
+            color: white; 
+            padding: 20px 15px; 
+            text-align: center; 
+        }
+        
+        h1 { 
+            font-size: 1.5rem; 
+            margin-bottom: 8px; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            line-height: 1.3;
+        }
+        
+        /* Hauptlayout für Mobile */
+        .dashboard { 
+            padding: 15px; 
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* Für größere Screens */
+        @media (min-width: 900px) {
+            .container {
+                max-width: 900px;
+            }
+            
+            .dashboard {
+                display: grid;
+                grid-template-columns: 1fr 320px;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            header {
+                padding: 25px;
+            }
+        }
+        
+        /* Control Panel bleibt gleich - nur Breite angepasst */
+        .control-panel { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 12px; 
+            border: 2px solid #e9ecef; 
+        }
+        
+        .control-group { 
+            margin-bottom: 15px; 
+        }
+        
+        .control-group label { 
+            display: block; 
+            margin-bottom: 6px; 
+            font-weight: 600; 
+            color: #495057; 
+        }
+        
+        .control-group input, 
+        .control-group select { 
+            width: 100%; 
+            padding: 10px; 
+            border: 2px solid #dee2e6; 
+            border-radius: 8px; 
+            font-size: 16px; 
+        }
+        
+        .slider-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        
+        .slider-container input[type="range"] { 
+            flex: 1; 
+        }
+        
+        .slider-value { 
+            min-width: 55px; 
+            text-align: center; 
+            font-weight: bold; 
+            color: #0984e3; 
+        }
+        
+        /* Stats Grid angepasst für Mobile */
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            margin: 15px 0; 
+        }
+        
+        @media (min-width: 480px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        .stat-item { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 10px; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
+            text-align: center; 
+            border-top: 4px solid #00b894; 
+        }
+        
+        .stat-value { 
+            font-size: 1.3rem; 
+            font-weight: bold; 
+            color: #2d3436; 
+            margin: 8px 0; 
+        }
+        
+        /* Charts angepasst */
+        .chart-container { 
+            height: 250px; 
+            margin: 15px 0; 
+        }
+        
+        @media (min-width: 900px) {
+            .chart-container {
+                height: 280px;
+            }
+        }
+        
+        /* Buttons */
+        button { 
+            padding: 12px 20px; 
+            background: #00b894; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+        }
+        
+        button:hover { 
+            background: #00a085; 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(0,184,148,0.3); 
+        }
+        
+        .btn-group { 
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 8px; 
+            margin: 15px 0; 
+        }
+        
+        .btn-group button {
+            flex: 1;
+            min-width: calc(50% - 4px);
+        }
+        
+        /* Tab Navigation angepasst */
+        .tab-container { 
+            margin: 15px 0; 
+        }
+        
+        .tab-buttons { 
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 5px; 
+            margin-bottom: 10px; 
+        }
+        
+        .tab-button { 
+            flex: 1;
+            min-width: calc(33.333% - 4px);
+            padding: 10px 5px; 
+            background: #e9ecef; 
+            border: none; 
+            border-radius: 6px 6px 0 0; 
+            cursor: pointer; 
+            font-size: 0.85rem;
+        }
+        
+        .tab-button.active { 
+            background: #00b894; 
+            color: white; 
+        }
+        
+        .tab-content { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 0 6px 6px 6px; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
+        }
+        
+        /* Bestehende Styles beibehalten */
+        .price-table { 
+            width: 100%; 
+            background: white; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
+            margin: 15px 0; 
+            font-size: 0.9rem;
+        }
+        
+        .price-table th { 
+            background: #00b894; 
+            color: white; 
+            padding: 12px 10px; 
+            text-align: left; 
+        }
+        
+        .price-table td { 
+            padding: 10px; 
+            border-bottom: 1px solid #f1f2f6; 
+        }
+        
+        .battery-section { 
+            background: #2d3436; 
+            padding: 15px; 
+            border-radius: 10px; 
+            color: white; 
+            margin: 15px 0; 
+        }
+        
+        .battery-level { 
+            height: 25px; 
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #2ecc71); 
+            border-radius: 12px; 
+            overflow: hidden; 
+            margin: 10px 0; 
+        }
+        
+        .battery-fill { 
+            height: 100%; 
+            background: #00b894; 
+            transition: width 0.5s; 
+        }
+        
+        .consumption-profile { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 10px; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
+            margin: 15px 0; 
+        }
+        
+        .recommendation-card { 
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); 
+            color: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            margin-top: 20px; 
+        }
+        
+        .data-source { 
+            background: #fff3cd; 
+            color: #856404; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 10px; 
+            text-align: center; 
+        }
+        
+        .loading, .error, .info, .success { 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 10px; 
+            text-align: center; 
+        }
+        
+        .loading { background: #fff3cd; color: #856404; }
+        .error { background: #ff6b6b; color: white; }
+        .info { background: #4ecdc4; color: white; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        
+        .optimization-results { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin: 15px 0; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
+        }
+        
+        .result-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px 0; 
+            border-bottom: 1px solid #eee; 
+        }
+        
+        .result-item:last-child { 
+            border-bottom: none; 
+        }
+        
+        .result-label { 
+            font-weight: 600; 
+        }
+        
+        .result-value { 
+            font-weight: bold; 
+            color: #00b894; 
+        }
+        
+        .progress-bar { 
+            height: 16px; 
+            background: #e9ecef; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            margin: 10px 0; 
+        }
+        
+        .progress-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #00b894, #0984e3); 
+            transition: width 0.5s; 
+        }
+        
+        /* Kleinere Anpassungen für sehr kleine Screens */
+        @media (max-width: 360px) {
+            .stat-item {
+                padding: 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.1rem;
+            }
+            
+            .tab-button {
+                font-size: 0.75rem;
+                padding: 8px 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Intelligente Strompreis-Optimierung</h1>
+            <p style="font-size: 0.9rem;">Optimale Nutzungszeiten für Haushaltsgeräte & Akkus</p>
+        </header>
+        
+        <div class="dashboard">
+            <div>
+                <div class="info">
+                    <strong>📊 Echtzeit-Analyse:</strong> Vergleich von Strompreisen mit Ihrem Verbrauchsprofil
+                </div>
+                
+                <div class="data-source">
+                    <strong>📈 Datenquelle:</strong> Simulierte Preise basierend auf typischen Day-Ahead-Mustern
+                    <div style="margin-top: 5px; font-size: 0.85em;">
+                        Preismuster: Nachts ↓, Morgens ↑, Abends ↑↑, Wochenende ↓, Sonne/Wind ↓
+                    </div>
+                </div>
+                
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" onclick="showTab('prices')">Preise</button>
+                        <button class="tab-button" onclick="showTab('consumption')">Verbrauch</button>
+                        <button class="tab-button" onclick="showTab('comparison')">Vergleich</button>
+                        <button class="tab-button" onclick="showTab('savings')">Ersparnis</button>
+                        <button class="tab-button" onclick="showTab('optimization')">Optimierung</button>
+                    </div>
+                    
+                    <div id="tab-prices" class="tab-content">
+                        <div class="btn-group">
+                            <button onclick="loadData('today')">Heute</button>
+                            <button onclick="loadData('tomorrow')">Morgen</button>
+                            <button onclick="loadData('yesterday')">Gestern</button>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="priceChart"></canvas>
+                        </div>
+                        
+                        <div class="price-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Uhrzeit</th>
+                                        <th>Preis (ct/kWh)</th>
+                                        <th>vs. Durchschnitt</th>
+                                        <th>Empfehlung</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="priceTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="tab-consumption" class="tab-content" style="display: none;">
+                        <h3>🏠 Ihr typisches Verbrauchsprofil</h3>
+                        <div class="consumption-profile">
+                            <div class="chart-container">
+                                <canvas id="consumptionChart"></canvas>
+                            </div>
+                            
+                            <div style="margin-top: 20px;">
+                                <h4>Verbrauchszeiten anpassen (kW):</h4>
+                                <div class="control-group">
+                                    <label>🌅 Morgens (06:00-09:00) - Kaffee, Duschen, Frühstück</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="morningConsumption" min="0" max="5" value="2" step="0.5">
+                                        <span class="slider-value" id="morningValue">2.0 kW</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label>🏙️ Tagsüber (09:00-17:00) - Home Office, Kühlschrank</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="dayConsumption" min="0" max="3" value="0.8" step="0.1">
+                                        <span class="slider-value" id="dayValue">0.8 kW</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label>🌆 Abends (17:00-22:00) - Kochen, TV, Beleuchtung</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="eveningConsumption" min="0" max="8" value="3.5" step="0.5">
+                                        <span class="slider-value" id="eveningValue">3.5 kW</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="control-group">
+                                    <label>🌃 Nachts (22:00-06:00) - Standby, Kühlschrank</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="nightConsumption" min="0" max="2" value="0.5" step="0.1">
+                                        <span class="slider-value" id="nightValue">0.5 kW</span>
+                                    </div>
+                                </div>
+                                
+                                <button onclick="updateConsumptionAndCalculate()" style="width: 100%; margin-top: 15px;">
+                                    🔄 Verbrauch aktualisieren & neu berechnen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="tab-comparison" class="tab-content" style="display: none;">
+                        <h3>📈 Preis vs. Verbrauch im Vergleich</h3>
+                        <div class="chart-container">
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div>Günstigste Verbrauchszeit</div>
+                                <div id="bestConsumptionTime" class="stat-value">-</div>
+                                <div id="bestConsumptionPrice">- ct/kWh</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>Teuerste Verbrauchszeit</div>
+                                <div id="worstConsumptionTime" class="stat-value">-</div>
+                                <div id="worstConsumptionPrice">- ct/kWh</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <h4>💰 Aktuelle Kostenübersicht:</h4>
+                            <div class="result-item">
+                                <span class="result-label">Täglicher Gesamtverbrauch:</span>
+                                <span class="result-value" id="totalDailyConsumption">- kWh</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Durchschnittspreis:</span>
+                                <span class="result-value" id="currentAvgPrice">- ct/kWh</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Aktuelle Tageskosten:</span>
+                                <span class="result-value" id="currentDailyCost">- €</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="tab-savings" class="tab-content" style="display: none;">
+                        <h3>💰 Ersparnis-Potential</h3>
+                        
+                        <div class="optimization-results">
+                            <h4>📊 Kostenvergleich</h4>
+                            <div class="result-item">
+                                <span class="result-label">Aktuelle tägliche Kosten:</span>
+                                <span class="result-value" id="currentCostDisplay">- €</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Optimierte tägliche Kosten:</span>
+                                <span class="result-value" id="optimizedCostDisplay">- €</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Tägliche Ersparnis:</span>
+                                <span class="result-value" id="dailySavingsDisplay">- €</span>
+                            </div>
+                            
+                            <div class="progress-bar">
+                                <div id="savingsProgress" class="progress-fill" style="width: 0%;"></div>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 10px;">
+                                <span id="savingsPercent">0%</span> Einsparung möglich
+                            </div>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div>Monatliche Ersparnis</div>
+                                <div id="monthlySavings" class="stat-value">- €</div>
+                                <div>bei Umstellung</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>Jährliche Ersparnis</div>
+                                <div id="yearlySavings" class="stat-value">- €</div>
+                                <div>bei Umstellung</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 25px;">
+                            <h4>💡 Einspar-Tipps:</h4>
+                            <div id="savingTips"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="tab-optimization" class="tab-content" style="display: none;">
+                        <h3>⚡ Optimierungs-Ergebnisse</h3>
+                        
+                        <div class="optimization-results">
+                            <h4>✅ Empfohlene Maßnahmen:</h4>
+                            <div id="optimizationActions"></div>
+                            
+                            <h4 style="margin-top: 25px;">📅 Optimierter Tagesplan:</h4>
+                            <div id="optimizedSchedule"></div>
+                            
+                            <h4 style="margin-top: 25px;">🔋 Akku-Strategie:</h4>
+                            <div id="batteryStrategy"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div>Tagesdurchschnitt</div>
+                        <div id="avgPrice" class="stat-value">- ct/kWh</div>
+                        <div>€/MWh: <span id="avgPriceMWh">-</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div>Günstigste Stunde</div>
+                        <div id="bestTime" class="stat-value">-</div>
+                        <div><span id="bestPrice">-</span> ct/kWh</div>
+                    </div>
+                    <div class="stat-item">
+                        <div>Teuerste Stunde</div>
+                        <div id="worstTime" class="stat-value">-</div>
+                        <div><span id="worstPrice">-</span> ct/kWh</div>
+                    </div>
+                    <div class="stat-item">
+                        <div>Empf. Ladezeit</div>
+                        <div id="chargeTime" class="stat-value">-</div>
+                        <div><span id="chargeHours">-</span> Stunden</div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <button onclick="calculateOptimization()" style="background: #0984e3; padding: 18px 40px; font-size: 18px;">
+                        🔄 OPTIMIERUNG JETZT BERECHNEN
+                    </button>
+                    <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Klicken Sie hier um alle Berechnungen durchzuführen
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>⚙️ Einstellungen</h3>
+                
+                <div class="control-group">
+                    <label>🔋 Akku-Ladezustand (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="batteryLevel" min="0" max="100" value="35" step="5">
+                        <span class="slider-value" id="batteryValue">35%</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>🔋 Akku-Kapazität</label>
+                    <select id="batteryCapacity">
+                        <option value="5">5 kWh (kleiner Hausakku)</option>
+                        <option value="10" selected>10 kWh (typischer Hausakku)</option>
+                        <option value="15">15 kWh (großer Hausakku)</option>
+                        <option value="50">50 kWh (E-Auto)</option>
+                        <option value="75">75 kWh (großes E-Auto)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>⚡ Ladeleistung</label>
+                    <select id="chargePower">
+                        <option value="2.3">2.3 kW (Haushaltssteckdose)</option>
+                        <option value="3.7">3.7 kW (Wallbox Basic)</option>
+                        <option value="11" selected>11 kW (Wallbox Standard)</option>
+                        <option value="22">22 kW (Wallbox Pro)</option>
+                    </select>
+                </div>
+                
+                <div class="battery-section">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <div>🔋 Akku-Ladestatus</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;" id="batteryPercent">35%</div>
+                    </div>
+                    <div class="battery-level">
+                        <div id="batteryFill" class="battery-fill" style="width: 35%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                        <button onclick="chargeBattery(10)" class="btn-small" style="padding: 8px 12px; font-size: 0.85rem; background: #00b894; color: white; border: none; border-radius: 6px; cursor: pointer;">+10%</button>
+                        <button onclick="chargeBattery(25)" class="btn-small" style="padding: 8px 12px; font-size: 0.85rem; background: #00b894; color: white; border: none; border-radius: 6px; cursor: pointer;">+25%</button>
+                        <button onclick="dischargeBattery(10)" class="btn-small" style="padding: 8px 12px; font-size: 0.85rem; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer;">-10%</button>
+                        <button onclick="dischargeBattery(25)" class="btn-small" style="padding: 8px 12px; font-size: 0.85rem; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer;">-25%</button>
+                    </div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button onclick="setBatteryLevel()" style="width: 100%; padding: 10px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            🔢 Manuell eingeben
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>🌡️ Wärmepumpe (2.5 kW)</label>
+                    <select id="heatpumpMode">
+                        <option value="none">Keine</option>
+                        <option value="auto" selected>Automatisch (bei günstigen Preisen)</option>
+                        <option value="eco">Eco (nur günstigste Zeiten)</option>
+                        <option value="continuous">Dauerbetrieb</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>🧺 Waschmaschine (2.0 kW)</label>
+                    <select id="laundryTime">
+                        <option value="auto">Automatisch (günstigste Zeit)</option>
+                        <option value="morning" selected>Morgens</option>
+                        <option value="afternoon">Nachmittags</option>
+                        <option value="night">Nachts</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>🌤️ Wettervorhersage</label>
+                    <select id="weather">
+                        <option value="sunny">☀️ Sonnig (viel Solarstrom)</option>
+                        <option value="partly_cloudy">⛅ Teilweise bewölkt</option>
+                        <option value="cloudy">☁️ Bewölkt</option>
+                        <option value="rainy">🌧️ Regnerisch</option>
+                        <option value="windy">💨 Windig (viel Windstrom)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>📅 Wochentag</label>
+                    <select id="weekday">
+                        <option value="1">Montag (Werktag)</option>
+                        <option value="2">Dienstag (Werktag)</option>
+                        <option value="3">Mittwoch (Werktag)</option>
+                        <option value="4">Donnerstag (Werktag)</option>
+                        <option value="5">Freitag (Werktag)</option>
+                        <option value="6">Samstag (Wochenende)</option>
+                        <option value="0">Sonntag (Wochenende)</option>
+                    </select>
+                </div>
+                
+                <button onclick="calculateOptimization()" style="width: 100%; background: #0984e3; margin-top: 20px; padding: 14px;">
+                    🧮 Optimierung berechnen
+                </button>
+                
+                <div class="recommendation-card">
+                    <h4>💡 Empfehlung</h4>
+                    <div id="recommendationText">Berechnung wurde noch nicht durchgeführt</div>
+                    <div style="margin-top: 15px; font-size: 0.9em;">
+                        <div>📊 Letzte Berechnung: <span id="lastCalculation">Nie</span></div>
+                        <div>💰 Ersparnis möglich: <span id="potentialSavings">-</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            <div>📡 Berechne Optimierung...</div>
+            <div style="margin-top: 10px; font-size: 0.9rem; color: #888;">
+                Analysiere <span id="calcStep">Preise und Verbrauch</span>...
+            </div>
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="success" class="success" style="display: none;"></div>
+
+        <footer class="app-footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
+            <p class="footer-text">
+                <span style="vertical-align: middle;">
+                    Intelligente Strompreis-Optimierung | 
+                    Copyright © <script>document.write(new Date().getFullYear())</script> 
+                    Friedhelm Koch | Lizenz: 
+                    <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.de" 
+                    target="_blank" style="color: rgb(2, 103, 204);">CC BY-NC-ND 4.0</a>
+                </span>
+            </p>
+        </footer>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Hier kommt der KOMPLETTE JavaScript-Code aus der letzten funktionierenden Version
+        // Ich kopiere ihn direkt 1:1 - keine Änderungen an der Funktionalität!
+        
+        // Globale Variablen
+        let priceChart = null;
+        let consumptionChart = null;
+        let comparisonChart = null;
+        let currentPrices = [];
+        let consumptionProfile = [];
+        let batteryLevel = 35;
+        let lastCalculationTime = null;
+        
+        // Standard-Verbrauchsprofil (in kW)
+        const DEFAULT_CONSUMPTION = {
+            morning: 2.0,
+            day: 0.8,
+            evening: 3.5,
+            night: 0.5
+        };
+        
+        // Einfache Preis-Muster (basierend auf realen Daten)
+        const PRICE_PATTERNS = {
+            weekday: {
+                "00-06": { base: 45, description: "Sehr günstig (Nacht)" },
+                "06-09": { base: 65, description: "Teurer (Morgen)" },
+                "09-12": { base: 70, description: "Hoch (Vormittag)" },
+                "12-15": { base: 68, description: "Hoch (Mittag)" },
+                "15-18": { base: 75, description: "Sehr hoch (Nachmittag)" },
+                "18-21": { base: 85, description: "Am teuersten (Abend)" },
+                "21-24": { base: 60, description: "Günstig (Spätabend)" }
+            },
+            weekend: {
+                "00-06": { base: 40, description: "Sehr günstig" },
+                "06-09": { base: 50, description: "Günstig" },
+                "09-12": { base: 55, description: "Mittel" },
+                "12-15": { base: 58, description: "Mittel" },
+                "15-18": { base: 65, description: "Hoch" },
+                "18-21": { base: 70, description: "Hoch" },
+                "21-24": { base: 50, description: "Günstig" }
+            }
+        };
+        
+        // Wetter-Einflüsse auf Strompreise
+        const WEATHER_IMPACT = {
+            sunny: { factor: 0.85, description: "Viel Solarstrom → Preise sinken" },
+            partly_cloudy: { factor: 0.95, description: "Etwas Solarstrom" },
+            cloudy: { factor: 1.05, description: "Wenig Solar → Preise steigen" },
+            rainy: { factor: 1.10, description: "Wenig Solar, höhere Nachfrage" },
+            windy: { factor: 0.80, description: "Viel Windstrom → Preise sinken stark" }
+        };
+
+        // Initialisierung
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSliders();
+            updateBatteryDisplay();
+            generateConsumptionProfile();
+            loadData('today');
+            
+            // Event-Listener für alle Einstellungen
+            document.getElementById('weather').addEventListener('change', () => calculateOptimization());
+            document.getElementById('weekday').addEventListener('change', () => {
+                loadData('today');
+                calculateOptimization();
+            });
+            document.getElementById('heatpumpMode').addEventListener('change', () => calculateOptimization());
+            document.getElementById('laundryTime').addEventListener('change', () => calculateOptimization());
+            document.getElementById('batteryCapacity').addEventListener('change', () => calculateOptimization());
+            document.getElementById('chargePower').addEventListener('change', () => calculateOptimization());
+        });
+
+        function setupSliders() {
+            // Verbrauchs-Slider
+            const sliders = [
+                { id: 'morningConsumption', valueId: 'morningValue', key: 'morning' },
+                { id: 'dayConsumption', valueId: 'dayValue', key: 'day' },
+                { id: 'eveningConsumption', valueId: 'eveningValue', key: 'evening' },
+                { id: 'nightConsumption', valueId: 'nightValue', key: 'night' }
+            ];
+            
+            sliders.forEach(slider => {
+                const element = document.getElementById(slider.id);
+                const valueElement = document.getElementById(slider.valueId);
+                
+                element.value = DEFAULT_CONSUMPTION[slider.key];
+                valueElement.textContent = element.value + ' kW';
+                
+                element.addEventListener('input', (e) => {
+                    valueElement.textContent = e.target.value + ' kW';
+                    DEFAULT_CONSUMPTION[slider.key] = parseFloat(e.target.value);
+                });
+            });
+            
+            // Akku-Slider
+            document.getElementById('batteryLevel').addEventListener('input', (e) => {
+                batteryLevel = parseInt(e.target.value);
+                updateBatteryDisplay();
+            });
+        }
+
+        function updateConsumptionAndCalculate() {
+            generateConsumptionProfile();
+            calculateOptimization();
+            showMessage('✅ Verbrauchsprofil aktualisiert und neu berechnet');
+        }
+
+        function generateConsumptionProfile() {
+            consumptionProfile = [];
+            
+            // Holen der aktuellen Werte von den Slidern
+            const morning = parseFloat(document.getElementById('morningConsumption').value);
+            const day = parseFloat(document.getElementById('dayConsumption').value);
+            const evening = parseFloat(document.getElementById('eveningConsumption').value);
+            const night = parseFloat(document.getElementById('nightConsumption').value);
+            
+            for (let hour = 0; hour < 24; hour++) {
+                let consumption;
+                
+                if (hour >= 6 && hour < 9) {
+                    consumption = morning;
+                } else if (hour >= 9 && hour < 17) {
+                    consumption = day;
+                } else if (hour >= 17 && hour < 22) {
+                    consumption = evening;
+                } else {
+                    consumption = night;
+                }
+                
+                // Zufällige Variation (±20%)
+                const variation = 0.8 + Math.random() * 0.4;
+                consumption *= variation;
+                
+                consumptionProfile.push({
+                    hour: hour,
+                    consumption: parseFloat(consumption.toFixed(2)),
+                    time: `${hour.toString().padStart(2, '0')}:00`
+                });
+            }
+            
+            // Gesamtverbrauch berechnen
+            const totalConsumption = consumptionProfile.reduce((sum, item) => sum + item.consumption, 0);
+            document.getElementById('totalDailyConsumption').textContent = totalConsumption.toFixed(1) + ' kWh';
+            
+            updateConsumptionChart();
+        }
+
+        function loadData(period) {
+            showLoading(true);
+            document.getElementById('calcStep').textContent = 'Lade Preisdaten...';
+            
+            setTimeout(() => {
+                try {
+                    currentPrices = generatePriceData(period);
+                    displayPriceData(currentPrices, period);
+                    generateConsumptionProfile();
+                    calculateOptimization();
+                    showMessage('✅ Preisdaten geladen und Optimierung berechnet');
+                } catch (error) {
+                    console.error('Fehler:', error);
+                    showError('Daten konnten nicht geladen werden.');
+                } finally {
+                    showLoading(false);
+                }
+            }, 800);
+        }
+
+        function generatePriceData(period) {
+            const weekday = document.getElementById('weekday').value;
+            const weather = document.getElementById('weather').value;
+            const isWeekend = weekday === '6' || weekday === '0';
+            const pattern = isWeekend ? PRICE_PATTERNS.weekend : PRICE_PATTERNS.weekday;
+            const weatherFactor = WEATHER_IMPACT[weather].factor;
+            
+            const prices = [];
+            
+            for (let hour = 0; hour < 24; hour++) {
+                let timeWindow = '';
+                for (const [window, data] of Object.entries(pattern)) {
+                    const [start, end] = window.split('-').map(Number);
+                    if (hour >= start && hour < end) {
+                        timeWindow = window;
+                        break;
+                    }
+                }
+                
+                if (!timeWindow) timeWindow = "00-06";
+                
+                const baseData = pattern[timeWindow];
+                let price = baseData.base;
+                
+                // Wetter-Einfluss anwenden
+                price *= weatherFactor;
+                
+                // Zufällige Variation (±10%)
+                const randomFactor = 0.95 + Math.random() * 0.1;
+                price *= randomFactor;
+                
+                // Rundung
+                price = Math.round(price * 100) / 100;
+                
+                prices.push({
+                    hour: hour,
+                    price: price,
+                    pricePerKWh: price / 10,
+                    time: `${hour.toString().padStart(2, '0')}:00`,
+                    description: baseData.description,
+                    timeWindow: timeWindow
+                });
+            }
+            
+            return prices;
+        }
+
+        function displayPriceData(prices, period) {
+            const priceValues = prices.map(p => p.pricePerKWh);
+            const avgPrice = priceValues.reduce((a, b) => a + b, 0) / priceValues.length;
+            const minPrice = Math.min(...priceValues);
+            const maxPrice = Math.max(...priceValues);
+            const minHour = priceValues.indexOf(minPrice);
+            const maxHour = priceValues.indexOf(maxPrice);
+            
+            // Statistiken anzeigen
+            document.getElementById('avgPrice').textContent = avgPrice.toFixed(2) + ' ct/kWh';
+            document.getElementById('avgPriceMWh').textContent = (avgPrice * 10).toFixed(2);
+            document.getElementById('bestTime').textContent = prices[minHour].time;
+            document.getElementById('bestPrice').textContent = minPrice.toFixed(2);
+            document.getElementById('worstTime').textContent = prices[maxHour].time;
+            document.getElementById('worstPrice').textContent = maxPrice.toFixed(2);
+            document.getElementById('currentAvgPrice').textContent = avgPrice.toFixed(2) + ' ct/kWh';
+            
+            updatePriceChart(prices);
+            updatePriceTable(prices, avgPrice);
+        }
+
+        function calculateOptimization() {
+            if (currentPrices.length === 0 || consumptionProfile.length === 0) {
+                showError('Bitte laden Sie zuerst Preisdaten');
+                return;
+            }
+            
+            showLoading(true);
+            document.getElementById('calcStep').textContent = 'Analysiere Verbrauch...';
+            
+            // Simuliere Berechnungsprozess
+            setTimeout(() => {
+                try {
+                    document.getElementById('calcStep').textContent = 'Berechne Kosten...';
+                    
+                    // 1. Aktuelle Kosten berechnen
+                    const currentCostResult = calculateCurrentCost();
+                    
+                    setTimeout(() => {
+                        document.getElementById('calcStep').textContent = 'Finde Optimierungen...';
+                        
+                        // 2. Optimierte Planung finden
+                        const optimizationResult = findOptimizations();
+                        
+                        setTimeout(() => {
+                            document.getElementById('calcStep').textContent = 'Berechne Ersparnis...';
+                            
+                            // 3. Ergebnisse anzeigen
+                            displayAllResults(currentCostResult, optimizationResult);
+                            
+                            // 4. Letzte Berechnungszeit speichern
+                            lastCalculationTime = new Date();
+                            document.getElementById('lastCalculation').textContent = 
+                                lastCalculationTime.toLocaleTimeString('de-DE');
+                            
+                            showLoading(false);
+                            showSuccessMessage('✅ Optimierung erfolgreich berechnet!');
+                            
+                        }, 300);
+                    }, 300);
+                } catch (error) {
+                    console.error('Fehler bei Optimierung:', error);
+                    showError('Optimierung fehlgeschlagen: ' + error.message);
+                    showLoading(false);
+                }
+            }, 500);
+        }
+
+        function calculateCurrentCost() {
+            let totalCost = 0;
+            let totalConsumption = 0;
+            
+            for (let i = 0; i < 24; i++) {
+                const hourCost = currentPrices[i].pricePerKWh; // ct/kWh
+                const hourConsumption = consumptionProfile[i].consumption; // kW
+                
+                totalCost += hourCost * hourConsumption;
+                totalConsumption += hourConsumption;
+            }
+            
+            // Kosten für verschiebbare Geräte hinzufügen
+            const laundryTime = document.getElementById('laundryTime').value;
+            const heatpumpMode = document.getElementById('heatpumpMode').value;
+            
+            let additionalCost = 0;
+            
+            // Waschmaschine (2.0 kW für 2 Stunden)
+            if (laundryTime === 'morning') {
+                additionalCost += currentPrices[7].pricePerKWh * 2.0 * 2; // 07:00 Uhr
+            } else if (laundryTime === 'afternoon') {
+                additionalCost += currentPrices[14].pricePerKWh * 2.0 * 2; // 14:00 Uhr
+            } else if (laundryTime === 'night') {
+                additionalCost += currentPrices[22].pricePerKWh * 2.0 * 2; // 22:00 Uhr
+            }
+            
+            // Wärmepumpe (2.5 kW, je nach Modus)
+            if (heatpumpMode === 'continuous') {
+                // 8 Stunden Betrieb
+                const avgPrice = currentPrices.reduce((sum, p) => sum + p.pricePerKWh, 0) / 24;
+                additionalCost += avgPrice * 2.5 * 8;
+            } else if (heatpumpMode === 'auto') {
+                // 6 Stunden zu günstigeren Zeiten
+                const cheapHours = [...currentPrices].sort((a, b) => a.pricePerKWh - b.pricePerKWh).slice(0, 6);
+                additionalCost += cheapHours.reduce((sum, h) => sum + h.pricePerKWh, 0) * 2.5;
+            } else if (heatpumpMode === 'eco') {
+                // 4 Stunden zu den günstigsten Zeiten
+                const cheapestHours = [...currentPrices].sort((a, b) => a.pricePerKWh - b.pricePerKWh).slice(0, 4);
+                additionalCost += cheapestHours.reduce((sum, h) => sum + h.pricePerKWh, 0) * 2.5;
+            }
+            
+            totalCost += additionalCost;
+            
+            const dailyCost = totalCost / 100; // Umrechnung von ct in €
+            
+            // Aktuelle Kosten anzeigen
+            document.getElementById('currentDailyCost').textContent = dailyCost.toFixed(2) + ' €';
+            document.getElementById('currentCostDisplay').textContent = dailyCost.toFixed(2) + ' €';
+            
+            return {
+                dailyCost: dailyCost,
+                totalConsumption: totalConsumption,
+                additionalCost: additionalCost / 100
+            };
+        }
+
+        function findOptimizations() {
+            const optimizations = {
+                laundry: { recommendedTime: null, savings: 0 },
+                heatpump: { recommendedHours: [], savings: 0 },
+                battery: { chargeTimes: [], savings: 0 },
+                shiftable: { recommendations: [] }
+            };
+            
+            // 1. Optimale Waschmaschinen-Zeit finden
+            const laundryOptions = [];
+            for (let i = 0; i < 24; i++) {
+                laundryOptions.push({
+                    hour: i,
+                    time: currentPrices[i].time,
+                    price: currentPrices[i].pricePerKWh,
+                    cost: currentPrices[i].pricePerKWh * 2.0 * 2 // 2 kW für 2 Stunden
+                });
+            }
+            
+            laundryOptions.sort((a, b) => a.price - b.price);
+            optimizations.laundry.recommendedTime = laundryOptions[0];
+            
+            // Aktuelle Waschzeit-Kosten berechnen
+            const currentLaundryTime = document.getElementById('laundryTime').value;
+            let currentLaundryCost = 0;
+            if (currentLaundryTime === 'morning') {
+                currentLaundryCost = currentPrices[7].pricePerKWh * 2.0 * 2;
+            } else if (currentLaundryTime === 'afternoon') {
+                currentLaundryCost = currentPrices[14].pricePerKWh * 2.0 * 2;
+            } else if (currentLaundryTime === 'night') {
+                currentLaundryCost = currentPrices[22].pricePerKWh * 2.0 * 2;
+            }
+            
+            optimizations.laundry.savings = (currentLaundryCost - laundryOptions[0].cost) / 100;
+            
+            // 2. Wärmepumpen-Optimierung
+            const heatpumpMode = document.getElementById('heatpumpMode').value;
+            if (heatpumpMode !== 'none') {
+                const sortedHours = [...currentPrices].sort((a, b) => a.pricePerKWh - b.pricePerKWh);
+                optimizations.heatpump.recommendedHours = sortedHours.slice(0, 6);
+            }
+            
+            // 3. Akku-Ladeoptimierung
+            const batteryCapacity = parseInt(document.getElementById('batteryCapacity').value);
+            const chargePower = parseFloat(document.getElementById('chargePower').value);
+            const neededCharge = batteryCapacity * ((100 - batteryLevel) / 100);
+            const hoursNeeded = Math.ceil(neededCharge / chargePower);
+            
+            const cheapHours = [...currentPrices]
+                .filter(p => p.pricePerKWh < 25)
+                .sort((a, b) => a.pricePerKWh - b.pricePerKWh)
+                .slice(0, hoursNeeded);
+            
+            optimizations.battery.chargeTimes = cheapHours;
+            
+            if (cheapHours.length > 0) {
+                const normalPrice = 30; // Durchschnittlicher Preis
+                const cheapPrice = cheapHours.reduce((sum, h) => sum + h.pricePerKWh, 0) / cheapHours.length;
+                optimizations.battery.savings = (normalPrice - cheapPrice) * neededCharge / 100;
+            }
+            
+            // 4. Verschiebbare Lasten identifizieren
+            const highConsumptionHours = consumptionProfile
+                .map((c, i) => ({...c, price: currentPrices[i].pricePerKWh}))
+                .filter(c => c.consumption > 2.0)
+                .sort((a, b) => b.price - a.price); // Teuerste zuerst
+            
+            const lowPriceHours = [...currentPrices]
+                .filter(p => p.pricePerKWh < 20)
+                .sort((a, b) => a.pricePerKWh - b.pricePerKWh);
+            
+            for (let i = 0; i < Math.min(highConsumptionHours.length, lowPriceHours.length); i++) {
+                const fromHour = highConsumptionHours[i];
+                const toHour = lowPriceHours[i];
+                const savings = (fromHour.price - toHour.price) * fromHour.consumption / 100;
+                
+                if (savings > 0.05) { // Nur wenn Ersparnis > 5 Cent
+                    optimizations.shiftable.recommendations.push({
+                        from: fromHour.time,
+                        to: toHour.time,
+                        savings: savings,
+                        consumption: fromHour.consumption
+                    });
+                }
+            }
+            
+            return optimizations;
+        }
+
+        function displayAllResults(currentCost, optimizations) {
+            // 1. Optimierte Kosten berechnen
+            const totalSavings = 
+                optimizations.laundry.savings + 
+                optimizations.battery.savings +
+                optimizations.shiftable.recommendations.reduce((sum, r) => sum + r.savings, 0);
+            
+            const optimizedCost = Math.max(0, currentCost.dailyCost - totalSavings);
+            
+            // 2. Ergebnisse anzeigen
+            document.getElementById('optimizedCostDisplay').textContent = optimizedCost.toFixed(2) + ' €';
+            document.getElementById('dailySavingsDisplay').textContent = totalSavings.toFixed(2) + ' €';
+            
+            const savingsPercent = totalSavings > 0 ? Math.round((totalSavings / currentCost.dailyCost) * 100) : 0;
+            document.getElementById('savingsPercent').textContent = savingsPercent + '%';
+            document.getElementById('savingsProgress').style.width = Math.min(savingsPercent, 100) + '%';
+            
+            // 3. Monatliche/Jährliche Ersparnis
+            const monthlySavings = totalSavings * 30;
+            const yearlySavings = totalSavings * 365;
+            document.getElementById('monthlySavings').textContent = monthlySavings.toFixed(2) + ' €';
+            document.getElementById('yearlySavings').textContent = yearlySavings.toFixed(2) + ' €';
+            document.getElementById('potentialSavings').textContent = monthlySavings.toFixed(2) + '€/Monat';
+            
+            // 4. Empfehlungstext
+            let recommendationText = '';
+            if (optimizations.laundry.recommendedTime) {
+                recommendationText += `🧺 Waschmaschine auf ${optimizations.laundry.recommendedTime.time} Uhr stellen<br>`;
+            }
+            if (optimizations.battery.chargeTimes.length > 0) {
+                const times = optimizations.battery.chargeTimes.map(t => t.time).join(', ');
+                recommendationText += `🔋 Akku laden: ${times} Uhr<br>`;
+            }
+            if (optimizations.shiftable.recommendations.length > 0) {
+                recommendationText += `⚡ Verbrauch verschieben (siehe Optimierungstab)<br>`;
+            }
+            
+            document.getElementById('recommendationText').innerHTML = recommendationText || 
+                'Keine Optimierung möglich - Preise sind relativ konstant';
+            
+            // 5. Optimierungs-Aktionen anzeigen
+            displayOptimizationActions(optimizations);
+            
+            // 6. Einspar-Tipps generieren
+            generateSavingTips(currentCost, optimizations, totalSavings);
+            
+            // 7. Vergleichs-Chart aktualisieren
+            updateComparisonChart(currentPrices, consumptionProfile);
+            
+            // 8. Günstigste/Teuerste Verbrauchszeit finden
+            findBestWorstConsumptionTimes();
+        }
+
+        function displayOptimizationActions(optimizations) {
+            let actionsHTML = '';
+            let scheduleHTML = '';
+            let batteryHTML = '';
+            
+            // Waschmaschine
+            if (optimizations.laundry.savings > 0) {
+                actionsHTML += `
+                    <div class="result-item">
+                        <span class="result-label">🧺 Waschmaschine:</span>
+                        <span class="result-value">${optimizations.laundry.recommendedTime.time} Uhr (spart ${optimizations.laundry.savings.toFixed(2)}€/Tag)</span>
+                    </div>
+                `;
+            }
+            
+            // Akku
+            if (optimizations.battery.savings > 0) {
+                const times = optimizations.battery.chargeTimes.map(t => t.time).join(', ');
+                actionsHTML += `
+                    <div class="result-item">
+                        <span class="result-label">🔋 Akku laden:</span>
+                        <span class="result-value">${times} Uhr (spart ${optimizations.battery.savings.toFixed(2)}€/Tag)</span>
+                    </div>
+                `;
+                
+                batteryHTML = `Laden Sie Ihren Akku zwischen ${times} Uhr für maximale Ersparnis`;
+            } else {
+                batteryHTML = 'Aktuell keine günstigen Ladezeiten verfügbar';
+            }
+            
+            // Verschiebbare Lasten
+            if (optimizations.shiftable.recommendations.length > 0) {
+                actionsHTML += `
+                    <div class="result-item">
+                        <span class="result-label">⚡ Verschiebbare Lasten:</span>
+                        <span class="result-value">${optimizations.shiftable.recommendations.length} Optimierungen möglich</span>
+                    </div>
+                `;
+                
+                scheduleHTML = '<ul style="margin-top: 10px; padding-left: 20px;">';
+                optimizations.shiftable.recommendations.forEach(rec => {
+                    scheduleHTML += `<li>Verschiebe Verbrauch von ${rec.from} auf ${rec.to} Uhr (spart ${rec.savings.toFixed(2)}€)</li>`;
+                });
+                scheduleHTML += '</ul>';
+            } else {
+                scheduleHTML = 'Keine Verschiebungen empfohlen';
+            }
+            
+            document.getElementById('optimizationActions').innerHTML = actionsHTML || 'Keine Optimierungen verfügbar';
+            document.getElementById('optimizedSchedule').innerHTML = scheduleHTML;
+            document.getElementById('batteryStrategy').innerHTML = batteryHTML;
+        }
+
+        function findBestWorstConsumptionTimes() {
+            let bestTime = '', worstTime = '';
+            let bestPrice = Infinity, worstPrice = 0;
+            
+            for (let i = 0; i < 24; i++) {
+                if (consumptionProfile[i].consumption > 0.5) {
+                    const price = currentPrices[i].pricePerKWh;
+                    if (price < bestPrice) {
+                        bestPrice = price;
+                        bestTime = currentPrices[i].time;
+                    }
+                    if (price > worstPrice) {
+                        worstPrice = price;
+                        worstTime = currentPrices[i].time;
+                    }
+                }
+            }
+            
+            document.getElementById('bestConsumptionTime').textContent = bestTime || '-';
+            document.getElementById('bestConsumptionPrice').textContent = bestPrice !== Infinity ? bestPrice.toFixed(2) + ' ct/kWh' : '-';
+            document.getElementById('worstConsumptionTime').textContent = worstTime || '-';
+            document.getElementById('worstConsumptionPrice').textContent = worstPrice !== 0 ? worstPrice.toFixed(2) + ' ct/kWh' : '-';
+        }
+
+        function generateSavingTips(currentCost, optimizations, totalSavings) {
+            const tips = [];
+            
+            if (totalSavings > 1.0) {
+                tips.push(`Sie können <strong>${totalSavings.toFixed(2)}€ pro Tag</strong> sparen!`);
+            }
+            
+            if (optimizations.laundry.savings > 0.2) {
+                tips.push(`Waschmaschine auf ${optimizations.laundry.recommendedTime.time} Uhr stellen spart ${optimizations.laundry.savings.toFixed(2)}€`);
+            }
+            
+            if (optimizations.battery.savings > 0.5) {
+                tips.push(`Akku bei niedrigen Preisen laden spart ${optimizations.battery.savings.toFixed(2)}€`);
+            }
+            
+            const expensiveHours = currentPrices.filter(p => p.pricePerKWh > 35).length;
+            if (expensiveHours > 4) {
+                tips.push(`Vermeiden Sie hohen Verbrauch zwischen 17-20 Uhr (teuerste Zeit)`);
+            }
+            
+            if (currentCost.totalConsumption > 25) {
+                tips.push(`Ihr Verbrauch ist überdurchschnittlich hoch - prüfen Sie Standby-Geräte`);
+            }
+            
+            document.getElementById('savingTips').innerHTML = tips.map(tip => `• ${tip}`).join('<br>');
+        }
+
+        // Chart-Funktionen
+        function updatePriceChart(prices) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            if (priceChart) priceChart.destroy();
+            
+            const avgPrice = prices.reduce((sum, p) => sum + p.pricePerKWh, 0) / prices.length;
+            
+            priceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: prices.map(p => p.time),
+                    datasets: [{
+                        label: 'Strompreis (ct/kWh)',
+                        data: prices.map(p => p.pricePerKWh),
+                        backgroundColor: prices.map(p => 
+                            p.pricePerKWh < avgPrice * 0.8 ? 'rgba(46, 204, 113, 0.7)' :
+                            p.pricePerKWh > avgPrice * 1.2 ? 'rgba(231, 76, 60, 0.7)' :
+                            'rgba(52, 152, 219, 0.7)'
+                        ),
+                        borderColor: prices.map(p => 
+                            p.pricePerKWh < avgPrice * 0.8 ? 'rgb(46, 204, 113)' :
+                            p.pricePerKWh > avgPrice * 1.2 ? 'rgb(231, 76, 60)' :
+                            'rgb(52, 152, 219)'
+                        ),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const price = context.parsed.y;
+                                    const ctPrice = price / 10;
+                                    const hour = context.label;
+                                    let recommendation = '';
+                                    
+                                    if (price < avgPrice * 0.7) recommendation = ' ⭐ Sehr günstig';
+                                    else if (price < avgPrice * 0.9) recommendation = ' 👍 Günstig';
+                                    else if (price > avgPrice * 1.3) recommendation = ' ⚠️ Teuer';
+                                    
+                                    return `${price.toFixed(2)} €/MWh (${ctPrice.toFixed(2)} ct/kWh)${recommendation}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Preis (€/MWh)' },
+                            ticks: { callback: v => v + ' €' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateConsumptionChart() {
+            const ctx = document.getElementById('consumptionChart').getContext('2d');
+            if (consumptionChart) consumptionChart.destroy();
+            
+            consumptionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: consumptionProfile.map(p => p.time),
+                    datasets: [{
+                        label: 'Stromverbrauch (kW)',
+                        data: consumptionProfile.map(p => p.consumption),
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Verbrauch (kW)' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateComparisonChart(prices, consumption) {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            if (comparisonChart) comparisonChart.destroy();
+            
+            comparisonChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: prices.map(p => p.time),
+                    datasets: [
+                        {
+                            label: 'Strompreis (ct/kWh)',
+                            data: prices.map(p => p.pricePerKWh),
+                            borderColor: '#00b894',
+                            backgroundColor: 'rgba(0, 184, 148, 0.1)',
+                            borderWidth: 2,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Verbrauch (kW)',
+                            data: consumption.map(c => c.consumption * 10),
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 2,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Preis (ct/kWh)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Verbrauch (kW)' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { callback: v => (v/10).toFixed(1) }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePriceTable(prices, avgPrice) {
+            const tableBody = document.getElementById('priceTableBody');
+            tableBody.innerHTML = '';
+            
+            prices.forEach(item => {
+                const diff = ((item.pricePerKWh - avgPrice) / avgPrice * 100);
+                const diffText = diff >= 0 ? `+${diff.toFixed(1)}%` : `${diff.toFixed(1)}%`;
+                const diffColor = diff > 10 ? '#e74c3c' : diff < -10 ? '#2ecc71' : '#666';
+                
+                let recommendation = 'Normal';
+                if (item.pricePerKWh < avgPrice * 0.8) recommendation = '⭐ Günstig';
+                if (item.pricePerKWh > avgPrice * 1.2) recommendation = '⚠️ Teuer';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.time}</td>
+                    <td><strong>${item.pricePerKWh.toFixed(2)}</strong> ct/kWh</td>
+                    <td style="color: ${diffColor};">${diffText}</td>
+                    <td>${recommendation}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Akku-Funktionen
+        function updateBatteryDisplay() {
+            document.getElementById('batteryFill').style.width = batteryLevel + '%';
+            document.getElementById('batteryPercent').textContent = batteryLevel + '%';
+            document.getElementById('batteryValue').textContent = batteryLevel + '%';
+            document.getElementById('batteryLevel').value = batteryLevel;
+            
+            const fill = document.getElementById('batteryFill');
+            if (batteryLevel < 20) fill.style.background = '#e74c3c';
+            else if (batteryLevel < 50) fill.style.background = '#f39c12';
+            else if (batteryLevel < 80) fill.style.background = '#3498db';
+            else fill.style.background = '#2ecc71';
+        }
+
+        function chargeBattery(amount) {
+            batteryLevel = Math.min(100, batteryLevel + amount);
+            updateBatteryDisplay();
+            showMessage(`🔋 Akku um ${amount}% geladen (jetzt: ${batteryLevel}%)`);
+            calculateOptimization();
+        }
+
+        function dischargeBattery(amount) {
+            if (batteryLevel >= amount) {
+                batteryLevel = Math.max(0, batteryLevel - amount);
+                updateBatteryDisplay();
+                showMessage(`🔌 Akku um ${amount}% entladen (jetzt: ${batteryLevel}%)`);
+                calculateOptimization();
+            } else {
+                showMessage('❌ Akku hat nicht genug Ladung');
+            }
+        }
+
+        function setBatteryLevel() {
+            const newLevel = prompt('Geben Sie den neuen Akku-Ladestand ein (0-100%):', batteryLevel);
+            if (newLevel !== null) {
+                const level = parseInt(newLevel);
+                if (!isNaN(level) && level >= 0 && level <= 100) {
+                    batteryLevel = level;
+                    updateBatteryDisplay();
+                    calculateOptimization();
+                    showMessage(`🔋 Akku auf ${level}% gesetzt`);
+                } else {
+                    showMessage('❌ Bitte geben Sie eine Zahl zwischen 0 und 100 ein');
+                }
+            }
+        }
+
+        // Tab-Funktionen
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+            document.querySelector(`button[onclick="showTab('${tabName}')"]`).classList.add('active');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(msg) {
+            const div = document.getElementById('error');
+            div.innerHTML = `<strong>⚠️</strong> ${msg}`;
+            div.style.display = 'block';
+            setTimeout(() => div.style.display = 'none', 5000);
+        }
+
+        function showSuccessMessage(msg) {
+            const div = document.getElementById('success');
+            div.innerHTML = `<strong>✅</strong> ${msg}`;
+            div.style.display = 'block';
+            setTimeout(() => div.style.display = 'none', 3000);
+        }
+
+        function showMessage(msg) {
+            const tempDiv = document.createElement('div');
+            tempDiv.style.cssText = `
+                position: fixed; top: 20px; right: 20px; 
+                background: #00b894; color: white; padding: 15px; 
+                border-radius: 10px; z-index: 1000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            `;
+            tempDiv.textContent = msg;
+            document.body.appendChild(tempDiv);
+            setTimeout(() => tempDiv.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
