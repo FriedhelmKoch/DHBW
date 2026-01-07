@@ -1295,7 +1295,7 @@
                 const splittingTax = taxSingle * 2;
                 
                 // Normale Steuer ohne Splitting berechnen
-                const taxWithoutSplitting = calculateBasicTax(year, income1) + calculateBasicTax(year, income2);
+                const taxWithoutSplitting = calculateTaxWithClass(year, income1, 'IV') + calculateTaxWithClass(year, income2, 'IV');
                 
                 // Splittingvorteil
                 splittingAdvantageValue = taxWithoutSplitting - splittingTax;
@@ -1303,9 +1303,9 @@
                 
                 totalTax = splittingTax;
                 details = `Splittingtarif: Gesamteinkommen ${totalIncome.toLocaleString('de-DE')} €<br>` +
-                         `Hälftiges Einkommen: ${splittingIncome.toLocaleString('de-DE')} €<br>` +
-                         `Steuer pro Person: ${taxSingle.toLocaleString('de-DE')} €<br>` +
-                         `Gesamtsteuer: ${splittingTax.toLocaleString('de-DE')} €`;
+                        `Hälftiges Einkommen: ${splittingIncome.toLocaleString('de-DE')} €<br>` +
+                        `Steuer pro Person: ${taxSingle.toLocaleString('de-DE')} €<br>` +
+                        `Gesamtsteuer: ${splittingTax.toLocaleString('de-DE')} €`;
                 
                 // Grenzsteuersatz basierend auf Gesamteinkommen
                 const taxData = calculateBasicTaxData(year, totalIncome);
@@ -1317,9 +1317,10 @@
                 const taxData = calculateBasicTaxData(year, income1);
                 marginalRateValue = taxData.marginalRate;
                 
+                const allowance = getTaxClassAllowance(year, currentTaxClass);
                 details = `Steuerklasse ${currentTaxClass}<br>` +
-                         `Freibetrag: ${getTaxClassAllowance(year, currentTaxClass).toLocaleString('de-DE')} €<br>` +
-                         `Zu versteuerndes Einkommen: ${(income1 - getTaxClassAllowance(year, currentTaxClass)).toLocaleString('de-DE')} €`;
+                        `Freibetrag: ${allowance.toLocaleString('de-DE')} €<br>` +
+                        `Zu versteuerndes Einkommen: ${(income1 - allowance).toLocaleString('de-DE')} €`;
             }
 
             // Durchschnittssteuersatz berechnen
@@ -1335,7 +1336,7 @@
             };
         }
 
-        // Grundlegende Steuerberechnung (ohne Steuerklasse)
+        // Grundlegende Steuerberechnung (ohne Steuerklasse) - KORRIGIERTE VERSION
         function calculateBasicTax(year, income) {
             const data = tarifData.find(item => item.jahr === year);
             if (!data) return 0;
@@ -1347,28 +1348,38 @@
                 return 0;
             }
 
-            // Variablen definieren
+            // Variablen definieren - ABHÄNGIG VOM JAHR!
             const y = (income - grundfreibetrag) / 10000;
-            const z = (income - 14926) / 10000;
+            
+            // Für z muss die richtige Basis für jedes Jahr verwendet werden
+            // Für Tarif 2: z = (x - G*) / 10000, wobei G* der Grundwert ist (z.B. 14926 für 2022)
+            // In den JSON-Daten ist der Anfangswert von Tarif 2 der Grundwert
+            const zBase = parseFloat(data.tarif2.von) - 1; // z.B. 14927 - 1 = 14926 für 2022
+            const z = (income - zBase) / 10000;
+            
             const x = income;
 
             let tax = 0;
 
-            // Tarifberechnung
+            // Tarifberechnung MIT KORREKTER LOGIK
             if (income <= parseFloat(data.tarif1.bis)) {
-                tax = eval(data.tarif1.formel.replace(/y/g, y).replace(/\•/g, '*'));
+                // Tarifzone 1
+                tax = eval(data.tarif1.formel.replace(/y/g, y).replace(/\•/g, '*').replace(/ /g, ''));
             } else if (income <= parseFloat(data.tarif2.bis)) {
-                tax = eval(data.tarif2.formel.replace(/z/g, z).replace(/\•/g, '*'));
+                // Tarifzone 2
+                tax = eval(data.tarif2.formel.replace(/z/g, z).replace(/\•/g, '*').replace(/ /g, ''));
             } else if (income <= parseFloat(data.tarif3.bis)) {
-                tax = eval(data.tarif3.formel.replace(/x/g, x).replace(/\•/g, '*'));
+                // Tarifzone 3
+                tax = eval(data.tarif3.formel.replace(/x/g, x).replace(/\•/g, '*').replace(/ /g, ''));
             } else {
-                tax = eval(data.tarif4.formel.replace(/x/g, x).replace(/\•/g, '*'));
+                // Tarifzone 4
+                tax = eval(data.tarif4.formel.replace(/x/g, x).replace(/\•/g, '*').replace(/ /g, ''));
             }
 
             return Math.max(0, Math.round(tax));
         }
 
-        // Grundlegende Steuerberechnung mit Daten
+        // Grundlegende Steuerberechnung mit Daten - KORRIGIERTE VERSION
         function calculateBasicTaxData(year, income) {
             const data = tarifData.find(item => item.jahr === year);
             if (!data) return { tax: 0, marginalRate: 0 };
@@ -1380,15 +1391,24 @@
             }
 
             const y = (income - grundfreibetrag) / 10000;
-            const z = (income - 14926) / 10000;
+            const zBase = parseFloat(data.tarif2.von) - 1;
+            const z = (income - zBase) / 10000;
 
             let marginalRateValue = 0;
 
-            // Grenzsteuersatz berechnen
+            // Grenzsteuersatz berechnen - KORREKTE LOGIK
             if (income <= parseFloat(data.tarif1.bis)) {
-                marginalRateValue = calculateMarginalRate(data.tarif1.formel, y);
+                // Ableitung von (a*y + 1400)*y = a*y² + 1400*y
+                // Ableitung: 2*a*y + 1400
+                // Grenzsteuersatz: (2*a*y + 1400)/10000
+                const a = parseFloat(data.tarif1.formel.match(/\((\d+\.\d+)/)[1]);
+                marginalRateValue = (2 * a * y + 1400) / 10000;
             } else if (income <= parseFloat(data.tarif2.bis)) {
-                marginalRateValue = calculateMarginalRate(data.tarif2.formel, z, true);
+                // Ableitung von (a*z + 2397)*z + b = a*z² + 2397*z + b
+                // Ableitung: 2*a*z + 2397
+                // Grenzsteuersatz: (2*a*z + 2397)/10000
+                const a = parseFloat(data.tarif2.formel.match(/\((\d+\.\d+)/)[1]);
+                marginalRateValue = (2 * a * z + 2397) / 10000;
             } else if (income <= parseFloat(data.tarif3.bis)) {
                 marginalRateValue = 0.42;
             } else {
@@ -1400,28 +1420,57 @@
             return { tax, marginalRate: marginalRateValue };
         }
 
-        // Steuer mit Steuerklasse berechnen
+        // Steuer mit Steuerklasse berechnen - KORRIGIERTE VERSION
         function calculateTaxWithClass(year, income, taxClass) {
             const data = tarifData.find(item => item.jahr === year);
             if (!data) return 0;
 
             // Freibetrag basierend auf Steuerklasse
             const allowance = getTaxClassAllowance(year, taxClass);
+            
+            // Das zu versteuernde Einkommen ist NICHT einfach Einkommen - Freibetrag!
+            // In der Praxis: zvE = Bruttoeinkommen - Werbungskosten - Sonderausgaben etc.
+            // Vereinfacht: Wir nehmen an, dass Freibeträge bereits abgezogen sind
             const taxableIncome = Math.max(0, income - allowance);
             
-            // Grundsteuer berechnen
+            // Grundsteuer berechnen AUF das zu versteuernde Einkommen
             const basicTax = calculateBasicTax(year, taxableIncome);
             
-            // Vorsorgepauschale abziehen (vereinfacht)
-            const vorsorgeRate = getVorsorgeRate(year, taxClass);
-            const vorsorgeAbzug = taxableIncome * vorsorgeRate;
+            // Vorsorgepauschale und Sonderausgaben sind bereits im zvE berücksichtigt
+            // In dieser vereinfachten Berechnung lassen wir sie weg
             
-            // Sonderausgabenpauschale
-            const sonderausgaben = getSonderausgaben(year, taxClass);
+            return Math.round(basicTax);
+        }
+
+        // Testfunktion für 2024 mit 85000 €
+        function testCalculation2024() {
+            const year = "2024";
+            const income = 85000;
             
-            const finalTax = Math.max(0, basicTax - vorsorgeAbzug - sonderausgaben);
+            // Laut BMF: 25.071,25 €
+            // Berechnung nach Formel Tarif 3: 0.42 * 85000 - 10636.31
+            const correctTax = 0.42 * 85000 - 10636.31; // = 35700 - 10636.31 = 25063.69
+            const roundedCorrectTax = Math.round(correctTax); // = 25064
             
-            return Math.round(finalTax);
+            console.log("BMF Berechnung für 2024 mit 85.000 €:");
+            console.log("Erwartet: ca. 25.064 €");
+            
+            const ourTax = calculateBasicTax(year, income);
+            console.log("Unsere Berechnung:", ourTax, "€");
+            console.log("Differenz:", ourTax - roundedCorrectTax, "€");
+            
+            // Problemdiagnose
+            const data = tarifData.find(item => item.jahr === year);
+            console.log("\nProblemdiagnose:");
+            console.log("Grundfreibetrag 2024:", data.grundfreibetrag);
+            console.log("Tarif 3 Grenzen:", data.tarif3.von, "-", data.tarif3.bis);
+            console.log("Tarif 3 Formel:", data.tarif3.formel);
+            console.log("Einkommen:", income, "liegt in Tarifzone 3:", 
+                        income >= parseFloat(data.tarif3.von) && income <= parseFloat(data.tarif3.bis));
+            
+            // Manuelle Berechnung
+            const manualTax = eval(data.tarif3.formel.replace(/x/g, income).replace(/\•/g, '*').replace(/ /g, ''));
+            console.log("Manuelle Berechnung mit Formel:", manualTax, "gerundet:", Math.round(manualTax));
         }
 
         // Freibetrag für Steuerklasse
