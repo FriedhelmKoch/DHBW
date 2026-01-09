@@ -1,0 +1,16 @@
+{
+    "greeting": "Bonjour le Monde!",
+    "welcome": "Bienvenue sur notre site web multilingue.",
+    "features-title": "Fonctionnalités:",
+    "feature-1": "Design moderne et épuré",
+    "feature-2": "Mise en page responsive",
+    "feature-3": "Changement de langue facile",
+    "feature-4": "Fichiers de traduction séparés",
+    "description": "Toutes les traductions sont chargées à partir de fichiers JSON séparés dans le dossier /locales.",
+    "btn-primary": "En savoir plus",
+    "btn-secondary": "Commencer",
+    "footer-text": "© 2026 Mon Site Web.",
+    "footer-rights": "Tous droits réservés.",
+    "language": "Langue",
+    "current-language": "Langue actuelle: Français"
+}

@@ -1,0 +1,16 @@
+{
+    "greeting": "¡Hola Mundo!",
+    "welcome": "Bienvenido a nuestro sitio web multilingüe.",
+    "features-title": "Características:",
+    "feature-1": "Diseño moderno y limpio",
+    "feature-2": "Diseño responsivo",
+    "feature-3": "Cambio de idioma fácil",
+    "feature-4": "Archivos de traducción separados",
+    "description": "Todas las traducciones se cargan desde archivos JSON separados en la carpeta /locales.",
+    "btn-primary": "Aprende más",
+    "btn-secondary": "Comenzar",
+    "footer-text": "© 2026 Mi Sitio Web.",
+    "footer-rights": "Todos los derechos reservados.",
+    "language": "Idioma",
+    "current-language": "Idioma actual: Español"
+}

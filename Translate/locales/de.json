@@ -1,0 +1,21 @@
+{
+    "greeting": "Hallo Welt!",
+    "welcome": "Willkommen auf unserer mehrsprachigen Webseite.",
+
+    "features-title": "Funktionen:",
+    "feature-1": "Sauberes, modernes Design",
+    "feature-2": "Responsives Layout",
+    "feature-3": "Einfacher Sprachwechsel",
+    "feature-4": "Separate Übersetzungsdateien",
+
+    "description": "Alle Übersetzungen werden aus separaten <strong>JSON-Dateien</strong> im /locales Ordner geladen.",
+
+    "btn-primary": "Mehr erfahren (Beispiel-Button) nicht aktiv",
+    "btn-secondary": "Loslegen (Beispiel-Button) nicht aktiv",
+
+    "footer-text": "© 2026 <u>Meine</u> Webseite.",
+    "footer-rights": "Alle Rechte vorbehalten.",
+
+    "language": "Sprache",
+    "current-language": "Aktuelle Sprache: Deutsch"
+}

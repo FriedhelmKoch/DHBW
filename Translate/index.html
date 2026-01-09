@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual Website - Separate Locales</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Kompakte Sprachauswahl oben rechts -->
+    <div class="compact-language-switcher">
+        <button class="language-toggle" id="lang-toggle" title="Change language">
+            🌐
+        </button>
+        <div class="language-options" id="language-options">
+            <button class="language-option active" data-lang="en">
+                <span class="flag-icon">🇺🇸</span>
+                <span class="lang-text">English</span>
+            </button>
+            <button class="language-option" data-lang="de">
+                <span class="flag-icon">🇩🇪</span>
+                <span class="lang-text">Deutsch</span>
+            </button>
+            <button class="language-option" data-lang="fr">
+                <span class="flag-icon">🇫🇷</span>
+                <span class="lang-text">Français</span>
+            </button>
+            <!-- <button class="language-option" data-lang="es">
+                <span class="flag-icon">🇪🇸</span>
+                <span class="lang-text">Español</span>
+            </button> -->
+        </div>
+    </div>
+
+    <!-- Hauptinhalt mit IDs für alle übersetzbaren Elemente -->
+    <main class="content">
+        <div class="demo-card">
+            <h1 id="greeting">Hello World!</h1>
+            <p id="welcome">Welcome to our multilingual website.</p>
+            
+            <div class="features">
+                <p id="features-title">Features:</p>
+                <ul>
+                    <li id="feature-1">Clean, modern design</li>
+                    <li id="feature-2">Responsive layout</li>
+                    <li id="feature-3">Easy language switching</li>
+                    <li id="feature-4">Separate translation files</li>
+                </ul>
+            </div>
+            
+            <p id="description">
+                All translations are loaded from separate JSON files in the /locales folder.
+            </p>
+            
+            <div class="buttons">
+                <button id="btn-primary">Learn More (Beispiel-Button) nicht aktiv</button>
+                <button id="btn-secondary">Get Started (Beispiel-Button) nicht aktiv</button>
+            </div>
+            
+            <footer>
+                <p id="footer-text">&copy; 2026 My Website. <span id="footer-rights">All rights reserved.</span></p>
+            </footer>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

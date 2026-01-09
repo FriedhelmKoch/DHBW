@@ -1,0 +1,16 @@
+{
+    "greeting": "Hello World!",
+    "welcome": "Welcome to our multilingual website.",
+    "features-title": "Features:",
+    "feature-1": "Clean, modern design",
+    "feature-2": "Responsive layout",
+    "feature-3": "Easy language switching",
+    "feature-4": "Separate translation files",
+    "description": "All translations are loaded from separate JSON files in the /locales folder.",
+    "btn-primary": "Learn More",
+    "btn-secondary": "Get Started",
+    "footer-text": "© 2026 My Website.",
+    "footer-rights": "All rights reserved.",
+    "language": "Language",
+    "current-language": "Current language: English"
+}
