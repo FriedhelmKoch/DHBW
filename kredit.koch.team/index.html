@@ -1352,7 +1352,7 @@
             return true;
         }
 
-        // Prüfen des Feldes auf numerische Eingabe
+        // Prüfen des Feldes auf numerische Eingabe (verwendet parseGermanNumber)
         function NumEingabe(FeldBezeichnung, Wert) {
             const bereinigterWert = parseGermanNumber(Wert);
             
@@ -1371,15 +1371,15 @@
 
         // Prüfen eines Feldes auf nur ganze Zahlen (für Jahre)
         function NurZahlen(FeldBezeichnung, Feld) {
-            const nurZiffern = Feld.replace(/[^0-9]/g, '');
+            // Erlaube Dezimalzahlen mit Komma oder Punkt
+            const bereinigterWert = parseGermanNumber(Feld);
             
-            if (nurZiffern.length === 0) {
+            if (isNaN(bereinigterWert)) {
                 alert("Bitte geben Sie eine gültige Zahl im Feld '" + FeldBezeichnung + "' ein!");
                 return false;
             }
             
-            const zahl = parseInt(nurZiffern);
-            if (zahl <= 0) {
+            if (bereinigterWert <= 0) {
                 alert("Die Tilgungsdauer muss größer als 0 sein!");
                 return false;
             }
@@ -1416,16 +1416,43 @@
         function parseGermanNumber(input) {
             if (!input) return NaN;
             
-            let cleaned = input.toString()
-                .replace(/\s/g, '')
-                .replace(/\./g, '')
-                .replace(/,/g, '.')
-                .replace('%', '')
-                .trim();
+            let str = input.toString().trim();
             
-            if (cleaned === '' || cleaned === '.') return NaN;
-                
-            const result = parseFloat(cleaned);
+            // Wenn nichts vorhanden ist, NaN zurückgeben
+            if (str === '') return NaN;
+            
+            // Entferne alle Leerzeichen
+            str = str.replace(/\s/g, '');
+            
+            // Entferne Prozentzeichen
+            str = str.replace('%', '');
+            
+            // Prüfe, ob Komma als Dezimaltrennzeichen vorhanden ist
+            const hasComma = str.includes(',');
+            const hasDot = str.includes('.');
+            
+            if (hasComma && hasDot) {
+                // Beide vorhanden: Punkt ist Tausendertrennzeichen, Komma ist Dezimaltrennzeichen
+                // Entferne alle Punkte (Tausendertrennzeichen), ersetze Komma durch Punkt
+                str = str.replace(/\./g, '').replace(',', '.');
+            } else if (hasComma) {
+                // Nur Komma: Dezimaltrennzeichen, ersetze durch Punkt
+                str = str.replace(',', '.');
+            } else if (hasDot) {
+                // Nur Punkt: könnte Dezimaltrennzeichen oder Tausendertrennzeichen sein
+                // Prüfe, ob es sich um ein Tausendertrennzeichen handelt
+                const parts = str.split('.');
+                if (parts.length > 2) {
+                    // Mehr als ein Punkt: Tausendertrennzeichen, entferne alle Punkte
+                    str = str.replace(/\./g, '');
+                }
+                // Wenn nur ein Punkt: lasse ihn als Dezimaltrennzeichen (wird von parseFloat interpretiert)
+            }
+            
+            // Prüfe auf leeren String nach Bereinigung
+            if (str === '' || str === '.') return NaN;
+            
+            const result = parseFloat(str);
             return isNaN(result) ? NaN : result;
         }
 

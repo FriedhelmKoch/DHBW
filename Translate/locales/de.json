@@ -13,7 +13,7 @@
     "btn-primary": "Mehr erfahren (Beispiel-Button) nicht aktiv",
     "btn-secondary": "Loslegen (Beispiel-Button) nicht aktiv",
 
-    "footer-text": "© 2026 <u>Meine</u> Webseite.",
+    "footer-text": "© 2026 <b>Meine</b> Webseite mit <i>Interpretation</i> von html-Tags wie <u>unterstrichen</u> etc.",
     "footer-rights": "Alle Rechte vorbehalten.",
 
     "language": "Sprache",
