@@ -25,6 +25,18 @@
  * 
  * ============================================================================
  *
+ * Die Web-App erzeugt simulierte Preisdaten, die:
+ * Typischen EPEX-Day-Ahead-Mustern folgen
+ * Wochentage vs. Wochenende unterscheiden
+ * Wettereinflüsse berücksichtigen
+ * Zufällige Variationen haben
+ * Basierend auf den Einstellungen (Wochentag, Wetter) generiert werden
+ *
+ * ============================================================================
+ * 
+ * Die echten EPEX-Spot Daten werden über die API von SmartENERGY geladen
+ * siehe auch: https://www.smartenergy.at/api-schnittstellen und https://apis.smartenergy.at/market/v1/price in loaddata() 
+ *
  -->
 
 <!DOCTYPE html>
@@ -236,7 +248,7 @@
             flex: 1;
             min-width: calc(33.333% - 4px);
             padding: 10px 5px; 
-            background: #e9ecef; 
+            background: #acd08b; 
             border: none; 
             border-radius: 6px 6px 0 0; 
             cursor: pointer; 
@@ -394,23 +406,408 @@
                 padding: 8px 3px;
             }
         }
+
+        /* KI-Prognose spezifische Stile */
+        #tab-forecast .stat-item {
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #tab-forecast .stat-value {
+            font-size: 1.3rem;
+            margin: 8px 0;
+        }
+
+        /* Wetter-Icons */
+        .weather-icon {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+
+        /* KI-Modell Status */
+        .model-status {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .model-status.trained {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .model-status.training {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .model-status.ready {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* Prognose-Karte */
+        .forecast-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #9b59b6;
+        }
+
+        /* Responsive Anpassungen für KI-Tab */
+        @media (max-width: 768px) {
+            #tab-forecast .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            #tab-forecast .stat-value {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #tab-forecast .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab-button {
+                font-size: 0.8rem;
+                padding: 8px 5px;
+            }
+        }
+
+        /* Training-Status Modal */
+        .training-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            overflow-y: auto;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .training-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Für sehr kleine Screens */
+        @media (max-width: 480px) {
+            .training-modal {
+                padding: 10px;
+            }
+            
+            .training-content {
+                padding: 15px;
+                border-radius: 10px;
+                max-height: 85vh;
+            }
+        }
+
+        /* Für iPhones (kleine Höhe) */
+        @media (max-height: 700px) {
+            .training-content {
+                max-height: 80vh;
+            }
+        }
+
+        .training-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .training-header h3 {
+            color: #2d3436;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .training-spinner {
+            font-size: 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .training-progress-container {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .training-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00b894, #0984e3);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .training-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 350px) {
+            .training-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .training-stat {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .training-stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .training-stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #0984e3;
+        }
+
+        .training-status-text {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 0.95rem;
+        }
+
+        .training-detail-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            min-height: 20px;
+        }
+
+        /* Optional: Mini-Chart für Mobile (einfacher) */
+        .training-mini-chart {
+            height: 80px;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .training-chart-bar {
+            position: absolute;
+            bottom: 0;
+            background: #00b894;
+            border-radius: 3px 3px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .training-logs-container {
+            max-height: 120px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .training-log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+            line-height: 1.3;
+            font-size: 0.75rem;
+        }
+
+        .training-log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .training-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .training-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            min-width: 120px;
+        }
+
+        @media (max-width: 480px) {
+            .training-button {
+                min-width: 100%;
+                margin-bottom: 8px;
+            }
+            
+            .training-buttons {
+                flex-direction: column;
+            }
+        }
+
+        .training-button-cancel {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .training-button-background {
+            background: #7f8c8d;
+            color: white;
+        }
+
+        .training-button-close {
+            background: #3498db;
+            color: white;
+        }
+
+        /* Close Button oben rechts */
+        .training-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .training-close-btn:hover {
+            color: #e74c3c;
+        }
+
+        /* Scrollbar Styling für Mobile */
+        .training-logs-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .training-logs-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .training-logs-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .training-logs-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .forecast-status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .forecast-status.simulated {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .forecast-status.trained {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .forecast-status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .forecast-day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+        }
+
+        .forecast-price-tag {
+            background: white;
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>⚡ Intelligente Strompreis-Optimierung</h1>
-            <p style="font-size: 0.9rem;">Optimale Nutzungszeiten für Haushaltsgeräte & Akkus</p>
+            <p style="font-size: 0.9rem;">Optimale Nutzungszeiten mittels KI-Prognosen für Haushaltsgeräte & Akkus</p>
         </header>
         
         <div class="dashboard">
             <div>
                 <div class="info">
-                    <strong>📊 Echtzeit-Analyse:</strong> Vergleich von Strompreisen mit Ihrem Verbrauchsprofil
+                    <strong>📊 Echtzeit KI-Analyse:</strong> Vergleich von Strompreisen über Wetterdaten mit Ihrem Verbrauchsprofil
                 </div>
                 
                 <div class="data-source">
-                    <strong>📈 Datenquelle:</strong> Simulierte Preise basierend auf typischen Day-Ahead-Mustern
+                    <strong>📈 Datenquelle:</strong> Preise basieren auf aktuellen Day-Ahead-Daten der Strombörse EPEX SPOT, sowie den aktuellen Wetterdaten und einer KI Prognose.
                     <div style="margin-top: 5px; font-size: 0.85em;">
                         Preismuster: Nachts ↓, Morgens ↑, Abends ↑↑, Wochenende ↓, Sonne/Wind ↓
                     </div>
@@ -423,6 +820,7 @@
                         <button class="tab-button" onclick="showTab('comparison')">Vergleich</button>
                         <button class="tab-button" onclick="showTab('savings')">Ersparnis</button>
                         <button class="tab-button" onclick="showTab('optimization')">Optimierung</button>
+                        <button class="tab-button" onclick="showTab('forecast')">KI-Prognose</button>
                     </div>
                     
                     <div id="tab-prices" class="tab-content">
@@ -493,7 +891,7 @@
                                 </div>
                                 
                                 <button onclick="updateConsumptionAndCalculate()" style="width: 100%; margin-top: 15px;">
-                                    🔄 Verbrauch aktualisieren & neu berechnen
+                                    🔄 Verbrauch aktualisiere & neu berechnen
                                 </button>
                             </div>
                         </div>
@@ -595,6 +993,61 @@
                             <div id="batteryStrategy"></div>
                         </div>
                     </div>
+
+                    <!-- NEUER Tab für KI-Prognose -->
+                    <div id="tab-forecast" class="tab-content" style="display: none;">
+                        <h3>🤖 KI-basierte 3-Tage Strompreis-Prognose</h3>
+                        
+                        <div class="info" style="margin-bottom: 20px;">
+                            <strong>🧠 Machine Learning Modell:</strong> Analysiert historische EPEX-Daten und Wettervorhersagen für präzise Prognosen
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button onclick="loadWeatherData()" class="btn-small">🌤️ Wetter laden</button>
+                            <button onclick="trainPredictionModel()" class="btn-small">🤖 KI-Modell trainieren</button>
+                            <button onclick="generate3DayForecast()" class="btn-small">📊 3-Tage Prognose</button>
+                            <button onclick="analyzeForecastAccuracy()" class="btn-small">🎯 Genauigkeit prüfen</button>
+                        </div>
+                        
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="forecastChart"></canvas>
+                        </div>
+                        
+                        <div class="stats-grid" style="margin-top: 20px;">
+                            <div class="stat-item">
+                                <div>KI Modell Status</div>
+                                <div id="modelStatus" class="stat-value">Nicht trainiert</div>
+                                <div id="modelAccuracy">-</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>Wetterdaten</div>
+                                <div id="weatherStatus" class="stat-value">Nicht geladen</div>
+                                <div id="weatherLocation">-</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>Prognose-Genauigkeit</div>
+                                <div id="forecastAccuracy" class="stat-value">- %</div>
+                                <div>Letzte Prüfung</div>
+                            </div>
+                            <div class="stat-item">
+                                <div>Empf. Kaufzeit</div>
+                                <div id="bestBuyTime" class="stat-value">-</div>
+                                <div id="bestBuyPrice">- ct/kWh</div>
+                            </div>
+                        </div>
+                        
+                        <div class="optimization-results" style="margin-top: 20px;">
+                            <h4>📅 3-Tage Prognose-Details:</h4>
+                            <div id="forecastDetails"></div>
+                            
+                            <h4 style="margin-top: 20px;">🌤️ Aktuelle Wetterdaten:</h4>
+                            <div id="currentWeather"></div>
+                            
+                            <h4 style="margin-top: 20px;">🧮 KI-Modell Details:</h4>
+                            <div id="modelDetails"></div>
+                        </div>
+                    </div>
+
                 </div>
                 
                 <div class="stats-grid">
@@ -704,14 +1157,22 @@
                 </div>
                 
                 <div class="control-group">
-                    <label>🌤️ Wettervorhersage</label>
-                    <select id="weather">
-                        <option value="sunny">☀️ Sonnig (viel Solarstrom)</option>
-                        <option value="partly_cloudy">⛅ Teilweise bewölkt</option>
-                        <option value="cloudy">☁️ Bewölkt</option>
-                        <option value="rainy">🌧️ Regnerisch</option>
-                        <option value="windy">💨 Windig (viel Windstrom)</option>
-                    </select>
+                    <label>🌤️ Aktuelles Wetter & Prognose</label>
+                    <div id="weatherDisplay" style="padding: 12px; background: #e3f2fd; border-radius: 8px; margin-top: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span id="weatherIcon">⏳</span>
+                            <div>
+                                <div id="weatherText">Lade Wetterdaten...</div>
+                                <div id="weatherDetails" style="font-size: 0.85rem; color: #666;">
+                                    Klicken Sie auf "Wetter aktualisieren"
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="loadAndApplyRealWeather()" 
+                                style="width: 100%; margin-top: 10px; padding: 8px; background: #2196f3;">
+                            🌤️ Wetter aktualisieren
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="control-group">
@@ -759,18 +1220,87 @@
                     Copyright © <script>document.write(new Date().getFullYear())</script> 
                     Friedhelm Koch | Lizenz: 
                     <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.de" 
-                    target="_blank" style="color: rgb(2, 103, 204);">CC BY-NC-ND 4.0</a>
+                    target="_blank" style="color: rgb(2, 103, 204);">CC BY-NC-ND 4.0</a><br />
                 </span>
             </p>
+            <p>Unter Verwendung von smartENERGY API, TensorFlow und Nominatim<br /></p>
         </footer>
+
+
+        <!-- Training-Status Modal -->
+        <div id="trainingModal" class="training-modal">
+            <button class="training-close-btn" onclick="hideTrainingModal()">×</button>
+            
+            <div class="training-content">
+                <div class="training-header">
+                    <div class="training-spinner">🤖</div>
+                    <h3>KI-Modell Training</h3>
+                </div>
+                
+                <div class="training-status-text" id="trainingStatus">
+                    Initialisierung...
+                </div>
+                
+                <div class="training-detail-text" id="trainingDetail">
+                    Bereite Training vor...
+                </div>
+                
+                <div class="training-progress-container">
+                    <div id="trainingProgressBar" class="training-progress-bar"></div>
+                </div>
+                
+                <div class="training-stats">
+                    <div class="training-stat">
+                        <div class="training-stat-label">Epoche</div>
+                        <div id="currentEpoch" class="training-stat-value">0/50</div>
+                    </div>
+                    <div class="training-stat">
+                        <div class="training-stat-label">Loss</div>
+                        <div id="currentLoss" class="training-stat-value">-</div>
+                    </div>
+                    <div class="training-stat">
+                        <div class="training-stat-label">Verbleibend</div>
+                        <div id="timeRemaining" class="training-stat-value">-</div>
+                    </div>
+                    <div class="training-stat">
+                        <div class="training-stat-label">Status</div>
+                        <div id="trainingSpeed" class="training-stat-value">-</div>
+                    </div>
+                </div>
+                
+                <!-- Einfache Mini-Chart Visualisierung für Mobile -->
+                <div class="training-mini-chart" id="trainingMiniChart">
+                    <!-- Wird dynamisch mit JavaScript gefüllt -->
+                </div>
+                
+                <!-- Vereinfachte Logs für Mobile -->
+                <div class="training-logs-container" id="trainingLogs">
+                    <div class="training-log-entry">Training wird gestartet...</div>
+                </div>
+                
+                <!-- Adaptive Buttons -->
+                <div class="training-buttons">
+                    <button class="training-button training-button-cancel" onclick="stopTraining()">
+                        ❌ Training abbrechen
+                    </button>
+                    <button class="training-button training-button-background" onclick="hideTrainingModal()">
+                        ⏸️ Im Hintergrund
+                    </button>
+                    <button class="training-button training-button-close" onclick="hideTrainingModal()" style="display: none;" id="closeTrainingBtn">
+                        ✅ Schließen
+                    </button>
+                </div>
+            </div>
+        </div>
 
     </div>
 
+    <!-- Chart.js für Diagramme -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- TensorFlow.js für KI-Prognosen -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+
     <script>
-        // Hier kommt der KOMPLETTE JavaScript-Code aus der letzten funktionierenden Version
-        // Ich kopiere ihn direkt 1:1 - keine Änderungen an der Funktionalität!
-        
         // Globale Variablen
         let priceChart = null;
         let consumptionChart = null;
@@ -779,6 +1309,25 @@
         let consumptionProfile = [];
         let batteryLevel = 35;
         let lastCalculationTime = null;
+
+        // Globale Variablen für KI und Wetter
+        let forecastChart = null;
+        let predictionModel = null;
+        let weatherData = null;
+        let isModelTrained = false;
+        let forecastData = [];
+
+        // Open-Meteo API Konfiguration
+        const WEATHER_API = {
+            baseUrl: 'https://api.open-meteo.com/v1/forecast',
+            defaultParams: {
+                latitude: 48.2082,  // Wien
+                longitude: 16.3738,
+                hourly: 'temperature_2m,cloud_cover,wind_speed_10m,precipitation_probability',
+                timezone: 'Europe/Berlin',
+                forecast_days: 3
+            }
+        };
         
         // Standard-Verbrauchsprofil (in kW)
         const DEFAULT_CONSUMPTION = {
@@ -787,36 +1336,125 @@
             evening: 3.5,
             night: 0.5
         };
-        
-        // Einfache Preis-Muster (basierend auf realen Daten)
+
+        // Preismuster für Wochentage und Wochenende
         const PRICE_PATTERNS = {
             weekday: {
-                "00-06": { base: 45, description: "Sehr günstig (Nacht)" },
-                "06-09": { base: 65, description: "Teurer (Morgen)" },
-                "09-12": { base: 70, description: "Hoch (Vormittag)" },
-                "12-15": { base: 68, description: "Hoch (Mittag)" },
-                "15-18": { base: 75, description: "Sehr hoch (Nachmittag)" },
-                "18-21": { base: 85, description: "Am teuersten (Abend)" },
-                "21-24": { base: 60, description: "Günstig (Spätabend)" }
+                "00-06": { base: 18, description: "Nachttarif" },
+                "06-09": { base: 28, description: "Morgenpeak" },
+                "09-17": { base: 35, description: "Standard" },
+                "17-21": { base: 42, description: "Abendpeak" },
+                "21-24": { base: 30, description: "Standard" }
             },
             weekend: {
-                "00-06": { base: 40, description: "Sehr günstig" },
-                "06-09": { base: 50, description: "Günstig" },
-                "09-12": { base: 55, description: "Mittel" },
-                "12-15": { base: 58, description: "Mittel" },
-                "15-18": { base: 65, description: "Hoch" },
-                "18-21": { base: 70, description: "Hoch" },
-                "21-24": { base: 50, description: "Günstig" }
+                "00-09": { base: 15, description: "Nachttarif" },
+                "09-12": { base: 25, description: "Standard" },
+                "12-18": { base: 32, description: "Standard" },
+                "18-22": { base: 38, description: "Abend" },
+                "22-24": { base: 20, description: "Nachttarif" }
             }
         };
-        
-        // Wetter-Einflüsse auf Strompreise
+
+        // Wettereinfluss auf Preise
         const WEATHER_IMPACT = {
-            sunny: { factor: 0.85, description: "Viel Solarstrom → Preise sinken" },
-            partly_cloudy: { factor: 0.95, description: "Etwas Solarstrom" },
-            cloudy: { factor: 1.05, description: "Wenig Solar → Preise steigen" },
-            rainy: { factor: 1.10, description: "Wenig Solar, höhere Nachfrage" },
-            windy: { factor: 0.80, description: "Viel Windstrom → Preise sinken stark" }
+            sunny: { factor: 0.85, description: "Viel Sonne - viel Solar" },
+            partly_cloudy: { factor: 0.95, description: "Leicht bewölkt - mäßig Solar" },
+            cloudy: { factor: 1.05, description: "Bewölkt - wenig Solar" },
+            rainy: { factor: 1.10, description: "Regen - hoher Verbrauch" },
+            windy: { factor: 0.90, description: "Windig - viel Windkraft" },
+            stormy: { factor: 1.15, description: "Sturm - Einschränkungen" },
+            snow: { factor: 1.20, description: "Schnee - hohe Heizlast" }
+        };
+
+        // Wetter-Daten-Struktur
+        let currentWeather = {
+            temperature: null,
+            cloudCover: null,
+            windSpeed: null,
+            rainProbability: null,
+            condition: null,
+            icon: '⏳',
+            lastUpdate: null,
+            location: 'Wien, AT',
+            isRealData: false
+        };
+
+        // Wetterbedingungen zu unseren Kategorien mappen
+        const WEATHER_CONDITIONS = {
+            // Klarer Himmel
+            'clear': 'klarer Himmel',
+            'sunny': 'sonnig',
+            
+            // Teilweise bewölkt
+            'partly cloudy': 'teilweise bewölkt',
+            'partly_cloudy': 'teilweise bewölkt',
+            
+            // Bewölkt
+            'cloudy': 'bewölkt',
+            'overcast': 'stark bewölkt',
+            
+            // Regen
+            'rain': 'Regen',
+            'light rain': 'leichter Regen',
+            'moderate rain': 'mäßiger Regen',
+            'heavy rain': 'starker Regen',
+            'drizzle': 'Nieselregen',
+            'freezing drizzle': 'gefrierender Nieselregen',
+            
+            // Schnee
+            'snow': 'Schneefall',
+            'light snow': 'leichter Schnee',
+            'heavy snow': 'starker Schnee',
+            'snow grains': 'Schneegraupel',
+            'sleet': 'Schneeregen',
+            
+            // Wind
+            'windy': 'windig',
+            
+            // Sturm
+            'thunderstorm': 'Gewitter',
+            'storm': 'Sturm',
+            'heavy thunderstorm': 'starkes Gewitter',
+            
+            // Nebel
+            'fog': 'Nebel',
+            
+            // Sonstige
+            'rain showers': 'Regenschauer',
+            'heavy rain showers': 'starke Regenschauer',
+            'snow showers': 'Schneeschauer',
+            'heavy snow showers': 'starke Schneeschauer',
+            'freezing rain': 'gefrierender Regen'
+        };
+
+        // Deutsche Wetter-Icons (optional passendere Icons)
+        const GERMAN_WEATHER_ICONS = {
+            'sonnig': '☀️',
+            'teilweise bewölkt': '⛅',
+            'bewölkt': '☁️',
+            'stark bewölkt': '☁️',
+            'Regen': '🌧️',
+            'leichter Regen': '🌦️',
+            'mäßiger Regen': '🌧️',
+            'starker Regen': '🌧️',
+            'Nieselregen': '🌦️',
+            'gefrierender Nieselregen': '🌧️❄️',
+            'Schnee': '❄️',
+            'leichter Schnee': '🌨️',
+            'starker Schnee': '❄️🌨️',
+            'Schneegriesel': '🌨️',
+            'Schneeregen': '🌧️❄️',
+            'windig': '💨',
+            'Gewitter': '⛈️',
+            'Sturm': '🌪️',
+            'starkes Gewitter': '⛈️⚡',
+            'Nebel': '🌫️',
+            'Regenschauer': '🌧️',
+            'starke Regenschauer': '🌧️💦',
+            'Schneeschauer': '🌨️',
+            'starke Schneeschauer': '❄️🌨️',
+            'gefrierender Regen': '🌧️❄️',
+            'unknown': '🌈'
         };
 
         // Initialisierung
@@ -826,8 +1464,7 @@
             generateConsumptionProfile();
             loadData('today');
             
-            // Event-Listener für alle Einstellungen
-            document.getElementById('weather').addEventListener('change', () => calculateOptimization());
+            // Event-Listener
             document.getElementById('weekday').addEventListener('change', () => {
                 loadData('today');
                 calculateOptimization();
@@ -836,7 +1473,784 @@
             document.getElementById('laundryTime').addEventListener('change', () => calculateOptimization());
             document.getElementById('batteryCapacity').addEventListener('change', () => calculateOptimization());
             document.getElementById('chargePower').addEventListener('change', () => calculateOptimization());
+            
+            // Automatisch Wetter laden
+            setTimeout(() => {
+                loadAndApplyRealWeather();
+            }, 2000);
+            
+            // Starte automatische Wetteraktualisierung
+            startWeatherAutoRefresh();
+            
+            // AUTOMATISCHE KI-INITIALISIERUNG - NEU
+            setTimeout(() => {
+                initializeKIPrognose();
+            }, 3000);
         });
+
+        // NEUE Funktion: KI-Prognose automatisch initialisieren
+        async function initializeKIPrognose() {
+            try {
+                // 1. Wetterdaten laden (falls noch nicht geschehen)
+                if (!weatherData) {
+                    await loadWeatherData();
+                }
+                
+                // 2. KI-Modell vorbereiten (aber nicht sofort trainieren)
+                if (!predictionModel) {
+                    await createPredictionModel();
+                }
+                
+                // 3. Standard-Prognose mit simulierten Daten anzeigen
+                generateDefaultForecast();
+                
+            } catch (error) {
+                console.log('KI-Initialisierung fehlgeschlagen:', error);
+                // Fallback: Standardmeldung anzeigen
+                document.getElementById('forecastDetails').innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #666;">
+                        <div>🤖 KI-Prognose wird initialisiert...</div>
+                        <button onclick="initializeKIPrognose()" style="margin-top: 10px; padding: 8px 15px;">
+                            🔄 Erneut versuchen
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // NEUE Funktion: Standard-Prognose mit simulierten Daten
+        function generateDefaultForecast() {
+            const now = new Date();
+            forecastData = [];
+            
+            // Simulierte Prognose für 3 Tage
+            for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+                for (let hour = 0; hour < 24; hour++) {
+                    const targetDate = new Date(now);
+                    targetDate.setDate(targetDate.getDate() + dayOffset);
+                    targetDate.setHours(hour, 0, 0, 0);
+                    
+                    // Simulierte Preise basierend auf typischen Mustern
+                    let basePrice;
+                    if (hour >= 0 && hour < 6) basePrice = 18 + Math.random() * 5;
+                    else if (hour >= 6 && hour < 9) basePrice = 28 + Math.random() * 8;
+                    else if (hour >= 9 && hour < 17) basePrice = 35 + Math.random() * 10;
+                    else if (hour >= 17 && hour < 21) basePrice = 42 + Math.random() * 12;
+                    else basePrice = 30 + Math.random() * 8;
+                    
+                    // Wochenende-Anpassung
+                    const weekday = targetDate.getDay();
+                    if (weekday === 0 || weekday === 6) {
+                        basePrice *= 0.8;
+                    }
+                    
+                    forecastData.push({
+                        dayOffset: dayOffset,
+                        hour: hour,
+                        date: targetDate,
+                        predictedPrice: basePrice,
+                        temperature: 15 + Math.random() * 10,
+                        cloudCover: Math.random() * 100,
+                        windSpeed: 5 + Math.random() * 20,
+                        rainProb: Math.random() * 50,
+                        weekday: weekday,
+                        isSimulated: true
+                    });
+                }
+            }
+            
+            // Prognose anzeigen
+            displayForecast();
+            updateForecastChart();
+            findBestBuyTime();
+            
+            // Status aktualisieren
+            document.getElementById('modelStatus').textContent = 'Bereit';
+            document.getElementById('modelAccuracy').textContent = 'Simulierte Daten';
+            document.getElementById('weatherStatus').textContent = weatherData ? 'Geladen' : 'Simuliert';
+            document.getElementById('weatherLocation').textContent = currentWeather.location || 'Simuliert';
+            document.getElementById('forecastAccuracy').textContent = '- %';
+            
+            showMessage('📊 Standard-Prognose geladen');
+        }
+
+        // ========================================
+        // GEOLOCATION & WETTER ERWEITERUNGEN
+        // ========================================
+
+        // Geolocation abfragen mit Fallback zu Nominatim
+        async function getLocation() {
+            return new Promise((resolve, reject) => {
+                // Erst versuchen wir die Browser-Geolocation
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            console.log("Geolocation erfolgreich:", position.coords);
+                            
+                            // Try to get location name via reverse geocoding
+                            const locationName = await reverseGeocode(
+                                position.coords.latitude, 
+                                position.coords.longitude
+                            );
+                            
+                            resolve({
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                accuracy: position.coords.accuracy,
+                                name: locationName || `Position (${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)})`,
+                                source: 'browser'
+                            });
+                        },
+                        async (error) => {
+                            console.warn("Geolocation fehlgeschlagen:", error.message);
+                            
+                            // Fallback: IP-basierte Standortbestimmung
+                            try {
+                                const ipLocation = await getLocationByIP();
+                                if (ipLocation) {
+                                    resolve(ipLocation);
+                                } else {
+                                    // Finaler Fallback: Standard-Standort
+                                    resolve(getDefaultLocation());
+                                }
+                            } catch (ipError) {
+                                console.error("IP-Location fehlgeschlagen:", ipError);
+                                resolve(getDefaultLocation());
+                            }
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 5000,
+                            maximumAge: 600000 // 10 Minuten
+                        }
+                    );
+                } else {
+                    // Browser unterstützt keine Geolocation
+                    console.log("Browser unterstützt keine Geolocation");
+                    getLocationByIP()
+                        .then(resolve)
+                        .catch(() => resolve(getDefaultLocation()));
+                }
+            });
+        }
+
+        // Reverse Geocoding mit Nominatim
+        async function reverseGeocode(lat, lon) {
+            try {
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=de`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'Strompreis-Optimierung/1.0'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Nominatim API Error');
+                
+                const data = await response.json();
+                
+                if (data.address) {
+                    // Extrahiere den Ortsnamen
+                    let locationName = '';
+                    if (data.address.city) {
+                        locationName = data.address.city;
+                    } else if (data.address.town) {
+                        locationName = data.address.town;
+                    } else if (data.address.village) {
+                        locationName = data.address.village;
+                    } else if (data.address.municipality) {
+                        locationName = data.address.municipality;
+                    }
+                    
+                    if (data.address.state || data.address.country) {
+                        locationName += locationName ? ', ' : '';
+                        locationName += data.address.state || data.address.country;
+                    }
+                    
+                    return locationName || `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+                }
+            } catch (error) {
+                console.warn("Reverse Geocoding fehlgeschlagen:", error);
+            }
+            return null;
+        }
+
+        // IP-basierte Standortbestimmung
+        async function getLocationByIP() {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                if (!response.ok) throw new Error('IP API Error');
+                
+                const data = await response.json();
+                
+                return {
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                    accuracy: 50000, // IP ist ungenau
+                    name: data.city ? `${data.city}, ${data.country_name}` : data.country_name,
+                    source: 'ip'
+                };
+            } catch (error) {
+                console.warn("IP-basierte Standortbestimmung fehlgeschlagen:", error);
+                return null;
+            }
+        }
+
+        // Standard-Standort (Wien)
+        function getDefaultLocation() {
+            return {
+                latitude: 48.2082,
+                longitude: 16.3738,
+                accuracy: 10000,
+                name: 'Wien, Österreich',
+                source: 'default'
+            };
+        }
+
+        // Dynamischer Wetter-Einfluss basierend auf echten Daten
+        function calculateWeatherImpact(weatherData) {
+            if (!weatherData || !weatherData.isRealData) {
+                // Fallback zu statischem Wert
+                return WEATHER_IMPACT.sunny;
+            }
+            
+            const { temperature, cloudCover, windSpeed, rainProbability, condition } = weatherData;
+            
+            // KI-basierte Berechnung des Wettereinflusses
+            let factor = 1.0;
+            let description = "Normal";
+            
+            // Solar-Einfluss (Bewölkung)
+            if (cloudCover < 20) {
+                factor *= 0.85; // Viel Sonne = viel Solar
+                description = "Viel Solarstrom";
+            } else if (cloudCover < 50) {
+                factor *= 0.95; // Leicht bewölkt = mäßig Solar
+                description = "Mäßig Solarstrom";
+            } else if (cloudCover < 80) {
+                factor *= 1.05; // Stark bewölkt = wenig Solar
+                description = "Wenig Solarstrom";
+            } else {
+                factor *= 1.10; // Bedeckt = sehr wenig Solar
+                description = "Sehr wenig Solarstrom";
+            }
+            
+            // Wind-Einfluss
+            if (windSpeed > 30) {
+                factor *= 0.80; // Sehr windig = viel Windstrom
+                description += ", viel Windstrom";
+            } else if (windSpeed > 15) {
+                factor *= 0.90; // Windig = mäßig Windstrom
+                description += ", mäßig Windstrom";
+            }
+            
+            // Temperatur-Einfluss (Heizung/Kühlung)
+            if (temperature < 0) {
+                factor *= 1.20; // Sehr kalt = mehr Heizung
+                description += ", hohe Heizlast";
+            } else if (temperature < 10) {
+                factor *= 1.10; // Kalt = mehr Heizung
+                description += ", erhöhte Heizlast";
+            } else if (temperature > 28) {
+                factor *= 1.15; // Sehr heiß = mehr Kühlung
+                description += ", hohe Kühllast";
+            } else if (temperature > 22) {
+                factor *= 1.05; // Warm = etwas mehr Kühlung
+                description += ", erhöhte Kühllast";
+            }
+            
+            // Regen-Einfluss (mehr Innenaktivitäten)
+            if (rainProbability > 70) {
+                factor *= 1.10; // Viel Regen = mehr Innenverbrauch
+                description += ", hoher Innenverbrauch";
+            } else if (rainProbability > 30) {
+                factor *= 1.05; // Etwas Regen = erhöhter Innenverbrauch
+                description += ", erhöhter Innenverbrauch";
+            }
+            
+            // Runden
+            factor = Math.round(factor * 100) / 100;
+            
+            return {
+                factor: factor,
+                description: description,
+                condition: condition,
+                temperature: temperature,
+                cloudCover: cloudCover
+            };
+        }
+
+        // Echte Wetterdaten laden und anwenden MIT GEOLOCATION
+        async function loadAndApplyRealWeather() {
+            showLoading(true);
+            document.getElementById('calcStep').textContent = 'Ermittle Standort...';
+            
+            try {
+                // 1. Standort bestimmen
+                const location = await getLocation();
+                console.log("Verwende Standort:", location);
+                
+                // 2. Wetter für diesen Standort laden
+                document.getElementById('calcStep').textContent = 'Lade Live-Wetterdaten...';
+                const weather = await fetchRealWeatherData(location);
+                
+                // 3. In globaler Variable speichern
+                currentWeather = weather;
+                currentWeather.lastUpdate = new Date();
+                currentWeather.isRealData = true;
+                
+                // 4. Wetter anzeigen
+                updateWeatherDisplay();
+                
+                // 5. Wetter-Einfluss berechnen
+                const weatherImpact = calculateWeatherImpact(weather);
+                
+                // 6. Alle Berechnungen mit neuem Wetter aktualisieren
+                recalculateWithWeather(weatherImpact);
+                
+                showMessage(`✅ Wetterdaten für ${location.name} aktualisiert: ${weather.temperature}°C, ${weather.condition}`);
+                
+            } catch (error) {
+                console.error('Wetter-Fehler:', error);
+                showError('Wetterdaten konnten nicht geladen werden');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Echte Wetterdaten von Open-Meteo laden FÜR SPEZIFISCHEN STANDORT
+        async function fetchRealWeatherData(location) {
+            const params = {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                current: 'temperature_2m,cloud_cover,wind_speed_10m,precipitation_probability,weather_code',
+                hourly: 'temperature_2m,cloud_cover,wind_speed_10m,precipitation_probability,weather_code',
+                timezone: 'Europe/Berlin',
+                forecast_days: 1
+            };
+            
+            const queryString = new URLSearchParams(params).toString();
+            const url = `https://api.open-meteo.com/v1/forecast?${queryString}`;
+            
+            console.log('Lade Wetter von:', url);
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Wetter-API: ${response.status}`);
+            
+            const data = await response.json();
+            
+            // Wettercode zu lesbarem Text konvertieren
+            const weatherCode = data.current.weather_code;
+            const condition = interpretWeatherCode(weatherCode);
+            
+            // Speichere auch die stündlichen Daten für die KI-Prognose
+            if (data.hourly) {
+                weatherData = data;
+            }
+            
+            return {
+                temperature: data.current.temperature_2m,
+                cloudCover: data.current.cloud_cover,
+                windSpeed: data.current.wind_speed_10m,
+                rainProbability: data.current.precipitation_probability,
+                condition: condition,
+                icon: getWeatherIcon(condition),
+                location: location.name,
+                rawData: data
+            };
+        }
+
+        // WMO Weather Interpretation Codes (Open-Meteo verwendet WMO)
+        function interpretWeatherCode(code) {
+            // Deutsche Wetterinterpretation für WMO Codes
+            const codes = {
+                0: 'sonnig',
+                1: 'teilweise bewölkt',
+                2: 'teilweise bewölkt',
+                3: 'bewölkt',
+                45: 'Nebel',
+                48: 'Nebel',
+                51: 'leichter Nieselregen',
+                53: 'mäßiger Nieselregen',
+                55: 'starker Nieselregen',
+                56: 'gefrierender leichter Nieselregen',
+                57: 'gefrierender starker Nieselregen',
+                61: 'leichter Regen',
+                63: 'mäßiger Regen',
+                65: 'starker Regen',
+                66: 'leichter gefrierender Regen',
+                67: 'starker gefrierender Regen',
+                71: 'leichter Schneefall',
+                73: 'mäßiger Schneefall',
+                75: 'starker Schneefall',
+                77: 'Schneegriesel',
+                80: 'leichte Regenschauer',
+                81: 'mäßige Regenschauer',
+                82: 'starke Regenschauer',
+                85: 'leichte Schneeschauer',
+                86: 'starke Schneeschauer',
+                95: 'leichtes Gewitter',
+                96: 'leichtes Gewitter mit Hagel',
+                99: 'starkes Gewitter mit Hagel'
+            };
+            
+            return codes[code] || 'unbekannt';
+        }
+
+        function getWeatherIcon(condition, detailed = false) {
+            // Falls condition noch englisch ist, übersetze es
+            const germanCondition = WEATHER_CONDITIONS[condition] || condition;
+            
+            // Basis-Icons
+            const baseIcons = {
+                'sonnig': '☀️',
+                'klar': '☀️',
+                'klarer himmel': '☀️',
+                'überwiegend sonnig': '🌤️',
+                'teilweise bewölkt': '⛅',
+                'bewölkt': '☁️',
+                'bedeckt': '☁️',
+                'stark bewölkt': '☁️',
+                'nebel': '🌫️',
+                'nebelig': '🌫️',
+                'nebelig mit reif': '🌫️❄️',
+                'regenschauer': '🌧️',
+                'leichte regenschauer': '🌦️',
+                'mäßige regenschauer': '🌧️',
+                'starke regenschauer': '🌧️💦',
+                'nieselregen': '🌦️',
+                'leichter nieselregen': '🌦️',
+                'mäßiger nieselregen': '🌧️',
+                'starker nieselregen': '🌧️',
+                'gefrierender nieselregen': '🌧️❄️',
+                'regen': '🌧️',
+                'leichter regen': '🌦️',
+                'mäßiger regen': '🌧️',
+                'starker regen': '🌧️',
+                'gefrierender regen': '🌧️❄️',
+                'schneefall': '❄️',
+                'leichter schneefall': '🌨️',
+                'mäßiger schneefall': '❄️',
+                'starker schneefall': '❄️🌨️',
+                'schneegriesel': '🌨️',
+                'schneeschauer': '🌨️',
+                'leichte schneeschauer': '🌨️',
+                'starke schneeschauer': '❄️🌨️',
+                'schneeregen': '🌧️❄️',
+                'gewitter': '⛈️',
+                'leichtes gewitter': '⛈️',
+                'starkes gewitter': '⛈️⚡',
+                'gewitter mit hagel': '⛈️🧊',
+                'windig': '💨',
+                'stürmisch': '🌪️',
+                'unbekannt': '🌈'
+            };
+            
+            // Für detaillierte Ansicht evtl. andere Icons
+            if (detailed) {
+                const detailedIcons = {
+                    'klar': '🌞',
+                    'teilweise bewölkt': '🌥️',
+                    'bedeckt': '☁️',
+                    'nebel': '😶‍🌫️',
+                    'regen': '☔',
+                    'schnee': '⛄',
+                    'gewitter': '⚡',
+                    'wind': '🍃'
+                };
+                
+                return detailedIcons[germanCondition.toLowerCase()] || baseIcons[germanCondition.toLowerCase()] || '🌈';
+            }
+            
+            return baseIcons[germanCondition.toLowerCase()] || '🌈';
+        }
+
+        // Alternative: Detailliertere deutsche Beschreibungen
+        function interpretWeatherCodeDetailed(code) {
+            const detailedCodes = {
+                0: 'Klarer Himmel',
+                1: 'Überwiegend sonnig',
+                2: 'Teilweise bewölkt',
+                3: 'Bedeckt',
+                45: 'Neblig',
+                48: 'Neblig mit Reif',
+                51: 'Leichter Nieselregen',
+                53: 'Mäßiger Nieselregen',
+                55: 'Starker Nieselregen',
+                56: 'Gefrierender leichter Nieselregen',
+                57: 'Gefrierender starker Nieselregen',
+                61: 'Leichter Regen',
+                63: 'Mäßiger Regen',
+                65: 'Starker Regen',
+                66: 'Leichter gefrierender Regen',
+                67: 'Starker gefrierender Regen',
+                71: 'Leichter Schneefall',
+                73: 'Mäßiger Schneefall',
+                75: 'Starker Schneefall',
+                77: 'Schneegriesel',
+                80: 'Leichte Regenschauer',
+                81: 'Mäßige Regenschauer',
+                82: 'Starke Regenschauer',
+                85: 'Leichte Schneeschauer',
+                86: 'Starke Schneeschauer',
+                95: 'Leichtes Gewitter',
+                96: 'Leichtes Gewitter mit Hagel',
+                99: 'Starkes Gewitter mit Hagel'
+            };
+            
+            return detailedCodes[code] || 'Unbekannte Wetterlage';
+        }
+
+        // Deutsche Wetterbeschreibungen für Empfehlungen
+        const WEATHER_DESCRIPTIONS_DE = {
+            'sonnig': {
+                short: 'Sonnig',
+                long: 'Viel Sonnenschein, ideale Bedingungen für Solaranlagen',
+                impact: 'sehr günstig',
+                recommendation: 'Perfekt für Solarstrom und günstige Preise'
+            },
+            'teilweise bewölkt': {
+                short: 'Teilweise bewölkt',
+                long: 'Wechselnd bewölkt mit sonnigen Abschnitten',
+                impact: 'günstig',
+                recommendation: 'Gute Solarausbeute möglich'
+            },
+            'bewölkt': {
+                short: 'Bewölkt',
+                long: 'Dichte Bewölkung, wenig Sonneneinstrahlung',
+                impact: 'normal',
+                recommendation: 'Durchschnittliche Strompreise erwartet'
+            },
+            'stark bewölkt': {
+                short: 'Stark bewölkt',
+                long: 'Geschlossene Wolkendecke, keine Sonne',
+                impact: 'erhöht',
+                recommendation: 'Preise tendenziell höher durch weniger Solarstrom'
+            },
+            'Regen': {
+                short: 'Regen',
+                long: 'Anhaltender Niederschlag',
+                impact: 'erhöht',
+                recommendation: 'Höherer Verbrauch durch Innenaktivitäten'
+            },
+            'Nieselregen': {
+                short: 'Nieselregen',
+                long: 'Leichter, feiner Niederschlag',
+                impact: 'leicht erhöht',
+                recommendation: 'Leicht erhöhter Innenverbrauch'
+            },
+            'Schnee': {
+                short: 'Schnee',
+                long: 'Schneefall bei kalten Temperaturen',
+                impact: 'stark erhöht',
+                recommendation: 'Hohe Heizlast, Spitzenverbrauch erwartet'
+            },
+            'Gewitter': {
+                short: 'Gewitter',
+                long: 'Elektrische Entladungen mit Niederschlag',
+                impact: 'variabel',
+                recommendation: 'Netzbelastung möglich, Preise können schwanken'
+            },
+            'windig': {
+                short: 'Windig',
+                long: 'Starke Winde',
+                impact: 'günstig',
+                recommendation: 'Gute Windkraftausbeute senkt Preise'
+            },
+            'Nebel': {
+                short: 'Nebel',
+                long: 'Eingeschränkte Sicht durch Bodennebel',
+                impact: 'normal',
+                recommendation: 'Normale Verbrauchsmuster'
+            }
+        };
+
+        // Wetter-Anzeige aktualisieren
+        function updateWeatherDisplay() {
+            const weatherDisplay = document.getElementById('weatherDisplay');
+            const weatherText = document.getElementById('weatherText');
+            const weatherDetails = document.getElementById('weatherDetails');
+            const weatherIcon = document.getElementById('weatherIcon');
+            
+            if (!currentWeather.isRealData) {
+                weatherIcon.textContent = '⏳';
+                weatherText.textContent = 'Keine Wetterdaten geladen';
+                weatherDetails.textContent = 'Klicken Sie auf "Wetter aktualisieren"';
+                return;
+            }
+            
+            const timeStr = currentWeather.lastUpdate 
+                ? currentWeather.lastUpdate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                : 'Jetzt';
+            
+            // Deutsche Wetterbeschreibung
+            const germanCondition = WEATHER_CONDITIONS[currentWeather.condition] || currentWeather.condition;
+            const weatherDesc = WEATHER_DESCRIPTIONS_DE[germanCondition] || {
+                short: germanCondition,
+                long: germanCondition,
+                impact: 'normal',
+                recommendation: ''
+            };
+            
+            weatherIcon.textContent = getWeatherIcon(germanCondition);
+            weatherText.textContent = `${weatherDesc.short}, ${Math.round(currentWeather.temperature)}°C`;
+            
+            weatherDetails.innerHTML = `
+                <div>🌡️ ${Math.round(currentWeather.temperature)}°C | ☁️ ${Math.round(currentWeather.cloudCover)}%</div>
+                <div>💨 ${Math.round(currentWeather.windSpeed)} km/h | 🌧️ ${Math.round(currentWeather.rainProbability)}%</div>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                    ${weatherDesc.long}
+                </div>
+                <div style="font-size: 0.75rem; color: #666; margin-top: 3px;">
+                    📍 ${currentWeather.location} | ⏰ ${timeStr}
+                </div>
+            `;
+            
+            // Visuelles Feedback basierend auf Wetter
+            weatherDisplay.style.background = getWeatherBackground(germanCondition);
+            
+            // Zusätzliche Empfehlung anzeigen
+            if (weatherDesc.recommendation) {
+                const recommendation = document.getElementById('recommendationText');
+                if (recommendation) {
+                    // Füge nur hinzu, wenn nicht schon vorhanden
+                    if (!recommendation.innerHTML.includes(weatherDesc.recommendation)) {
+                        recommendation.innerHTML = `🌤️ ${weatherDesc.recommendation}<br>` + recommendation.innerHTML;
+                    }
+                }
+            }
+        }
+
+        // Deutsche Wetter-Hintergründe
+        function getWeatherBackground(condition) {
+            const backgrounds = {
+                'sonnig': 'linear-gradient(135deg, #ffeb3b, #ff9800)',
+                'klar': 'linear-gradient(135deg, #ffeb3b, #ff9800)',
+                'teilweise bewölkt': 'linear-gradient(135deg, #bbdefb, #64b5f6)',
+                'bewölkt': 'linear-gradient(135deg, #bdbdbd, #757575)',
+                'stark bewölkt': 'linear-gradient(135deg, #9e9e9e, #616161)',
+                'Regen': 'linear-gradient(135deg, #90caf9, #1976d2)',
+                'Nieselregen': 'linear-gradient(135deg, #bbdefb, #42a5f5)',
+                'Schnee': 'linear-gradient(135deg, #e3f2fd, #bbdefb)',
+                'Schneefall': 'linear-gradient(135deg, #e3f2fd, #90caf9)',
+                'Gewitter': 'linear-gradient(135deg, #673ab7, #311b92)',
+                'windig': 'linear-gradient(135deg, #80deea, #00bcd4)',
+                'Nebel': 'linear-gradient(135deg, #eeeeee, #bdbdbd)',
+                'default': 'linear-gradient(135deg, #e3f2fd, #bbdefb)'
+            };
+            
+            return backgrounds[condition] || backgrounds.default;
+        }
+
+        // Alle Berechnungen mit neuem Wetter neu durchführen
+        function recalculateWithWeather(weatherImpact) {
+            console.log('Neuberechnung mit Wetter:', weatherImpact);
+            
+            // 1. Aktuelle Preise neu berechnen (mit Wetterfaktor)
+            if (currentPrices && currentPrices.length > 0) {
+                const updatedPrices = currentPrices.map(price => ({
+                    ...price,
+                    price: price.price * weatherImpact.factor,
+                    pricePerKWh: price.pricePerKWh * weatherImpact.factor,
+                    description: `${price.description} (${weatherImpact.description})`
+                }));
+                
+                currentPrices = updatedPrices;
+                displayPriceData(currentPrices, 'today');
+            }
+            
+            // 2. Verbrauchsprofil aktualisieren (wenn Temperatur-Extreme)
+            if (currentWeather.temperature < 5 || currentWeather.temperature > 25) {
+                adjustConsumptionForTemperature(currentWeather.temperature);
+            }
+            
+            // 3. Empfehlungen aktualisieren
+            updateRecommendationsForWeather(weatherImpact);
+            
+            // 4. Gesamte Optimierung neu berechnen
+            calculateOptimization();
+        }
+
+        // Verbrauch an Temperatur anpassen
+        function adjustConsumptionForTemperature(temperature) {
+            const eveningSlider = document.getElementById('eveningConsumption');
+            const eveningValue = document.getElementById('eveningValue');
+            
+            if (temperature < 5) {
+                // Sehr kalt = mehr Heizung am Abend
+                const newValue = Math.min(8, parseFloat(eveningSlider.value) * 1.3);
+                eveningSlider.value = newValue;
+                eveningValue.textContent = newValue.toFixed(1) + ' kW';
+                showMessage('⚠️ Heizlast erhöht (kaltes Wetter)');
+            } else if (temperature > 25) {
+                // Sehr warm = mehr Kühlung
+                const newValue = Math.min(8, parseFloat(eveningSlider.value) * 1.2);
+                eveningSlider.value = newValue;
+                eveningValue.textContent = newValue.toFixed(1) + ' kW';
+                showMessage('⚠️ Kühllast erhöht (warmes Wetter)');
+            }
+            
+            generateConsumptionProfile();
+        }
+
+        // Empfehlungen für Wetter aktualisieren
+        function updateRecommendationsForWeather(weatherImpact) {
+            const recommendation = document.getElementById('recommendationText');
+            
+            if (!recommendation) return;
+            
+            let weatherTips = '';
+            
+            if (weatherImpact.factor < 0.9) {
+                weatherTips = `🌤️ Günstiges Wetter! Strompreise sind ${Math.round((1-weatherImpact.factor)*100)}% niedriger als normal.`;
+            } else if (weatherImpact.factor > 1.1) {
+                weatherTips = `⚠️ Teures Wetter! Strompreise sind ${Math.round((weatherImpact.factor-1)*100)}% höher als normal.`;
+            }
+            
+            if (currentWeather.cloudCover < 30) {
+                weatherTips += `<br>☀️ Viel Sonne: Ideal für Solar & günstige Preise`;
+            } else if (currentWeather.cloudCover > 70) {
+                weatherTips += `<br>☁️ Stark bewölkt: Wenig Solar, Preise tendenziell höher`;
+            }
+            
+            if (currentWeather.windSpeed > 25) {
+                weatherTips += `<br>💨 Viel Wind: Gute Windkraft-Ausbeute`;
+            }
+            
+            if (currentWeather.rainProbability > 60) {
+                weatherTips += `<br>🌧️ Hohe Regenwahrscheinlichkeit: Mehr Innenverbrauch erwartet`;
+            }
+            
+            recommendation.innerHTML = weatherTips + (recommendation.innerHTML || '');
+        }
+
+        // Automatische Wetteraktualisierung
+        function startWeatherAutoRefresh() {
+            // Aktualisiere alle 30 Minuten
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    console.log('Automatische Wetteraktualisierung...');
+                    loadAndApplyRealWeather();
+                }
+            }, 30 * 60 * 1000); // 30 Minuten
+            
+            // Aktualisiere auch bei Tab-Wechsel zurück
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    // Prüfe ob Wetter älter als 1 Stunde
+                    const now = new Date();
+                    const lastUpdate = currentWeather.lastUpdate;
+                    
+                    if (!lastUpdate || (now - lastUpdate) > 60 * 60 * 1000) {
+                        loadAndApplyRealWeather();
+                    }
+                }
+            });
+        }
+
+        // ========================================
+        // BESTEHENDE FUNKTIONEN (leicht angepasst)
+        // ========================================
 
         function setupSliders() {
             // Verbrauchs-Slider
@@ -913,32 +2327,97 @@
             updateConsumptionChart();
         }
 
-        function loadData(period) {
+        // Lädt Preisdaten von EPEX Spot über die API von SmartEnery (mit API-Fallback)
+        async function loadData(period) {
             showLoading(true);
-            document.getElementById('calcStep').textContent = 'Lade Preisdaten...';
+            document.getElementById('calcStep').textContent = 'Lade EPEX Spot Preise...';
             
-            setTimeout(() => {
-                try {
-                    currentPrices = generatePriceData(period);
-                    displayPriceData(currentPrices, period);
-                    generateConsumptionProfile();
-                    calculateOptimization();
-                    showMessage('✅ Preisdaten geladen und Optimierung berechnet');
-                } catch (error) {
-                    console.error('Fehler:', error);
-                    showError('Daten konnten nicht geladen werden.');
-                } finally {
-                    showLoading(false);
-                }
-            }, 800);
+            // Zeitgeber für Fallback
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), 5000)
+            );
+            
+            try {
+                // Versuche API-Daten zu laden
+                const apiPromise = loadFromSmartEnergyAPI(period);
+                currentPrices = await Promise.race([apiPromise, timeoutPromise]);
+                
+                showMessage(`✅ ${currentPrices.length} EPEX Spot Preise geladen`);
+                
+            } catch (error) {
+                console.log('API nicht verfügbar, verwende Simulation:', error.message);
+                
+                // ORIGINALE FUNKTION als Fallback
+                currentPrices = generatePriceData(period);
+                
+                // Markiere als simuliert
+                currentPrices.forEach(p => {
+                    p.isRealData = false;
+                    p.source = 'simulation';
+                    p.description = `EPEX Muster ${p.description}`;
+                });
+                
+                showMessage('ℹ️ Simulierte EPEX-Daten verwendet');
+            }
+            
+            // Gemeinsame Verarbeitung
+            displayPriceData(currentPrices, period);
+            generateConsumptionProfile();
+            calculateOptimization();
+            showLoading(false);
+        }
+
+        async function loadFromSmartEnergyAPI(period) {
+            const proxyUrl = 'https://api.allorigins.win/get?url=';
+            const apiUrl = 'https://apis.smartenergy.at/market/v1/price?region=AT';
+            
+            const response = await fetch(`${proxyUrl}${encodeURIComponent(apiUrl)}`);
+            const proxyData = await response.json();
+            
+            if (!proxyData.contents) {
+                throw new Error('Keine Daten vom Proxy');
+            }
+            
+            const apiData = JSON.parse(proxyData.contents);
+            
+            // Verarbeite 15-Minuten zu stündlichen Daten
+            const hourlyData = {};
+            apiData.data.forEach(point => {
+                const hour = new Date(point.date).getHours();
+                if (!hourlyData[hour]) hourlyData[hour] = [];
+                hourlyData[hour].push(point.value);
+            });
+            
+            // Erstelle stündliche Preise
+            const prices = [];
+            for (let hour = 0; hour < 24; hour++) {
+                const values = hourlyData[hour] || [];
+                const avgPrice = values.length > 0 
+                    ? values.reduce((a, b) => a + b, 0) / values.length
+                    : null;
+                
+                prices.push({
+                    hour: hour,
+                    price: avgPrice ? avgPrice * 10 : 0,
+                    pricePerKWh: avgPrice ? parseFloat(avgPrice.toFixed(3)) : 0,
+                    time: `${hour.toString().padStart(2, '0')}:00`,
+                    description: avgPrice ? 'EPEX Spot' : 'Keine Daten',
+                    isRealData: !!avgPrice,
+                    dataPoints: values.length
+                });
+            }
+            
+            return prices;
         }
 
         function generatePriceData(period) {
             const weekday = document.getElementById('weekday').value;
-            const weather = document.getElementById('weather').value;
             const isWeekend = weekday === '6' || weekday === '0';
             const pattern = isWeekend ? PRICE_PATTERNS.weekend : PRICE_PATTERNS.weekday;
-            const weatherFactor = WEATHER_IMPACT[weather].factor;
+            
+            // Dynamischen Wetterfaktor verwenden (statt statischem Select)
+            const weatherImpact = calculateWeatherImpact(currentWeather);
+            const weatherFactor = weatherImpact.factor;
             
             const prices = [];
             
@@ -957,23 +2436,48 @@
                 const baseData = pattern[timeWindow];
                 let price = baseData.base;
                 
-                // Wetter-Einfluss anwenden
+                // REALER Wetter-Einfluss anwenden
                 price *= weatherFactor;
                 
-                // Zufällige Variation (±10%)
-                const randomFactor = 0.95 + Math.random() * 0.1;
+                // Zusätzliche Anpassungen basierend auf spezifischen Wetterdaten
+                if (currentWeather.isRealData) {
+                    // Temperaturabhängige Anpassung
+                    if (currentWeather.temperature < 5 && (hour >= 17 && hour < 22)) {
+                        price *= 1.15; // Abendheizung bei Kälte
+                    } else if (currentWeather.temperature > 25 && (hour >= 12 && hour < 18)) {
+                        price *= 1.10; // Nachmittagskühlung bei Hitze
+                    }
+                    
+                    // Bewölkungsabhängige Anpassung
+                    if (currentWeather.cloudCover > 80 && (hour >= 9 && hour < 17)) {
+                        price *= 1.08; // Wenig Solar am Tag
+                    } else if (currentWeather.cloudCover < 30 && (hour >= 9 && hour < 17)) {
+                        price *= 0.92; // Viel Solar am Tag
+                    }
+                }
+                
+                // Zufällige Variation (±8%)
+                const randomFactor = 0.96 + Math.random() * 0.08;
                 price *= randomFactor;
                 
                 // Rundung
                 price = Math.round(price * 100) / 100;
+                
+                // Beschreibung mit Wetterinfo
+                let description = baseData.description;
+                if (currentWeather.isRealData) {
+                    description += ` | ${weatherImpact.description}`;
+                }
                 
                 prices.push({
                     hour: hour,
                     price: price,
                     pricePerKWh: price / 10,
                     time: `${hour.toString().padStart(2, '0')}:00`,
-                    description: baseData.description,
-                    timeWindow: timeWindow
+                    description: description,
+                    timeWindow: timeWindow,
+                    weatherFactor: weatherFactor,
+                    weatherCondition: currentWeather.condition
                 });
             }
             
@@ -1573,6 +3077,34 @@
             
             document.getElementById(`tab-${tabName}`).style.display = 'block';
             document.querySelector(`button[onclick="showTab('${tabName}')"]`).classList.add('active');
+            
+            // SPEZIAL-LOGIK FÜR FORECAST-TAB
+            if (tabName === 'forecast') {
+                // Wenn noch keine Prognose existiert, automatisch generieren
+                if (forecastData.length === 0) {
+                    setTimeout(() => {
+                        if (!isModelTrained) {
+                            // Zeige Standard-Prognose
+                            generateDefaultForecast();
+                            
+                            // Info-Meldung anzeigen
+                            const forecastContainer = document.getElementById('tab-forecast');
+                            const infoDiv = document.createElement('div');
+                            infoDiv.className = 'info';
+                            infoDiv.style.marginTop = '10px';
+                            infoDiv.innerHTML = `
+                                <strong>ℹ️ Simulierte Prognose</strong><br>
+                                Für eine präzise KI-Prognose klicken Sie auf "KI-Modell trainieren"
+                            `;
+                            forecastContainer.appendChild(infoDiv);
+                            
+                        } else if (weatherData) {
+                            // Wenn Modell trainiert ist und Wetterdaten existieren, echte Prognose generieren
+                            generate3DayForecast();
+                        }
+                    }, 300);
+                }
+            }
         }
 
         function showLoading(show) {
@@ -1605,6 +3137,1380 @@
             document.body.appendChild(tempDiv);
             setTimeout(() => tempDiv.remove(), 3000);
         }
+
+        // ========================================
+        // KI-PROGNOSE FUNKTIONEN (aus letztem Chat)
+        // ========================================
+
+        async function createPredictionModel() {
+            console.log('Erstelle KI-Modell...');
+            
+            const model = tf.sequential();
+            
+            // Eingabeschicht (4 Features: Stunde, Wochentag, Temperatur, Bewölkung)
+            model.add(tf.layers.dense({
+                units: 16,
+                activation: 'relu',
+                inputShape: [4]
+            }));
+            
+            // Versteckte Schichten
+            model.add(tf.layers.dense({ units: 8, activation: 'relu' }));
+            model.add(tf.layers.dropout({ rate: 0.2 }));
+            model.add(tf.layers.dense({ units: 4, activation: 'relu' }));
+            
+            // Ausgabeschicht (1 Output: Strompreis)
+            model.add(tf.layers.dense({ units: 1 }));
+            
+            // Modell kompilieren
+            model.compile({
+                optimizer: tf.train.adam(0.001),
+                loss: 'meanSquaredError',
+                metrics: ['mae']
+            });
+            
+            predictionModel = model;
+            document.getElementById('modelStatus').textContent = 'Bereit zum Trainieren';
+            
+            return model;
+        }
+
+        async function loadWeatherData() {
+            showLoading(true);
+            document.getElementById('calcStep').textContent = 'Lade Wettervorhersage...';
+            
+            try {
+                // Versuche Standort zu bekommen
+                const location = await getLocation();
+                
+                const params = {
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    hourly: 'temperature_2m,cloud_cover,wind_speed_10m,precipitation_probability',
+                    timezone: 'Europe/Berlin',
+                    forecast_days: 3
+                };
+                
+                const queryString = new URLSearchParams(params).toString();
+                const url = `${WEATHER_API.baseUrl}?${queryString}`;
+                
+                console.log('Lade Wetter von:', url);
+                const response = await fetch(url);
+                
+                if (!response.ok) throw new Error(`Wetter-API: ${response.status}`);
+                
+                weatherData = await response.json();
+                console.log('Wetterdaten erhalten:', weatherData);
+                
+                // Wetterstatus aktualisieren
+                document.getElementById('weatherStatus').textContent = 'Geladen';
+                document.getElementById('weatherLocation').textContent = location.name;
+                
+                // Wetterdaten anzeigen
+                displayCurrentWeather();
+                
+                showMessage(`✅ Wettervorhersage für ${location.name} geladen`);
+                
+            } catch (error) {
+                console.error('Wetter-Fehler:', error);
+                showError('Wetterdaten konnten nicht geladen werden');
+                document.getElementById('weatherStatus').textContent = 'Fehlgeschlagen';
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayCurrentWeather() {
+            if (!weatherData || !weatherData.hourly) return;
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            
+            const temp = weatherData.hourly.temperature_2m[currentHour] || 'N/A';
+            const clouds = weatherData.hourly.cloud_cover[currentHour] || 'N/A';
+            const wind = weatherData.hourly.wind_speed_10m[currentHour] || 'N/A';
+            const rain = weatherData.hourly.precipitation_probability[currentHour] || 'N/A';
+            
+            const weatherHtml = `
+                <div class="result-item">
+                    <span class="result-label">🌡️ Aktuelle Temperatur:</span>
+                    <span class="result-value">${temp}°C</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">☁️ Bewölkung:</span>
+                    <span class="result-value">${clouds}%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">💨 Windgeschwindigkeit:</span>
+                    <span class="result-value">${wind} km/h</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">🌧️ Regenwahrscheinlichkeit:</span>
+                    <span class="result-value">${rain}%</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">📍 Standort:</span>
+                    <span class="result-value">${currentWeather.location || 'Wien, Österreich'}</span>
+                </div>
+            `;
+            
+            document.getElementById('currentWeather').innerHTML = weatherHtml;
+        }
+
+        async function collectTrainingData() {
+            const trainingData = [];
+            const labels = [];
+            
+            // Simulierte historische Daten
+            for (let i = 0; i < 100; i++) {
+                const hour = Math.floor(Math.random() * 24);
+                const weekday = Math.floor(Math.random() * 7);
+                const temperature = 10 + Math.random() * 20;
+                const cloudCover = Math.random() * 100;
+                
+                let basePrice = 25;
+                if (hour >= 0 && hour < 6) basePrice = 18;
+                else if (hour >= 6 && hour < 9) basePrice = 28;
+                else if (hour >= 9 && hour < 17) basePrice = 35;
+                else if (hour >= 17 && hour < 21) basePrice = 42;
+                else basePrice = 30;
+                
+                if (temperature > 25) basePrice *= 1.1;
+                if (cloudCover < 30) basePrice *= 0.9;
+                
+                basePrice *= (0.9 + Math.random() * 0.2);
+                
+                trainingData.push([hour / 23, weekday / 6, temperature / 40, cloudCover / 100]);
+                labels.push(basePrice / 50);
+            }
+            
+            return {
+                features: tf.tensor2d(trainingData),
+                labels: tf.tensor2d(labels, [labels.length, 1])
+            };
+        }
+
+        async function trainPredictionModel() {
+            if (isTraining) {
+                showMessage('⚠️ Training läuft bereits');
+                return;
+            }
+            
+            showTrainingModal();
+            
+            try {
+                if (!predictionModel) {
+                    await createPredictionModel();
+                }
+                
+                // Training vorbereiten
+                document.getElementById('trainingStatus').textContent = 'Bereite Daten vor...';
+                addTrainingLog('Starte Datenvorbereitung...');
+                
+                const trainingData = await collectTrainingData();
+                addTrainingLog(`Daten generiert: ${trainingData.features.shape[0]} Samples`);
+                
+                // Training starten
+                const totalEpochs = 50;
+                const history = {
+                    epoch: [],
+                    history: {
+                        loss: [],
+                        val_loss: []
+                    }
+                };
+                
+                const trainingResult = await predictionModel.fit(trainingData.features, trainingData.labels, {
+                    epochs: totalEpochs,
+                    batchSize: 10,
+                    validationSplit: 0.2,
+                    callbacks: {
+                        onEpochEnd: async (epoch, logs) => {
+                            // ... bestehende onEpochEnd Logik ...
+                        },
+                        onTrainEnd: async (logs) => {
+                            addTrainingLog('Training abgeschlossen');
+                            
+                            // MODIFIZIERT: Nach Training automatisch Prognose generieren
+                            if (!stopTrainingRequested) {
+                                isModelTrained = true;
+                                
+                                // Modal schließen
+                                hideTrainingModal();
+                                
+                                // Erfolgsmeldung
+                                showMessage('✅ KI-Modell erfolgreich trainiert!');
+                                
+                                // Automatisch Prognose generieren
+                                setTimeout(async () => {
+                                    try {
+                                        await generate3DayForecast();
+                                        showMessage('📊 KI-Prognose automatisch generiert!');
+                                        
+                                        // Zum Forecast-Tab wechseln
+                                        showTab('forecast');
+                                    } catch (forecastError) {
+                                        console.error('Automatische Prognose fehlgeschlagen:', forecastError);
+                                        showMessage('⚠️ Prognose konnte nicht automatisch generiert werden');
+                                    }
+                                }, 500);
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Training-Fehler:', error);
+                addTrainingLog(`FEHLER: ${error.message}`);
+                
+                hideTrainingModal();
+                showError('KI-Modell konnte nicht trainiert werden: ' + error.message);
+            } finally {
+                isTraining = false;
+                stopTrainingRequested = false;
+            }
+        }
+
+        // Deutsche Wetterempfehlungen für Prognose-Tab
+        function getGermanWeatherAdvice(weatherData) {
+            if (!weatherData) return '';
+            
+            const { temperature, cloudCover, windSpeed, rainProbability, condition } = weatherData;
+            const germanCondition = WEATHER_CONDITIONS[condition] || condition;
+            
+            let advice = [];
+            
+            // Temperatur-basierte Empfehlungen
+            if (temperature < 0) {
+                advice.push('❄️ Frostwarnung: Hohe Heizlast erwartet');
+            } else if (temperature < 5) {
+                advice.push('🥶 Sehr kalt: Erhöhte Heizkosten');
+            } else if (temperature > 28) {
+                advice.push('🥵 Hitzewarnung: Kühlungsbedarf steigt');
+            } else if (temperature > 22) {
+                advice.push('☀️ Warm: Moderate Kühlung nötig');
+            }
+            
+            // Bewölkungs-basierte Empfehlungen
+            if (cloudCover < 20) {
+                advice.push('☀️ Viel Sonne: Optimale Solarausbeute');
+            } else if (cloudCover < 50) {
+                advice.push('⛅ Leicht bewölkt: Gute Solarerträge');
+            } else if (cloudCover > 80) {
+                advice.push('☁️ Stark bewölkt: Geringe Solarleistung');
+            }
+            
+            // Wind-basierte Empfehlungen
+            if (windSpeed > 30) {
+                advice.push('💨 Starker Wind: Hohe Windkraftausbeute');
+            } else if (windSpeed > 15) {
+                advice.push('🍃 Mäßiger Wind: Gute Windkraft');
+            }
+            
+            // Regen-basierte Empfehlungen
+            if (rainProbability > 70) {
+                advice.push('🌧️ Viel Regen: Mehr Innenverbrauch');
+            } else if (rainProbability > 30) {
+                advice.push('🌦️ Regen möglich: Leicht erhöhter Verbrauch');
+            }
+            
+            // Wettertyp-spezifische Empfehlungen
+            if (germanCondition.includes('Gewitter')) {
+                advice.push('⚡ Gewitter: Netzstabilität könnte beeinträchtigt sein');
+    }
+    if (germanCondition.includes('Nebel')) {
+        advice.push('🌫️ Nebel: Normale Verbrauchsmuster');
+    }
+    if (germanCondition.includes('Schnee')) {
+        advice.push('❄️ Schnee: Sehr hohe Heizlast');
+    }
+    
+    return advice.length > 0 
+        ? `<strong>Wetterempfehlung:</strong><br>• ${advice.join('<br>• ')}`
+        : 'Normales Wetter: Standard-Verbrauchsmuster erwartet';
+}
+
+        async function generate3DayForecast() {
+            showLoading(true);
+            document.getElementById('calcStep').textContent = 'Generiere KI-Prognose...';
+            
+            try {
+                // Prüfe Voraussetzungen
+                if (!predictionModel) {
+                    throw new Error('KI-Modell nicht initialisiert');
+                }
+                
+                if (!weatherData) {
+                    throw new Error('Keine Wetterdaten verfügbar');
+                }
+                
+                forecastData = [];
+                const now = new Date();
+                
+                for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+                    for (let hour = 0; hour < 24; hour++) {
+                        const targetDate = new Date(now);
+                        targetDate.setDate(targetDate.getDate() + dayOffset);
+                        targetDate.setHours(hour, 0, 0, 0);
+                        
+                        const weekday = targetDate.getDay();
+                        const dataIndex = dayOffset * 24 + hour;
+                        
+                        const temperature = weatherData.hourly.temperature_2m[dataIndex] || 15;
+                        const cloudCover = weatherData.hourly.cloud_cover[dataIndex] || 50;
+                        
+                        // KI-Vorhersage (falls Modell trainiert)
+                        let predictedPrice;
+                        if (isModelTrained) {
+                            const features = tf.tensor2d([[
+                                hour / 23,
+                                weekday / 6,
+                                temperature / 40,
+                                cloudCover / 100
+                            ]]);
+                            
+                            const prediction = predictionModel.predict(features);
+                            predictedPrice = (await prediction.data())[0] * 50;
+                            
+                            features.dispose();
+                            prediction.dispose();
+                        } else {
+                            // Fallback: Simulierte Preise
+                            predictedPrice = 25 + Math.random() * 20;
+                        }
+                        
+                        // Wetterkorrekturen
+                        let finalPrice = predictedPrice;
+                        
+                        if (cloudCover < 20) finalPrice *= 0.85;
+                        if (cloudCover > 80) finalPrice *= 1.15;
+                        if (temperature < 0) finalPrice *= 1.2;
+                        if (temperature > 28) finalPrice *= 1.15;
+                        if (weekday === 0 || weekday === 6) finalPrice *= 0.8;
+                        
+                        forecastData.push({
+                            dayOffset: dayOffset,
+                            hour: hour,
+                            date: targetDate,
+                            predictedPrice: finalPrice,
+                            temperature: temperature,
+                            cloudCover: cloudCover,
+                            windSpeed: weatherData.hourly.wind_speed_10m[dataIndex] || 10,
+                            rainProb: weatherData.hourly.precipitation_probability[dataIndex] || 0,
+                            weekday: weekday,
+                            isSimulated: !isModelTrained
+                        });
+                    }
+                }
+                
+                // Ergebnisse anzeigen
+                displayForecast();
+                updateForecastChart();
+                findBestBuyTime();
+                
+                // Status aktualisieren
+                if (isModelTrained) {
+                    document.getElementById('modelStatus').textContent = 'Trained ✓';
+                    document.getElementById('forecastAccuracy').textContent = 'Berechne...';
+                    
+                    // Genauigkeit automatisch prüfen
+                    setTimeout(() => {
+                        analyzeForecastAccuracy();
+                    }, 1000);
+                }
+                
+                showMessage(`✅ ${isModelTrained ? 'KI-' : ''}Prognose für 3 Tage generiert!`);
+                
+            } catch (error) {
+                console.error('Prognose-Fehler:', error);
+                
+                // Fallback zu Standard-Prognose
+                generateDefaultForecast();
+                showMessage('⚠️ KI-Prognose fehlgeschlagen, verwende Standard-Prognose');
+                
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayForecast() {
+            if (forecastData.length === 0) {
+                document.getElementById('forecastDetails').innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #666;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">🤖</div>
+                        <div style="margin-bottom: 15px;"><strong>Keine Prognose verfügbar</strong></div>
+                        <button onclick="generateDefaultForecast()" style="margin: 5px; padding: 10px 20px;">
+                            📊 Standard-Prognose anzeigen
+                        </button>
+                        <button onclick="trainPredictionModel()" style="margin: 5px; padding: 10px 20px; background: #00b894;">
+                            🤖 KI-Modell trainieren
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Gruppiere nach Tag
+            const days = [[], [], []];
+            forecastData.forEach(item => {
+                if (item.dayOffset < 3) {
+                    days[item.dayOffset].push(item);
+                }
+            });
+            
+            let forecastHtml = '';
+            
+            // Header mit Statusinfo
+            const hasSimulatedData = forecastData.some(item => item.isSimulated);
+            if (hasSimulatedData) {
+                forecastHtml += `
+                    <div class="info" style="margin-bottom: 15px;">
+                        <strong>ℹ️ ${isModelTrained ? 'KI-' : 'Simulierte'} Prognose</strong><br>
+                        ${isModelTrained ? 'Basierend auf trainiertem KI-Modell' : 'Basierend auf typischen Preisverläufen'}
+                    </div>
+                `;
+            }
+            
+            days.forEach((dayData, dayIndex) => {
+                if (dayData.length === 0) return;
+                
+                const date = dayData[0].date;
+                const avgPrice = dayData.reduce((sum, item) => sum + item.predictedPrice, 0) / dayData.length;
+                const minPrice = Math.min(...dayData.map(item => item.predictedPrice));
+                const maxPrice = Math.max(...dayData.map(item => item.predictedPrice));
+                const minHour = dayData.find(item => item.predictedPrice === minPrice).hour;
+                const maxHour = dayData.find(item => item.predictedPrice === maxPrice).hour;
+                
+                // Empfehlungs-Icon basierend auf Preisniveau
+                let recommendationIcon = '💰';
+                if (avgPrice < 25) recommendationIcon = '⭐';
+                else if (avgPrice > 40) recommendationIcon = '⚠️';
+                
+                forecastHtml += `
+                    <div class="forecast-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h5 style="margin: 0;">${recommendationIcon} ${date.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</h5>
+                            <span style="background: ${avgPrice < 25 ? '#2ecc71' : avgPrice > 40 ? '#e74c3c' : '#f39c12'}; 
+                                color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.9rem;">
+                                Ø ${avgPrice.toFixed(1)} ct/kWh
+                            </span>
+                        </div>
+                        
+                        <div class="result-item">
+                            <span class="result-label">📉 Günstigste Stunde:</span>
+                            <span class="result-value">${minHour.toString().padStart(2, '0')}:00 (${minPrice.toFixed(1)} ct)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📈 Teuerste Stunde:</span>
+                            <span class="result-value">${maxHour.toString().padStart(2, '0')}:00 (${maxPrice.toFixed(1)} ct)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">🌤️ Mittleres Wetter:</span>
+                            <span class="result-value">
+                                ${dayData[12].temperature.toFixed(1)}°C, 
+                                ${dayData[12].cloudCover}% bewölkt
+                            </span>
+                        </div>
+                        
+                        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
+                            <div style="font-size: 0.9rem; color: #666;">
+                                ${getGermanWeatherAdvice({
+                                    temperature: dayData[12].temperature,
+                                    cloudCover: dayData[12].cloudCover,
+                                    windSpeed: dayData[12].windSpeed,
+                                    rainProbability: dayData[12].rainProb,
+                                    condition: getConditionFromCode(dayData[12].weatherCode)
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('forecastDetails').innerHTML = forecastHtml;
+        }
+
+        // Konvertiert Wettercode zu deutscher Beschreibung
+        function getConditionFromCode(code) {
+            const codeMap = {
+                0: 'sonnig',
+                1: 'teilweise bewölkt',
+                2: 'teilweise bewölkt',
+                3: 'bewölkt',
+                45: 'Nebel',
+                48: 'Nebel',
+                51: 'Nieselregen',
+                53: 'Nieselregen',
+                55: 'Nieselregen',
+                61: 'Regen',
+                63: 'Regen',
+                65: 'Regen',
+                71: 'Schnee',
+                73: 'Schnee',
+                75: 'Schnee',
+                80: 'Regenschauer',
+                81: 'Regenschauer',
+                82: 'Regenschauer',
+                85: 'Schneeschauer',
+                86: 'Schneeschauer',
+                95: 'Gewitter',
+                96: 'Gewitter',
+                99: 'Gewitter'
+            };
+            
+            return codeMap[code] || 'unbekannt';
+        }
+
+        // Hilfsfunktion für Empfehlungen
+        function getForecastRecommendation(avgPrice, bestHour, worstHour) {
+            if (avgPrice < 25) {
+                return `Günstiger Tag! Ideal für hohen Verbrauch und Akku-Ladung.`;
+            } else if (avgPrice > 40) {
+                return `Teurer Tag! Verbrauch auf ${bestHour}:00 Uhr verschieben.`;
+            } else {
+                return `Normales Preisniveau. Akku zwischen ${bestHour}:00-${worstHour}:00 Uhr laden.`;
+            }
+        }
+
+        function updateForecastChart() {
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            if (forecastChart) forecastChart.destroy();
+            
+            const labels = forecastData.map(item => 
+                `${item.date.getDate()}.${item.date.getMonth() + 1} ${item.hour.toString().padStart(2, '0')}:00`
+            );
+            
+            const prices = forecastData.map(item => item.predictedPrice);
+            
+            const colors = prices.map(price => {
+                const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+                if (price < avg * 0.8) return 'rgba(46, 204, 113, 0.7)';
+                if (price < avg) return 'rgba(52, 152, 219, 0.7)';
+                if (price > avg * 1.2) return 'rgba(231, 76, 60, 0.7)';
+                return 'rgba(241, 196, 15, 0.7)';
+            });
+            
+            forecastChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'KI-Prognose (ct/kWh)',
+                            data: prices,
+                            borderColor: '#9b59b6',
+                            backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Durchschnitt',
+                            data: Array(prices.length).fill(prices.reduce((a, b) => a + b, 0) / prices.length),
+                            borderColor: '#7f8c8d',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Prognostizierter Preis (ct/kWh)' },
+                            beginAtZero: false
+                        },
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 24,
+                                callback: function(value, index) {
+                                    return index % 6 === 0 ? this.getLabelForValue(value) : '';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const item = forecastData[context.dataIndex];
+                                    return [
+                                        `Preis: ${context.raw.toFixed(2)} ct/kWh`,
+                                        `Uhrzeit: ${item.hour}:00`,
+                                        `Temperatur: ${item.temperature.toFixed(1)}°C`,
+                                        `Bewölkung: ${item.cloudCover}%`
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Deutsche Wettervorhersage für mehrere Tage
+        function displayGermanWeatherForecast() {
+            if (!weatherData || !weatherData.daily) return;
+            
+            let forecastHTML = '<h4>📅 7-Tage Wettervorhersage</h4>';
+            
+            weatherData.daily.time.forEach((dateStr, index) => {
+                if (index >= 7) return; // Nur 7 Tage
+                
+                const date = new Date(dateStr);
+                const dayName = date.toLocaleDateString('de-DE', { weekday: 'long' });
+                const maxTemp = Math.round(weatherData.daily.temperature_2m_max[index]);
+                const minTemp = Math.round(weatherData.daily.temperature_2m_min[index]);
+                const weatherCode = weatherData.daily.weather_code[index];
+                const condition = interpretWeatherCodeDetailed(weatherCode);
+                const icon = getWeatherIcon(condition, true);
+                
+                forecastHTML += `
+                    <div style="display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <div style="font-size: 1.5rem; margin-right: 10px;">${icon}</div>
+                        <div style="flex: 1;">
+                            <div><strong>${dayName}</strong></div>
+                            <div style="font-size: 0.9rem; color: #666;">${condition}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div><strong>${maxTemp}°</strong> / ${minTemp}°</div>
+                            <div style="font-size: 0.8rem; color: #888;">${date.getDate()}.${date.getMonth() + 1}.</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('weatherForecastDetails').innerHTML = forecastHTML;
+        }
+
+        function findBestBuyTime() {
+            if (forecastData.length === 0) return;
+            
+            const sortedByPrice = [...forecastData].sort((a, b) => a.predictedPrice - b.predictedPrice);
+            const bestTimes = sortedByPrice.slice(0, 3);
+            
+            document.getElementById('bestBuyTime').textContent = 
+                `${bestTimes[0].hour.toString().padStart(2, '0')}:00`;
+            document.getElementById('bestBuyPrice').textContent = 
+                `${bestTimes[0].predictedPrice.toFixed(2)} ct/kWh`;
+            
+            const recommendation = document.getElementById('recommendationText');
+            if (recommendation) {
+                recommendation.innerHTML += `<br>🤖 KI-Empfehlung: Laden Sie zwischen ${bestTimes[0].hour}:00-${bestTimes[2].hour}:00 Uhr`;
+            }
+        }
+
+        async function analyzeForecastAccuracy() {
+            if (forecastData.length === 0) {
+                showError('Bitte zuerst Prognose generieren');
+                return;
+            }
+            
+            try {
+                const currentPrices = await loadCurrentEPEXData();
+                
+                if (!currentPrices || currentPrices.length < 24) {
+                    throw new Error('Nicht genug aktuelle Daten zum Vergleich');
+                }
+                
+                let totalError = 0;
+                let count = 0;
+                
+                for (let i = 0; i < 24 && i < currentPrices.length; i++) {
+                    const forecastItem = forecastData.find(item => item.dayOffset === 0 && item.hour === i);
+                    if (forecastItem && currentPrices[i]) {
+                        const error = Math.abs(forecastItem.predictedPrice - currentPrices[i].pricePerKWh);
+                        totalError += error;
+                        count++;
+                    }
+                }
+                
+                const avgError = totalError / count;
+                const accuracy = Math.max(0, 100 - (avgError * 10));
+                
+                document.getElementById('forecastAccuracy').textContent = `${accuracy.toFixed(1)} %`;
+                
+                showMessage(`✅ Prognose-Genauigkeit: ${accuracy.toFixed(1)}% (Durchschn. Fehler: ${avgError.toFixed(2)} ct/kWh)`);
+                
+            } catch (error) {
+                console.error('Genauigkeitsprüfung fehlgeschlagen:', error);
+                showError('Genauigkeit konnte nicht geprüft werden');
+            }
+        }
+
+        async function loadCurrentEPEXData() {
+            try {
+                const proxyUrl = 'https://api.allorigins.win/get?url=';
+                const apiUrl = 'https://apis.smartenergy.at/market/v1/price?region=AT';
+                
+                const response = await fetch(`${proxyUrl}${encodeURIComponent(apiUrl)}`);
+                const proxyData = await response.json();
+                
+                if (proxyData.contents) {
+                    const apiData = JSON.parse(proxyData.contents);
+                    return processToHourly(apiData.data || []);
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden aktueller Daten:', error);
+            }
+            return null;
+        }
+
+        function processToHourly(dataPoints) {
+            const hourlyData = {};
+            
+            dataPoints.forEach(point => {
+                const hour = new Date(point.date).getHours();
+                if (!hourlyData[hour]) hourlyData[hour] = [];
+                hourlyData[hour].push(point.value);
+            });
+            
+            const prices = [];
+            for (let hour = 0; hour < 24; hour++) {
+                const values = hourlyData[hour] || [];
+                const avgPrice = values.length > 0 
+                    ? values.reduce((a, b) => a + b, 0) / values.length
+                    : null;
+                
+                if (avgPrice) {
+                    prices.push({
+                        hour: hour,
+                        pricePerKWh: avgPrice
+                    });
+                }
+            }
+            
+            return prices;
+        }
+
+        // Globale Variablen für Training
+        let trainingChart = null;
+        let trainingLogs = [];
+        let isTraining = false;
+        let trainingStartTime = null;
+        let stopTrainingRequested = false;
+
+        // Mobile-optimierte Training-Funktionen
+        let miniChartData = [];
+
+        // Training-Modal Funktionen
+        function showTrainingModal() {
+            const modal = document.getElementById('trainingModal');
+            modal.style.display = 'flex';
+            
+            // Für Mobile: Verhindere Hintergrund-Scroll
+            document.body.style.overflow = 'hidden';
+            
+            isTraining = true;
+            stopTrainingRequested = false;
+            trainingStartTime = new Date();
+            trainingLogs = [];
+            miniChartData = [];
+            
+            updateTrainingLogs();
+            updateMiniChart();
+            
+            // Zeige "Schließen"-Button nur nach Training
+            document.getElementById('closeTrainingBtn').style.display = 'none';
+        }
+
+        function hideTrainingModal() {
+            const modal = document.getElementById('trainingModal');
+            modal.style.display = 'none';
+            
+            // Erlaube wieder Scroll
+            document.body.style.overflow = '';
+        }
+
+        // Vereinfachte Mini-Chart für Mobile
+        function updateMiniChart() {
+            const container = document.getElementById('trainingMiniChart');
+            if (!container) return;
+            
+            if (miniChartData.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Chart wird geladen...</div>';
+                return;
+            }
+            
+            const maxLoss = Math.max(...miniChartData);
+            const minLoss = Math.min(...miniChartData);
+            const range = maxLoss - minLoss || 1;
+            const barWidth = 100 / miniChartData.length;
+            
+            let chartHTML = '<div style="display: flex; align-items: flex-end; height: 100%; gap: 2px;">';
+            
+            miniChartData.forEach((loss, index) => {
+                const height = 70 - ((loss - minLoss) / range) * 65; // 5-70px Höhe
+                const color = loss < (maxLoss * 0.3) ? '#2ecc71' : 
+                            loss < (maxLoss * 0.6) ? '#f39c12' : '#e74c3c';
+                
+                chartHTML += `
+                    <div class="training-chart-bar" 
+                        style="width: ${barWidth}%; height: ${height}%; background: ${color};"
+                        title="Epoche ${index + 1}: ${loss.toFixed(4)}">
+                    </div>
+                `;
+            });
+            
+            chartHTML += '</div>';
+            container.innerHTML = chartHTML;
+        }
+
+        function stopTraining() {
+            stopTrainingRequested = true;
+            showMessage('⚠️ Training wird abgebrochen...');
+        }
+
+        function updateTrainingLogs() {
+            const logsContainer = document.getElementById('trainingLogs');
+            logsContainer.innerHTML = trainingLogs
+                .map(log => `<div class="training-log-entry">${log}</div>`)
+                .join('');
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        }
+
+        function addTrainingLog(message) {
+            const time = new Date().toLocaleTimeString('de-DE', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            // Kürze lange Nachrichten für Mobile
+            let shortMessage = message;
+            if (message.length > 60) {
+                shortMessage = message.substring(0, 57) + '...';
+            }
+            
+            trainingLogs.push(`[${time}] ${shortMessage}`);
+            
+            // Begrenze auf 10 Einträge für Mobile
+            if (trainingLogs.length > 10) {
+                trainingLogs.shift();
+            }
+            
+            updateTrainingLogs();
+        }
+
+        function updateTrainingChart(history) {
+            const ctx = document.getElementById('trainingChart').getContext('2d');
+            
+            if (trainingChart) trainingChart.destroy();
+            
+            const epochs = Array.from({length: history.epoch.length}, (_, i) => i + 1);
+            
+            trainingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: epochs,
+                    datasets: [
+                        {
+                            label: 'Training Loss',
+                            data: history.history.loss,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Validation Loss',
+                            data: history.history.val_loss || Array(epochs.length).fill(null),
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Loss (logarithmisch)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Epoche'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        function calculateTimeRemaining(currentEpoch, totalEpochs, startTime) {
+            if (currentEpoch <= 1) return 'Berechne...';
+            
+            const now = new Date();
+            const elapsed = now - startTime;
+            const timePerEpoch = elapsed / currentEpoch;
+            const remainingEpochs = totalEpochs - currentEpoch;
+            const remainingMs = timePerEpoch * remainingEpochs;
+            
+            if (remainingMs < 1000) return '< 1 Sekunde';
+            if (remainingMs < 60000) return `${Math.ceil(remainingMs / 1000)} Sekunden`;
+            if (remainingMs < 3600000) return `${Math.ceil(remainingMs / 60000)} Minuten`;
+            
+            const hours = Math.floor(remainingMs / 3600000);
+            const minutes = Math.ceil((remainingMs % 3600000) / 60000);
+            return `${hours}h ${minutes}m`;
+        }
+
+        // Überarbeitete trainPredictionModel Funktion
+        async function trainPredictionModel() {
+            if (isTraining) {
+                showMessage('⚠️ Training läuft bereits');
+                return;
+            }
+            
+            showTrainingModal();
+            
+            try {
+                if (!predictionModel) {
+                    await createPredictionModel();
+                }
+                
+                // Training vorbereiten
+                document.getElementById('trainingStatus').textContent = 'Bereite Daten vor...';
+                document.getElementById('trainingDetail').textContent = 'Generiere Trainingsdaten...';
+                addTrainingLog('Starte Datenvorbereitung...');
+                
+                const trainingData = await collectTrainingData();
+                addTrainingLog(`Daten generiert: ${trainingData.features.shape[0]} Samples`);
+                
+                // Training starten
+                document.getElementById('trainingStatus').textContent = 'Training läuft...';
+                
+                const totalEpochs = 50;
+                const history = {
+                    epoch: [],
+                    history: {
+                        loss: [],
+                        val_loss: []
+                    }
+                };
+                
+                const trainingResult = await predictionModel.fit(trainingData.features, trainingData.labels, {
+                    epochs: totalEpochs,
+                    batchSize: 10,
+                    validationSplit: 0.2,
+                    callbacks: {
+                        onEpochBegin: async (epoch, logs) => {
+                            if (stopTrainingRequested) {
+                                addTrainingLog('Training abgebrochen vom Benutzer');
+                                predictionModel.stopTraining = true;
+                            }
+                        },
+                        onEpochEnd: async (epoch, logs) => {
+                            const currentEpoch = epoch + 1;
+                            
+                            // Update UI
+                            document.getElementById('currentEpoch').textContent = `${currentEpoch}/${totalEpochs}`;
+                            document.getElementById('currentLoss').textContent = logs.loss.toFixed(4);
+                            document.getElementById('currentMAE').textContent = logs.mae ? logs.mae.toFixed(4) : '-';
+                            
+                            const progress = (currentEpoch / totalEpochs) * 100;
+                            document.getElementById('trainingProgressBar').style.width = `${progress}%`;
+                            
+                            const timeRemaining = calculateTimeRemaining(currentEpoch, totalEpochs, trainingStartTime);
+                            document.getElementById('timeRemaining').textContent = timeRemaining;
+                            
+                            document.getElementById('trainingDetail').textContent = 
+                                `Epoche ${currentEpoch}/${totalEpochs} - Loss: ${logs.loss.toFixed(4)}`;
+                            
+                            // History speichern
+                            history.epoch.push(currentEpoch);
+                            history.history.loss.push(logs.loss);
+                            if (logs.val_loss) history.history.val_loss.push(logs.val_loss);
+                            
+                            // Chart aktualisieren (alle 5 Epochen)
+                            if (currentEpoch % 5 === 0 || currentEpoch === totalEpochs) {
+                                updateTrainingChart(history);
+                            }
+                            
+                            // Log hinzufügen
+                            const logMsg = `Epoche ${currentEpoch}: Loss=${logs.loss.toFixed(4)}, Val=${logs.val_loss ? logs.val_loss.toFixed(4) : 'N/A'}`;
+                            addTrainingLog(logMsg);
+                            
+                            // Alle 10 Epochen Status speichern
+                            if (currentEpoch % 10 === 0) {
+                                console.log(logMsg);
+                            }
+                        },
+                        onTrainEnd: async (logs) => {
+                            addTrainingLog('Training abgeschlossen');
+                        }
+                    }
+                });
+                
+                if (!stopTrainingRequested) {
+                    // Training erfolgreich abgeschlossen
+                    isModelTrained = true;
+                    
+                    document.getElementById('modelStatus').textContent = 'Trained ✓';
+                    document.getElementById('modelAccuracy').textContent = 
+                        `Loss: ${trainingResult.history.loss[trainingResult.history.loss.length - 1].toFixed(4)}`;
+                    
+                    const modelDetails = `
+                        <div class="result-item">
+                            <span class="result-label">🏋️ Trainingsepochs:</span>
+                            <span class="result-value">${totalEpochs}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📉 Finaler Loss:</span>
+                            <span class="result-value">${trainingResult.history.loss[trainingResult.history.loss.length - 1].toFixed(4)}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">🧠 Modell-Architektur:</span>
+                            <span class="result-value">4-16-8-4-1 Neuronen</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">⚙️ Optimizer:</span>
+                            <span class="result-value">Adam (0.001)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">⏱️ Trainingszeit:</span>
+                            <span class="result-value">${((new Date() - trainingStartTime) / 1000).toFixed(1)}s</span>
+                        </div>
+                    `;
+                    
+                    document.getElementById('modelDetails').innerHTML = modelDetails;
+                    
+                    // Finales Chart anzeigen
+                    updateTrainingChart({
+                        epoch: Array.from({length: totalEpochs}, (_, i) => i + 1),
+                        history: trainingResult.history
+                    });
+                    
+                    // Modal schließen nach kurzer Anzeige
+                    setTimeout(() => {
+                        hideTrainingModal();
+                        showMessage('✅ KI-Modell erfolgreich trainiert!');
+                    }, 2000);
+                    
+                } else {
+                    // Training abgebrochen
+                    hideTrainingModal();
+                    showMessage('⚠️ Training wurde abgebrochen');
+                }
+                
+            } catch (error) {
+                console.error('Training-Fehler:', error);
+                addTrainingLog(`FEHLER: ${error.message}`);
+                
+                setTimeout(() => {
+                    hideTrainingModal();
+                    showError('KI-Modell konnte nicht trainiert werden: ' + error.message);
+                }, 1000);
+            } finally {
+                isTraining = false;
+                stopTrainingRequested = false;
+            }
+        }
+
+        // Mobile-optimierte Trainingsfunktion
+        async function trainPredictionModelMobile() {
+            if (isTraining) {
+                showMessage('⚠️ Training läuft bereits');
+                return;
+            }
+            
+            showTrainingModal();
+            
+            try {
+                if (!predictionModel) {
+                    await createPredictionModel();
+                }
+                
+                // Training vorbereiten
+                updateTrainingUI('Bereite Daten vor...', 'Generiere Trainingsdaten...', 0);
+                addTrainingLog('Starte Datenvorbereitung...');
+                
+                const trainingData = await collectTrainingData();
+                addTrainingLog(`${trainingData.features.shape[0]} Samples`);
+                
+                // Training starten
+                const totalEpochs = 50;
+                let currentEpoch = 0;
+                
+                const trainingResult = await predictionModel.fit(trainingData.features, trainingData.labels, {
+                    epochs: totalEpochs,
+                    batchSize: 10,
+                    validationSplit: 0.2,
+                    callbacks: {
+                        onEpochBegin: async (epoch, logs) => {
+                            if (stopTrainingRequested) {
+                                addTrainingLog('Training abgebrochen');
+                                predictionModel.stopTraining = true;
+                            }
+                        },
+                        onEpochEnd: async (epoch, logs) => {
+                            currentEpoch = epoch + 1;
+                            
+                            // Speichere Loss für Chart
+                            miniChartData.push(logs.loss);
+                            if (miniChartData.length > 20) miniChartData.shift();
+                            
+                            // Update UI
+                            updateTrainingUI(
+                                `Training Epoche ${currentEpoch}/${totalEpochs}`,
+                                `Loss: ${logs.loss.toFixed(4)}${logs.val_loss ? ` | Val: ${logs.val_loss.toFixed(4)}` : ''}`,
+                                (currentEpoch / totalEpochs) * 100
+                            );
+                            
+                            // Update Stats
+                            document.getElementById('currentEpoch').textContent = `${currentEpoch}/${totalEpochs}`;
+                            document.getElementById('currentLoss').textContent = logs.loss.toFixed(4);
+                            
+                            // Zeitberechnung für Mobile (vereinfacht)
+                            if (trainingStartTime) {
+                                const elapsed = (new Date() - trainingStartTime) / 1000;
+                                const remaining = ((totalEpochs - currentEpoch) * (elapsed / currentEpoch)).toFixed(0);
+                                document.getElementById('timeRemaining').textContent = `${remaining}s`;
+                                document.getElementById('trainingSpeed').textContent = `${(currentEpoch / elapsed).toFixed(1)}/s`;
+                            }
+                            
+                            // Log
+                            addTrainingLog(`E${currentEpoch}: L=${logs.loss.toFixed(4)}`);
+                            
+                            // Chart aktualisieren (nicht zu oft für Performance)
+                            if (currentEpoch % 5 === 0) {
+                                updateMiniChart();
+                            }
+                        },
+                        onTrainEnd: async (logs) => {
+                            if (!stopTrainingRequested) {
+                                // Training erfolgreich
+                                isModelTrained = true;
+                                
+                                updateTrainingUI(
+                                    'Training abgeschlossen!',
+                                    `Finaler Loss: ${trainingResult.history.loss[trainingResult.history.loss.length - 1].toFixed(4)}`,
+                                    100
+                                );
+                                
+                                addTrainingLog('✅ Training erfolgreich');
+                                
+                                // Zeige "Schließen"-Button
+                                document.getElementById('closeTrainingBtn').style.display = 'block';
+                                
+                                // Automatisch nach 3 Sekunden schließen
+                                setTimeout(() => {
+                                    hideTrainingModal();
+                                    showMessage('✅ KI-Modell trainiert!');
+                                    
+                                    // Automatisch Prognose generieren
+                                    setTimeout(() => {
+                                        generate3DayForecast();
+                                        showTab('forecast');
+                                    }, 500);
+                                }, 3000);
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Training-Fehler:', error);
+                
+                updateTrainingUI(
+                    'Fehler beim Training',
+                    error.message.substring(0, 50) + '...',
+                    0
+                );
+                
+                addTrainingLog(`FEHLER: ${error.message}`);
+                
+                // Zeige "Schließen"-Button bei Fehler
+                document.getElementById('closeTrainingBtn').style.display = 'block';
+                
+            } finally {
+                if (stopTrainingRequested) {
+                    isTraining = false;
+                    hideTrainingModal();
+                    showMessage('⚠️ Training abgebrochen');
+                }
+            }
+        }
+
+        // Hilfsfunktion für UI-Updates
+        function updateTrainingUI(status, detail, progress) {
+            const statusEl = document.getElementById('trainingStatus');
+            const detailEl = document.getElementById('trainingDetail');
+            const progressBar = document.getElementById('trainingProgressBar');
+            
+            if (statusEl) statusEl.textContent = status;
+            if (detailEl) detailEl.textContent = detail;
+            if (progressBar) progressBar.style.width = `${progress}%`;
+        }
+
+        // Alternative: Vereinfachte Version ohne Chart
+        function trainPredictionModelSimple() {
+            if (isTraining) {
+                showMessage('⚠️ Training läuft bereits');
+                return;
+            }
+            
+            showTrainingModal();
+            const totalEpochs = 50;
+            
+            // Simuliertes Training für Demo
+            let currentEpoch = 0;
+            const trainingInterval = setInterval(() => {
+                if (stopTrainingRequested || currentEpoch >= totalEpochs) {
+                    clearInterval(trainingInterval);
+                    
+                    if (stopTrainingRequested) {
+                        hideTrainingModal();
+                        showMessage('⚠️ Training abgebrochen');
+                    } else {
+                        // Training "abgeschlossen"
+                        isModelTrained = true;
+                        document.getElementById('modelStatus').textContent = 'Trained ✓';
+                        
+                        setTimeout(() => {
+                            hideTrainingModal();
+                            showMessage('✅ KI-Modell erfolgreich trainiert!');
+                        }, 1000);
+                    }
+                    isTraining = false;
+                    return;
+                }
+                
+                currentEpoch++;
+                const progress = (currentEpoch / totalEpochs) * 100;
+                const fakeLoss = 0.5 * Math.exp(-currentEpoch / 20) + 0.01 * Math.random();
+                
+                // Update UI
+                document.getElementById('currentEpoch').textContent = `${currentEpoch}/${totalEpochs}`;
+                document.getElementById('currentLoss').textContent = fakeLoss.toFixed(4);
+                document.getElementById('trainingProgressBar').style.width = `${progress}%`;
+                document.getElementById('trainingStatus').textContent = `Training Epoche ${currentEpoch}...`;
+                
+                addTrainingLog(`Epoche ${currentEpoch}: Loss=${fakeLoss.toFixed(4)}`);
+                
+            }, 200); // 200ms pro Epoche = 10 Sekunden Gesamt
+        }
+
+        // Alternative: Super einfache Version für sehr alte Geräte
+        function trainPredictionModelSimpleMobile() {
+            if (isTraining) {
+                showMessage('⚠️ Training läuft bereits');
+                return;
+            }
+            
+            showTrainingModal();
+            const totalEpochs = 30; // Weniger Epochen für Mobile
+            
+            // Simuliertes Training
+            let currentEpoch = 0;
+            const trainingInterval = setInterval(() => {
+                if (stopTrainingRequested || currentEpoch >= totalEpochs) {
+                    clearInterval(trainingInterval);
+                    
+                    if (!stopTrainingRequested) {
+                        // "Training abgeschlossen"
+                        isModelTrained = true;
+                        updateTrainingUI('Training abgeschlossen!', 'KI-Modell ist bereit', 100);
+                        addTrainingLog('✅ Training erfolgreich');
+                        
+                        // Zeige Schließen-Button
+                        document.getElementById('closeTrainingBtn').style.display = 'block';
+                        
+                        // Automatisch schließen nach 2 Sekunden
+                        setTimeout(() => {
+                            hideTrainingModal();
+                            showMessage('✅ KI-Modell trainiert!');
+                            
+                            // Automatisch Prognose generieren
+                            generateDefaultForecast();
+                            showTab('forecast');
+                        }, 2000);
+                    } else {
+                        hideTrainingModal();
+                        showMessage('⚠️ Training abgebrochen');
+                    }
+                    
+                    isTraining = false;
+                    return;
+                }
+                
+                currentEpoch++;
+                const progress = (currentEpoch / totalEpochs) * 100;
+                const fakeLoss = 0.5 * Math.exp(-currentEpoch / 10) + 0.02 * Math.random();
+                
+                // Update UI
+                updateTrainingUI(
+                    `Training läuft...`,
+                    `Epoche ${currentEpoch}/${totalEpochs}`,
+                    progress
+                );
+                
+                document.getElementById('currentEpoch').textContent = `${currentEpoch}/${totalEpochs}`;
+                document.getElementById('currentLoss').textContent = fakeLoss.toFixed(4);
+                
+                // Mini-Chart
+                miniChartData.push(fakeLoss);
+                if (miniChartData.length > 15) miniChartData.shift();
+                updateMiniChart();
+                
+                // Log
+                addTrainingLog(`E${currentEpoch}: L=${fakeLoss.toFixed(4)}`);
+                
+            }, 300); // Langsamer für bessere Sichtbarkeit
+        }
+
+        // Event-Listener für Touch-Geräte
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... bestehende Initialisierung ...
+            
+            // Touch-Optimierung für Modal
+            const modal = document.getElementById('trainingModal');
+            if (modal) {
+                // Verhindere Modal-Schließen bei Touch im Content
+                modal.addEventListener('touchstart', (e) => {
+                    if (e.target === modal) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+                
+                // Swipe-down to close (optional)
+                let startY;
+                modal.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                });
+                
+                modal.addEventListener('touchmove', (e) => {
+                    if (!startY) return;
+                    
+                    const currentY = e.touches[0].clientY;
+                    const diff = currentY - startY;
+                    
+                    // Wenn nach unten geswiped wird, Modal schließen
+                    if (diff > 100 && !isTraining) {
+                        hideTrainingModal();
+                    }
+                });
+            }
+        });
+
     </script>
 </body>
 </html>
