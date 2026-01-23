@@ -34,7 +34,7 @@
  *
  * ============================================================================
  * 
- * Die echten EPEX-Spot Daten werden über die API von SmartENERGY geladen
+ * Die aktuellen EPEX-Spot Daten werden über die API von SmartENERGY geladen
  * siehe auch: https://www.smartenergy.at/api-schnittstellen und https://apis.smartenergy.at/market/v1/price in loaddata() 
  *
  -->
@@ -1176,7 +1176,7 @@
                 </div>
                 
                 <div class="control-group">
-                    <label>📅 Wochentag</label>
+                    <label id="label-tag">📅 Wochentag Tarif</label>
                     <select id="weekday">
                         <option value="1">Montag (Werktag)</option>
                         <option value="2">Dienstag (Werktag)</option>
@@ -1223,7 +1223,7 @@
                     target="_blank" style="color: rgb(2, 103, 204);">CC BY-NC-ND 4.0</a><br />
                 </span>
             </p>
-            <p>Unter Verwendung von smartENERGY API, TensorFlow und Nominatim<br /></p>
+            <p>Unter Verwendung von smartENERGY API, TensorFlow, Nominatim und Open-Meteo<br /></p>
         </footer>
 
 
@@ -1459,6 +1459,29 @@
 
         // Initialisierung
         document.addEventListener('DOMContentLoaded', () => {
+
+            // Aktueller Wochentag (0 = Sonntag, 1 = Montag, etc.)
+            const currentDay = new Date().getDay();
+            
+            // Selectbox setzen
+            const select = document.getElementById('weekday');
+            if (select) select.value = currentDay;
+
+            // Datum formatieren
+            let now = new Date();
+            const day = now.getDate();
+            const month = now.getMonth() + 1; // 0-basiert
+            const year = now.getFullYear();
+            const dateStr = day + '.' + month + '.' + year;
+            
+            // Label sicher aktualisieren
+            const label = document.getElementById('label-tag');
+            if (label) {
+                const emojis = ['☀️', '📅', '📅', '📅', '📅', '⭐', '☀️'];
+                const text = label.textContent.replace(/^[^a-zA-Z]*/, '').trim();
+                label.textContent = `${emojis[now.getDay()]} ${text} (${dateStr})`;
+            }
+
             setupSliders();
             updateBatteryDisplay();
             generateConsumptionProfile();
@@ -1473,7 +1496,7 @@
             document.getElementById('laundryTime').addEventListener('change', () => calculateOptimization());
             document.getElementById('batteryCapacity').addEventListener('change', () => calculateOptimization());
             document.getElementById('chargePower').addEventListener('change', () => calculateOptimization());
-            
+
             // Automatisch Wetter laden
             setTimeout(() => {
                 loadAndApplyRealWeather();
@@ -1486,6 +1509,7 @@
             setTimeout(() => {
                 initializeKIPrognose();
             }, 3000);
+
         });
 
         // NEUE Funktion: KI-Prognose automatisch initialisieren
