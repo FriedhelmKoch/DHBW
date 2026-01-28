@@ -1,0 +1,486 @@
+<!--
+ * ============================================================================
+ * Bluetooth Scanner - v1.0.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter 
+ * gleichen Bedingungen 4.0 International Lizenz.
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, müssen Sie Ihre Beiträge unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth Scanner</title>
+    <link rel="icon" href="data:,">
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            margin: 0; padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 20px; 
+            padding: 30px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            color: #333;
+        }
+        h1 { 
+            text-align: center; 
+            color: #667eea; 
+            margin-bottom: 30px;
+        }
+        .button-group { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button { 
+            padding: 12px 24px; 
+            font-size: 16px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        #scanButton { 
+            background: #4CAF50; 
+            color: white; 
+        }
+        #scanButton:hover { background: #45a049; }
+        #stopButton { 
+            background: #f44336; 
+            color: white; 
+        }
+        #stopButton:hover { background: #da190b; }
+        #stopButton:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+        }
+        .device-card { 
+            background: #f8f9fa; 
+            border-left: 5px solid #667eea; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 10px;
+            transition: transform 0.2s ease;
+        }
+        .device-card:hover { transform: translateY(-2px); }
+        .signal-bar { 
+            height: 10px; 
+            background: linear-gradient(to right, #f44336, #FFC107, #4CAF50); 
+            border-radius: 5px; 
+            margin: 5px 0; 
+            overflow: hidden;
+        }
+        .signal-level { 
+            height: 100%; 
+            background: rgba(255,255,255,0.3); 
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        .status { 
+            padding: 15px; 
+            background: #e3f2fd; 
+            border-radius: 10px; 
+            margin: 20px 0; 
+            text-align: center;
+            font-weight: 500;
+        }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        .info { background: #e3f2fd; color: #1565c0; }
+        .calibration-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #dee2e6;
+        }
+        .calibration-panel h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .calibration-control {
+            margin: 10px 0;
+        }
+        .calibration-control label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        .calibration-control input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .info-panel {
+            font-size: 0.9em;
+            background: #e6feca;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #dee2e6;
+        }
+        .distance-display {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+        .distance-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1976d2;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📡 Bluetooth Scanner</h1>
+
+        <div class="info-panel">
+            <strong>⚠️ Web Bluetooth ist nur in Chrome/Edge verfügbar:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Web Bluetooth (BLE)ist experimentell. Öffnen Sie: <code>chrome://flags/#enable-experimental-web-platform-features</code></li>
+                <li>RSSI (Received Signal Strength Indication) bezeichnet die Messung der von einem drahtlosen Gerät empfangenen Signalstärke.</li>
+                <li>Der Umgebungsfaktor (n) ist ein Exponent zur Vorhersage der Signalstärke. Er gibt an, wie schnell das Signal schwächer wird, wenn der Abstand zwischen Sender und Empfänger größer wird.</li>
+            </ul>
+        </div>
+        
+        <div class="calibration-panel">
+            <h3>📏 Entfernungs-Kalibrierung</h3>
+            <div class="calibration-control">
+                <label for="txPower">Referenz-RSSI bei 1m:</label>
+                <input type="number" id="txPower" value="-59" min="-100" max="-20">
+                <small>Standard: -59 dBm (typisch für BLE-Geräte)</small>
+            </div>
+            <div class="calibration-control">
+                <label for="pathLoss">Umgebungsfaktor (n): <span id="nValue">3.0</span></label>
+                <input type="range" id="pathLoss" min="2.0" max="4.0" step="0.1" value="3.0">
+                <small>2.0 = Freifeld, 3.0 = normale Räume, 4.0 = dichte Bebauung</small>
+            </div>
+            <button onclick="applyCalibration()" style="background: #2196F3; color: white; margin-top: 10px;">
+                🎯 Kalibrierung anwenden
+            </button>
+        </div>
+        
+        <div class="button-group">
+            <button id="scanButton">🔍 Geräte scannen</button>
+            <button id="stopButton" disabled>⏹️ Scan stoppen</button>
+        </div>
+        
+        <div id="status" class="status info">Bereit zum Scannen...</div>
+        
+        <div id="devices"></div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 14px; color: #666;">
+            <strong>ℹ️ Wie die Entfernungsberechnung funktioniert:</strong> 
+            <ul>
+                <li>Formel: Entfernung = 10^((Referenz-RSSI - gemessener RSSI) / (10 × n))</li>
+                <li><strong>Referenz-RSSI</strong>: Signalstärke bei 1 Meter Entfernung</li>
+                <li><strong>Umgebungsfaktor n</strong>: 2.0 (Freifeld) bis 4.0 (viele Hindernisse)</li>
+                <li>Für bessere Genauigkeit: Gerät bei 1m Entfernung platzieren und Referenz-RSSI anpassen</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
+            <p class="footer-text">
+                <span style="vertical-align: middle;">
+                    Bluetooth Scanner | Copyright © <script>document.write(new Date().getFullYear())</script> 
+                    Friedhelm Koch | Lizenz: 
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+                    target="_blank" style="color: rgb(109, 182, 255);">CC BY-NC-SA 4.0</a>
+                </span>
+            </p>
+        </footer>
+
+    </div>
+
+    <script>
+        // App State
+        let isScanning = false;
+        let devices = new Map();
+        
+        // Kalibrierungswerte
+        let calibration = {
+            txPower: -59,
+            pathLossExponent: 3.0
+        };
+        
+        // DOM Elements
+        const scanBtn = document.getElementById('scanButton');
+        const stopBtn = document.getElementById('stopButton');
+        const statusDiv = document.getElementById('status');
+        const devicesDiv = document.getElementById('devices');
+        console.log('Bluetooth Scanner initialized: Web Bluetooth API is', navigator.bluetooth ? 'available' : 'not available');
+        
+        // Kalibrierungs-Elemente
+        const txPowerInput = document.getElementById('txPower');
+        const pathLossInput = document.getElementById('pathLoss');
+        const nValueSpan = document.getElementById('nValue');
+        
+        // Kalibrierung anwenden
+        function applyCalibration() {
+            calibration.txPower = parseInt(txPowerInput.value);
+            calibration.pathLossExponent = parseFloat(pathLossInput.value);
+            statusDiv.textContent = `Kalibrierung angewendet: ${calibration.txPower}dBm @1m, n=${calibration.pathLossExponent}`;
+            statusDiv.className = 'status success';
+            
+            // Alle Geräte neu berechnen
+            devices.forEach((device, deviceId) => {
+                if (device.rssi) {
+                    const distance = calculateDistance(device.rssi);
+                    updateDeviceDisplay(deviceId, device, distance);
+                }
+            });
+        }
+        
+        // Event Listener für Range Slider
+        pathLossInput.addEventListener('input', function() {
+            nValueSpan.textContent = this.value;
+        });
+        
+        // Entfernungsberechnung
+        function calculateDistance(rssi) {
+            if (!rssi || rssi >= 0) return null;
+            
+            // Log-Distance Path Loss Model
+            // distance = 10^((txPower - rssi) / (10 * n))
+            const distance = Math.pow(10, (calibration.txPower - rssi) / (10 * calibration.pathLossExponent));
+            
+            // Auf sinnvollen Bereich beschränken
+            return Math.max(0.1, Math.min(distance, 50));
+        }
+        
+        // Signalstärke visualisieren
+        function getSignalInfo(rssi) {
+            if (rssi >= -50) return { width: '90%', color: '#4CAF50', label: 'Sehr stark' };
+            if (rssi >= -65) return { width: '70%', color: '#FFC107', label: 'Stark' };
+            if (rssi >= -75) return { width: '50%', color: '#FF9800', label: 'Mittel' };
+            if (rssi >= -85) return { width: '30%', color: '#F44336', label: 'Schwach' };
+            return { width: '15%', color: '#9E9E9E', label: 'Sehr schwach' };
+        }
+        
+        // Gerät anzeigen/aktualisieren
+        function updateDeviceDisplay(deviceId, device, distance = null) {
+            let deviceElement = document.getElementById(`device-${deviceId}`);
+            const signal = getSignalInfo(device.rssi);
+            
+            if (!distance && device.rssi) {
+                distance = calculateDistance(device.rssi);
+            }
+            
+            if (!deviceElement) {
+                deviceElement = document.createElement('div');
+                deviceElement.className = 'device-card';
+                deviceElement.id = `device-${deviceId}`;
+                devicesDiv.appendChild(deviceElement);
+            }
+            
+            // HTML für Entfernungsanzeige
+            let distanceHTML = '';
+            if (distance) {
+                distanceHTML = `
+                    <div class="distance-display">
+                        <div>Geschätzte Entfernung:</div>
+                        <div class="distance-value">${distance.toFixed(2)} Meter</div>
+                        <small>±${(distance * 0.3).toFixed(1)}m Unsicherheit</small>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                            Berechnet aus: RSSI=${device.rssi}dBm, 
+                            Referenz=${calibration.txPower}dBm @1m, 
+                            n=${calibration.pathLossExponent}
+                        </div>
+                    </div>
+                `;
+            }
+            else {
+                distanceHTML = `<div style="color: #999; font-size: 12px; margin: 5px 0;">Entfernung nicht verfügbar (kein RSSI)</div>`;
+            }
+            
+            deviceElement.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-size: 18px;">${device.name || 'Unbenanntes Gerät'}</strong>
+                    <small style="color: #666;">${deviceId.substring(0, 8)}...</small>
+                </div>
+                <div style="margin: 10px 0;">
+                    <div>Signalstärke: <strong>${device.rssi || 'N/A'} dBm</strong> (${signal.label})</div>
+                    <div class="signal-bar">
+                        <div class="signal-level" style="width: ${signal.width}; background: ${signal.color};"></div>
+                    </div>
+                </div>
+                ${distanceHTML}
+                <div><small>Erkannt: ${new Date(device.timestamp).toLocaleTimeString()}</small></div>
+            `;
+        }
+        
+        // Scannen starten (Original-Methode)
+        async function startScan() {
+            if (isScanning || !navigator.bluetooth) {
+                setStatus('Bluetooth API nicht verfügbar', 'error');
+                return;
+            }
+            
+            try {
+                isScanning = true;
+                scanBtn.disabled = true;
+                stopBtn.disabled = false;
+                devices.clear();
+                devicesDiv.innerHTML = '';
+                
+                setStatus('Scanne... Wählen Sie ein Gerät im Popup aus', 'info');
+                
+                // Einfache Methode: requestDevice (funktioniert in allen Browsern)
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: [] // Keine Verbindung nötig, nur Scan
+                });
+                
+                // Da wir nur RSSI vom Scan wollen, nicht vom verbundenen Gerät,
+                // zeigen wir einfach das gefundene Gerät an
+                const deviceData = {
+                    name: device.name || 'Unbenannt',
+                    rssi: null, // Leider nicht direkt verfügbar bei requestDevice
+                    timestamp: Date.now(),
+                    id: device.id
+                };
+                
+                devices.set(device.id, deviceData);
+                updateDeviceDisplay(device.id, deviceData);
+                setStatus(`Gerät gefunden: ${device.name || 'Unbekannt'}`, 'success');
+                
+                // Alternative: Versuchen, fortgeschrittenen Scan zu starten
+                setTimeout(tryAdvancedScan, 100);
+                
+            } catch (error) {
+                if (error.name !== 'NotFoundError') {
+                    setStatus(`Fehler: ${error.message}`, 'error');
+                    console.error('Scan error:', error);
+                } else {
+                    setStatus('Scan abgebrochen', 'info');
+                }
+                stopScan();
+            }
+        }
+        
+        // Fortgeschrittenen Scan versuchen (für Browser die es unterstützen)
+        async function tryAdvancedScan() {
+            if (!navigator.bluetooth || !navigator.bluetooth.requestLEScan) {
+                console.log('Advanced scan nicht verfügbar');
+                return;
+            }
+            
+            try {
+                // Fortgeschrittenen Scan starten
+                await navigator.bluetooth.requestLEScan({
+                    acceptAllAdvertisements: true,
+                    keepRepeatedDevices: true
+                });
+                
+                setStatus('Fortgeschrittener Scan gestartet...', 'success');
+                
+                // Event Listener für gefundene Geräte mit RSSI
+                navigator.bluetooth.addEventListener('advertisementreceived', event => {
+                    const deviceId = event.device.id;
+                    const deviceData = {
+                        name: event.device.name || 'Unbekannt',
+                        rssi: event.rssi,
+                        timestamp: Date.now(),
+                        id: deviceId
+                    };
+                    
+                    devices.set(deviceId, deviceData);
+                    updateDeviceDisplay(deviceId, deviceData);
+                    setStatus(`${devices.size} Gerät(e) gefunden`, 'success');
+                });
+                
+            } catch (error) {
+                console.log('Advanced scan fehlgeschlagen:', error);
+                // Fallback zu einfachem Scan
+            }
+        }
+        
+        // Scannen stoppen
+        function stopScan() {
+            isScanning = false;
+            scanBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            try {
+                if (navigator.bluetooth && navigator.bluetooth.stopLEScan) {
+                    navigator.bluetooth.stopLEScan();
+                }
+            } catch (e) {
+                // Ignorieren
+            }
+            
+            setStatus(`Scan gestoppt. ${devices.size} Gerät(e) gefunden.`, 'info');
+        }
+        
+        // Status setzen
+        function setStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        // Event Listener
+        scanBtn.addEventListener('click', startScan);
+        stopBtn.addEventListener('click', stopScan);
+        
+        // Initialisierung
+        window.addEventListener('load', () => {
+            if (!navigator.bluetooth) {
+                setStatus('Web Bluetooth wird von diesem Browser nicht unterstützt!', 'error');
+                scanBtn.disabled = true;
+                return;
+            }
+            
+            setStatus('Klicken Sie auf "Geräte scannen" und wählen Sie ein Bluetooth-Gerät', 'success');
+            
+            // Service Worker deaktivieren
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => registration.unregister());
+                });
+            }
+        });
+    </script>
+</body>
+</html>
