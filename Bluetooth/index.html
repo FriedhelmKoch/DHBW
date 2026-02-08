@@ -338,7 +338,7 @@
             deviceElement.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <strong style="font-size: 18px;">${device.name || 'Unbenanntes Gerät'}</strong>
-                    <small style="color: #666;">${deviceId.substring(0, 8)}...</small>
+                    <small style="color: #666;">Device-ID: ${deviceId.substring(0, 8)}...</small>
                 </div>
                 <div style="margin: 10px 0;">
                     <div>Signalstärke: <strong>${device.rssi || 'N/A'} dBm</strong> (${signal.label})</div>

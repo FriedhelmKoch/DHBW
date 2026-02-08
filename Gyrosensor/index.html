@@ -1,0 +1,1186 @@
+<!--
+ * ============================================================================
+ * Gyroskop & Audio Recorder - v2.1.0
+ * ============================================================================
+ * 
+ * LIZENZINFORMATIONEN:
+ * 
+ * Copyright (c) 2025 by Friedhelm Koch
+ * 
+ * Dieses Werk ist lizenziert unter einer 
+ * Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter 
+ * gleichen Bedingungen 4.0 International Lizenz.
+ * 
+ * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
+ * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
+ * 
+ * ============================================================================
+ * 
+ * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
+ * 
+ * - NAMENSNENNUNG — Sie müssen angemessene Urheber- und Rechteangaben machen
+ * - NICHT KOMMERZIELL — Sie dürfen das Material nicht für kommerzielle Zwecke nutzen
+ * - WEITERGABE UNTER GLEICHEN BEDINGUNGEN — Wenn Sie das Material remixen, verändern
+ *   oder darauf aufbauen, müssen Sie Ihre Beiträge unter der gleichen Lizenz
+ *   wie das Original verbreiten
+ * 
+ * ============================================================================
+ *
+ -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyroskop & Audio Recorder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        h2 {
+            margin: 20px 0 15px 0;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 8px;
+        }
+        
+        h3 {
+            margin: 15px 0 10px 0;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .data-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .data-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 5px 0;
+            color: #4ade80;
+        }
+        
+        .unit {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        #stopBtn {
+            background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+            color: white;
+        }
+        
+        #startGyro {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+        
+        #requestPermission {
+            background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+            color: white;
+        }
+        
+        #startRecording {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+        
+        #stopRecording {
+            background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+            color: white;
+        }
+        
+        #downloadData {
+            background: linear-gradient(135deg, #38b2ac 0%, #319795 100%);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .recording-status {
+            animation: pulse 1.5s infinite;
+            background: rgba(245, 101, 101, 0.3);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .ios-warning {
+            background-color: #fefcbe;
+            border: 2px solid #f63030;
+            color: #856404;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .ios-instructions {
+            background: rgba(56, 178, 172, 0.2);
+            border: 2px solid rgba(56, 178, 172, 0.4);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .recorded-data {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .data-point {
+            font-family: monospace;
+            font-size: 0.85em;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .timestamp {
+            color: #63b3ed;
+        }
+        
+        .audio-visualizer {
+            width: 100%;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .audio-bar {
+            position: absolute;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to top, #4299e1, #667eea);
+            border-radius: 2px;
+        }
+        
+        .file-list {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+        
+        .file-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .file-info {
+            flex-grow: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .file-meta {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .file-action-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9em;
+        }
+        
+        .file-action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .download-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 12px 20px;
+            background: rgba(56, 178, 172, 0.3);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .download-link:hover {
+            background: rgba(56, 178, 172, 0.5);
+        }
+        
+        .instructions-box {
+            background: rgba(56, 178, 172, 0.2);
+            border: 2px solid rgba(56, 178, 172, 0.4);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        
+        .ios-download-help {
+            background: rgba(245, 158, 11, 0.2);
+            border: 2px solid rgba(245, 158, 11, 0.4);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+        
+        .ios-download-help ol {
+            margin: 10px 0 10px 20px;
+        }
+        
+        .ios-download-help li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .data-display {
+                grid-template-columns: 1fr;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .file-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Gyroskop & Audio Recorder</h1>
+        
+        <div class="ios-warning">
+            <strong>Hinweis:</strong> Ein Gyroskop ist ausreichend empfindlich, um akustische Signale in der Nähe eines Telefons oder Rednerpults etc. zu erfassen. 
+            Die resultierenden Signale enthalten zwar nur sehr niederfrequente Informationen (<200 Hz), dennoch ist das Signal ausreichend, um Sprach-Informationen zu identifizieren und abzuhören/belauschen, auch wenn das Mikrofon des jeweiligen Smartphones ausgeschaltet ist.<br /> 
+            Das Smartphone dazu aus der Hülle entfernen und auf einen Untergrund, möglichst aus Metall-, Keramik-, oder Glas-Platte legen, damit die Schwingungen der Umgebungsgeräusche/Töne am effizientesten weitergeleitet werden können. 
+        </div>
+        
+        <div class="section">
+            <h2>Gyroskop-Sensor</h2>
+            
+            <div class="ios-instructions">
+                <h4>📋 Wichtig für iPhone/iPad Benutzer:</h4>
+                <p>- Du musst zuerst eine <strong>Berechtigung anfordern</strong><p>
+                <p>- Das Gerät darf sich nicht im <strong>Energiesparmodus</strong> befinden</p>
+            </div>
+            
+            <div class="controls">
+                <button id="requestPermission">
+                    <span>🔒 Berechtigung anfordern</span>
+                </button>
+                <button id="startGyro" disabled>
+                    <span>🎮 Gyroskop starten</span>
+                </button>
+            </div>
+            
+            <div class="data-display">
+                <div class="data-item">
+                    <div>X-Rotation (α)</div>
+                    <div class="value" id="alpha">0</div>
+                    <div class="unit">Grad</div>
+                </div>
+                <div class="data-item">
+                    <div>Y-Rotation (β)</div>
+                    <div class="value" id="beta">0</div>
+                    <div class="unit">Grad</div>
+                </div>
+                <div class="data-item">
+                    <div>Z-Rotation (γ)</div>
+                    <div class="value" id="gamma">0</div>
+                    <div class="unit">Grad</div>
+                </div>
+            </div>
+            
+            <div class="data-display">
+                <div class="data-item">
+                    <div>Beschleunigung X</div>
+                    <div class="value" id="accelX">0</div>
+                    <div class="unit">m/s²</div>
+                </div>
+                <div class="data-item">
+                    <div>Beschleunigung Y</div>
+                    <div class="value" id="accelY">0</div>
+                    <div class="unit">m/s²</div>
+                </div>
+                <div class="data-item">
+                    <div>Beschleunigung Z</div>
+                    <div class="value" id="accelZ">0</div>
+                    <div class="unit">m/s²</div>
+                </div>
+            </div>
+            
+            <div id="gyroStatus" class="status">
+                Berechtigung erforderlich für iOS
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Audio-Aufzeichnung</h2>
+            <p>Die Gyroskop-Daten werden in synthetisierte Audiofrequenzen (Beta-Wert = Neigung -> Frequenz) umgewandelt und aufgezeichnet.</p>
+            
+            <div class="audio-visualizer" id="audioVisualizer">
+                <!-- Audio-Bars werden hier dynamisch eingefügt -->
+            </div>
+            
+            <div class="controls">
+                <button id="startRecording" disabled>
+                    <span>⏺️ Aufnahme starten</span>
+                </button>
+                <button id="stopRecording" disabled>
+                    <span>⏹️ Aufnahme stoppen</span>
+                </button>
+                <button id="downloadData" disabled>
+                    <span>📥 Aktuelle Aufnahme speichern</span>
+                </button>
+            </div>
+            
+            <div id="recordStatus" class="status">
+                Gyroskop muss gestartet sein
+            </div>
+            
+            <h3>Aufgezeichnete Datenpunkte:</h3>
+            <div class="recorded-data" id="recordedData">
+                <div class="data-point">Noch keine Daten aufgezeichnet</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Aktuelle Aufnahme</h2>
+            
+            <div id="currentRecordingInfo" class="instructions-box">
+                Keine aktive Aufnahme. Starte eine Aufnahme mit dem roten Button oben.
+            </div>
+            
+            <div id="currentRecordingActions" style="display: none;">
+                <div class="controls">
+                    <button id="saveRecording">
+                        <span>💾 Als WAV speichern</span>
+                    </button>
+                    <button id="saveCSV">
+                        <span>📊 Als CSV speichern</span>
+                    </button>
+                    <button id="saveJSON">
+                        <span>📁 Als JSON speichern</span>
+                    </button>
+                </div>
+                
+                <div class="ios-download-help" id="iosHelp" style="display: none;">
+                    <strong>📱 Wichtiger Hinweis für iPhone/iPad Nutzer:</strong>
+                    <ol>
+                        <li>Drücke auf einen der Speichern-Buttons</li>
+                        <li>Im Share-Menü "Dateien" auswählen</li>
+                        <li>Ort zum Speichern wählen (z.B. "Auf meinem iPhone")</li>
+                        <li>Drücke "Speichern"</li>
+                    </ol>
+                    <p><em>Hinweis: Die Dateien werden nicht automatisch in Fotos oder Musik gespeichert, sondern müssen manuell in die Dateien-App exportiert werden.</em></p>
+                </div>
+            </div>
+            
+            <div id="downloadLinks" class="file-list">
+                <!-- Download-Links werden hier eingefügt -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
+            <p class="footer-text">
+                <span style="vertical-align: middle;">
+                    Gyroskop & Audio Recorder | Copyright © <script>document.write(new Date().getFullYear())</script> 
+                    Friedhelm Koch | Lizenz: 
+                    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+                    target="_blank" style="color: rgb(109, 182, 255);">CC BY-NC-SA 4.0</a>
+                </span>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // iOS-spezifische Erkennung
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
+        // Elemente
+        const alphaElem = document.getElementById('alpha');
+        const betaElem = document.getElementById('beta');
+        const gammaElem = document.getElementById('gamma');
+        const accelXElem = document.getElementById('accelX');
+        const accelYElem = document.getElementById('accelY');
+        const accelZElem = document.getElementById('accelZ');
+        const gyroStatus = document.getElementById('gyroStatus');
+        const recordStatus = document.getElementById('recordStatus');
+        const recordedData = document.getElementById('recordedData');
+        const audioVisualizer = document.getElementById('audioVisualizer');
+        const currentRecordingInfo = document.getElementById('currentRecordingInfo');
+        const currentRecordingActions = document.getElementById('currentRecordingActions');
+        const iosHelp = document.getElementById('iosHelp');
+        const downloadLinks = document.getElementById('downloadLinks');
+        
+        const requestPermissionBtn = document.getElementById('requestPermission');
+        const startGyroBtn = document.getElementById('startGyro');
+        const startRecordingBtn = document.getElementById('startRecording');
+        const stopRecordingBtn = document.getElementById('stopRecording');
+        const saveRecordingBtn = document.createElement('button');
+        saveRecordingBtn.id = 'saveRecording';
+        const saveCSVBtn = document.createElement('button');
+        saveCSVBtn.id = 'saveCSV';
+        const saveJSONBtn = document.createElement('button');
+        saveJSONBtn.id = 'saveJSON';
+        
+        // Status-Variablen
+        let gyroActive = false;
+        let permissionGranted = false;
+        let isRecording = false;
+        let recordedGyroData = [];
+        let audioBuffer = null;
+        
+        // Audio-Kontext und Variablen
+        let audioContext;
+        let oscillator;
+        let gainNode;
+        let recordingStartTime;
+        let sampleInterval;
+        
+        // Audio Visualizer Bars
+        let visualizerBars = [];
+        const barCount = 64;
+        
+        // Datei-Liste
+        let savedFiles = [];
+        
+        // iOS-spezifische Meldung
+        if (isIOS) {
+            gyroStatus.innerHTML = `
+                <strong>iOS-Erkennung:</strong> Dieses Gerät benötigt spezielle Berechtigungen.<br>
+                <small>Tippe auf "Berechtigung anfordern" und erlaube Bewegungszugriff.</small>
+            `;
+            gyroStatus.style.background = "rgba(245, 158, 11, 0.3)";
+            
+            // iOS Download Hilfe anzeigen
+            iosHelp.style.display = 'block';
+        }
+        
+        // Initialisiere Audio Visualizer
+        function initVisualizer() {
+            audioVisualizer.innerHTML = '';
+            visualizerBars = [];
+            
+            const barWidth = audioVisualizer.offsetWidth / barCount;
+            
+            for (let i = 0; i < barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'audio-bar';
+                bar.style.left = `${i * barWidth}px`;
+                bar.style.height = '0px';
+                audioVisualizer.appendChild(bar);
+                visualizerBars.push(bar);
+            }
+        }
+        
+        // Update Visualizer basierend auf Gyro-Daten
+        function updateVisualizer(alpha, beta, gamma) {
+            const intensity = (Math.abs(beta) + Math.abs(gamma)) / 180;
+            
+            visualizerBars.forEach((bar, index) => {
+                const barHeight = 20 + (intensity * 60 * Math.sin(Date.now() * 0.01 + index * 0.1));
+                bar.style.height = `${barHeight}px`;
+                const hue = 200 + (alpha % 360);
+                bar.style.background = `linear-gradient(to top, hsl(${hue}, 70%, 50%), hsl(${hue + 20}, 90%, 70%))`;
+            });
+        }
+        
+        // Berechtigung für iOS anfordern
+        requestPermissionBtn.addEventListener('click', requestMotionPermission);
+        
+        async function requestMotionPermission() {
+            try {
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    const permission = await DeviceOrientationEvent.requestPermission();
+                    
+                    if (permission === 'granted') {
+                        permissionGranted = true;
+                        startGyroBtn.disabled = false;
+                        requestPermissionBtn.disabled = true;
+                        requestPermissionBtn.innerHTML = '<span>✅ Berechtigung erteilt</span>';
+                        gyroStatus.textContent = "Berechtigung erteilt! Starte jetzt das Gyroskop.";
+                        gyroStatus.style.background = "rgba(72, 187, 120, 0.3)";
+                        
+                        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                            await DeviceMotionEvent.requestPermission();
+                        }
+                        
+                        initAudio();
+                    } else {
+                        gyroStatus.textContent = "Berechtigung verweigert. Gyroskop funktioniert nicht.";
+                        gyroStatus.style.background = "rgba(245, 101, 101, 0.3)";
+                    }
+                } else {
+                    permissionGranted = true;
+                    startGyroBtn.disabled = false;
+                    requestPermissionBtn.style.display = 'none';
+                    gyroStatus.textContent = "Bereit - Starte Gyroskop";
+                    initAudio();
+                }
+            } catch (error) {
+                console.error("Fehler bei Berechtigung:", error);
+                gyroStatus.textContent = "Fehler: " + error.message;
+            }
+        }
+        
+        // Audio initialisieren
+        async function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                oscillator = audioContext.createOscillator();
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = 0;
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.start();
+                
+                startRecordingBtn.disabled = false;
+                recordStatus.textContent = "Audio bereit - Gyroskop starten und aufnehmen";
+                recordStatus.style.background = "rgba(72, 187, 120, 0.3)";
+                
+                initVisualizer();
+                
+            } catch (error) {
+                console.error("Audio-Fehler:", error);
+                recordStatus.textContent = "Audio konnte nicht initialisiert werden";
+                recordStatus.style.background = "rgba(245, 101, 101, 0.3)";
+            }
+        }
+        
+        // Gyroskop starten/stoppen
+        startGyroBtn.addEventListener('click', toggleGyro);
+        
+        function toggleGyro() {
+            if (!gyroActive) {
+                startGyro();
+            } else {
+                stopGyro();
+            }
+        }
+        
+        function startGyro() {
+            if (!permissionGranted && isIOS) {
+                gyroStatus.textContent = "Bitte zuerst Berechtigung anfordern!";
+                return;
+            }
+            
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+            
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', handleMotion);
+            }
+            
+            gyroActive = true;
+            startGyroBtn.innerHTML = '<span>⏹️ Gyroskop stoppen</span>';
+            gyroStatus.textContent = "Gyroskop aktiv - Bewege dein Gerät!";
+            gyroStatus.style.background = "rgba(72, 187, 120, 0.3)";
+            
+            if (isIOS && navigator.wakeLock) {
+                navigator.wakeLock.request('screen').catch(console.error);
+            }
+        }
+        
+        function stopGyro() {
+            if (window.DeviceOrientationEvent) {
+                window.removeEventListener('deviceorientation', handleOrientation);
+            }
+            
+            if (window.DeviceMotionEvent) {
+                window.removeEventListener('devicemotion', handleMotion);
+            }
+            
+            gyroActive = false;
+            startGyroBtn.innerHTML = '<span>🎮 Gyroskop starten</span>';
+            gyroStatus.textContent = "Gyroskop gestoppt";
+            gyroStatus.style.background = "";
+            
+            if (isRecording) {
+                stopRecording();
+            }
+            
+            startRecordingBtn.disabled = true;
+        }
+        
+        // Aufnahme steuern
+        startRecordingBtn.addEventListener('click', startRecording);
+        stopRecordingBtn.addEventListener('click', stopRecording);
+        
+        function startRecording() {
+            if (!gyroActive) {
+                recordStatus.textContent = "Gyroskop muss aktiv sein!";
+                return;
+            }
+            
+            isRecording = true;
+            recordingStartTime = Date.now();
+            recordedGyroData = [];
+            audioBuffer = null;
+            
+            startRecordingBtn.disabled = true;
+            stopRecordingBtn.disabled = false;
+            
+            recordStatus.textContent = "⏺️ Aufnahme läuft...";
+            recordStatus.classList.add('recording-status');
+            
+            if (gainNode) {
+                gainNode.gain.value = 0.1;
+            }
+            
+            sampleInterval = setInterval(sampleGyroData, 100);
+            
+            updateCurrentRecordingInfo();
+        }
+        
+        function stopRecording() {
+            if (!isRecording) return;
+            
+            isRecording = false;
+            clearInterval(sampleInterval);
+            
+            startRecordingBtn.disabled = false;
+            stopRecordingBtn.disabled = true;
+            
+            const duration = ((Date.now() - recordingStartTime) / 1000).toFixed(1);
+            recordStatus.textContent = `✅ Aufnahme gestoppt - ${recordedGyroData.length} Datenpunkte (${duration}s)`;
+            recordStatus.classList.remove('recording-status');
+            
+            if (gainNode) {
+                gainNode.gain.value = 0;
+            }
+            
+            displayRecordedData();
+            updateCurrentRecordingInfo();
+            createAudioBuffer();
+            
+            // Zeige Speicher-Buttons
+            currentRecordingActions.style.display = 'block';
+            
+            // Buttons einhängen
+            document.querySelector('#saveRecording')?.remove();
+            document.querySelector('#saveCSV')?.remove();
+            document.querySelector('#saveJSON')?.remove();
+            
+            saveRecordingBtn.innerHTML = '<span>💾 Als WAV speichern</span>';
+            saveCSVBtn.innerHTML = '<span>📊 Als CSV speichern</span>';
+            saveJSONBtn.innerHTML = '<span>📁 Als JSON speichern</span>';
+            
+            saveRecordingBtn.onclick = () => saveAsWAV();
+            saveCSVBtn.onclick = () => saveAsCSV();
+            saveJSONBtn.onclick = () => saveAsJSON();
+            
+            currentRecordingActions.querySelector('.controls').appendChild(saveRecordingBtn);
+            currentRecordingActions.querySelector('.controls').appendChild(saveCSVBtn);
+            currentRecordingActions.querySelector('.controls').appendChild(saveJSONBtn);
+        }
+        
+        function sampleGyroData() {
+            const timestamp = Date.now() - recordingStartTime;
+            const data = {
+                timestamp,
+                alpha: parseFloat(alphaElem.textContent) || 0,
+                beta: parseFloat(betaElem.textContent) || 0,
+                gamma: parseFloat(gammaElem.textContent) || 0,
+                accelX: parseFloat(accelXElem.textContent) || 0,
+                accelY: parseFloat(accelYElem.textContent) || 0,
+                accelZ: parseFloat(accelZElem.textContent) || 0
+            };
+            
+            recordedGyroData.push(data);
+            
+            if (oscillator && audioContext) {
+                const baseFreq = 400;
+                const freqVariation = (data.beta / 90) * 200;
+                oscillator.frequency.setValueAtTime(
+                    baseFreq + freqVariation, 
+                    audioContext.currentTime
+                );
+            }
+        }
+        
+        function displayRecordedData() {
+            recordedData.innerHTML = '';
+            
+            if (recordedGyroData.length === 0) {
+                recordedData.innerHTML = '<div class="data-point">Noch keine Daten aufgezeichnet</div>';
+                return;
+            }
+            
+            const displayData = recordedGyroData.slice(-30);
+            
+            displayData.forEach(data => {
+                const div = document.createElement('div');
+                div.className = 'data-point';
+                div.innerHTML = `
+                    <span class="timestamp">${(data.timestamp / 1000).toFixed(1)}s</span> | 
+                    α:${data.alpha.toFixed(1)}° β:${data.beta.toFixed(1)}° γ:${data.gamma.toFixed(1)}° | 
+                    X:${data.accelX.toFixed(2)} Y:${data.accelY.toFixed(2)} Z:${data.accelZ.toFixed(2)}m/s²
+                `;
+                recordedData.appendChild(div);
+            });
+            
+            recordedData.scrollTop = recordedData.scrollHeight;
+        }
+        
+        function updateCurrentRecordingInfo() {
+            if (isRecording) {
+                const duration = ((Date.now() - recordingStartTime) / 1000).toFixed(1);
+                currentRecordingInfo.innerHTML = `
+                    <strong>🎙️ Aktive Aufnahme</strong><br>
+                    Dauer: ${duration} Sekunden<br>
+                    Datenpunkte: ${recordedGyroData.length}<br>
+                    <em>Bewege dein Gerät, um Daten zu erfassen</em>
+                `;
+                currentRecordingInfo.style.background = "rgba(245, 101, 101, 0.2)";
+                currentRecordingInfo.style.borderColor = "rgba(245, 101, 101, 0.4)";
+            } else if (recordedGyroData.length > 0) {
+                const duration = recordedGyroData.length * 0.1;
+                currentRecordingInfo.innerHTML = `
+                    <strong>✅ Aufnahme bereit zum Speichern</strong><br>
+                    Dauer: ${duration.toFixed(1)} Sekunden<br>
+                    Datenpunkte: ${recordedGyroData.length}<br>
+                    <em>Wähle ein Format zum Speichern aus</em>
+                `;
+                currentRecordingInfo.style.background = "rgba(72, 187, 120, 0.2)";
+                currentRecordingInfo.style.borderColor = "rgba(72, 187, 120, 0.4)";
+            } else {
+                currentRecordingInfo.innerHTML = `
+                    Keine aktive Aufnahme. Starte eine Aufnahme mit dem roten Button oben.<br>
+                    <small><em>Die Daten werden hier gespeichert und können exportiert werden</em></small>
+                `;
+                currentRecordingInfo.style.background = "rgba(56, 178, 172, 0.2)";
+                currentRecordingInfo.style.borderColor = "rgba(56, 178, 172, 0.4)";
+            }
+        }
+        
+        function createAudioBuffer() {
+            if (recordedGyroData.length === 0) return;
+            
+            const sampleRate = 44100;
+            const duration = recordedGyroData.length * 0.1;
+            const sampleCount = Math.floor(sampleRate * duration);
+            
+            try {
+                audioBuffer = audioContext.createBuffer(1, sampleCount, sampleRate);
+                const channelData = audioBuffer.getChannelData(0);
+                
+                for (let i = 0; i < sampleCount; i++) {
+                    const dataIndex = Math.floor(i / (sampleRate * 0.1));
+                    if (dataIndex < recordedGyroData.length) {
+                        const beta = recordedGyroData[dataIndex].beta;
+                        const frequency = 440 + (beta / 90) * 220;
+                        channelData[i] = 0.3 * Math.sin(2 * Math.PI * frequency * i / sampleRate);
+                    }
+                }
+            } catch (error) {
+                console.error("Audio Buffer Error:", error);
+            }
+        }
+        
+        // WAV Datei erstellen
+        function saveAsWAV() {
+            if (!audioBuffer) {
+                alert("Keine Audiodaten verfügbar!");
+                return;
+            }
+            
+            const wavData = audioBufferToWav(audioBuffer);
+            const timestamp = new Date().toISOString().slice(0,19).replace(/[:T]/g, '-');
+            const filename = `gyro_recording_${timestamp}.wav`;
+            
+            downloadFile(wavData, filename, 'audio/wav');
+            addToFileList(filename, 'WAV Audio', wavData.byteLength);
+        }
+        
+        // CSV Datei erstellen
+        function saveAsCSV() {
+            if (recordedGyroData.length === 0) {
+                alert("Keine Daten zum Speichern!");
+                return;
+            }
+            
+            let csvContent = "Zeit (s),Alpha (Grad),Beta (Grad),Gamma (Grad),Beschleunigung X (m/s²),Beschleunigung Y (m/s²),Beschleunigung Z (m/s²)\n";
+            
+            recordedGyroData.forEach(data => {
+                const row = [
+                    (data.timestamp / 1000).toFixed(3),
+                    data.alpha.toFixed(3),
+                    data.beta.toFixed(3),
+                    data.gamma.toFixed(3),
+                    data.accelX.toFixed(3),
+                    data.accelY.toFixed(3),
+                    data.accelZ.toFixed(3)
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+            
+            const timestamp = new Date().toISOString().slice(0,19).replace(/[:T]/g, '-');
+            const filename = `gyro_data_${timestamp}.csv`;
+            
+            downloadFile(csvContent, filename, 'text/csv');
+            addToFileList(filename, 'CSV Daten', csvContent.length);
+        }
+        
+        // JSON Datei erstellen
+        function saveAsJSON() {
+            if (recordedGyroData.length === 0) {
+                alert("Keine Daten zum Speichern!");
+                return;
+            }
+            
+            const jsonData = {
+                metadata: {
+                    recordedAt: new Date().toISOString(),
+                    sampleCount: recordedGyroData.length,
+                    duration: recordedGyroData.length * 0.1,
+                    device: navigator.userAgent
+                },
+                data: recordedGyroData
+            };
+            
+            const jsonString = JSON.stringify(jsonData, null, 2);
+            const timestamp = new Date().toISOString().slice(0,19).replace(/[:T]/g, '-');
+            const filename = `gyro_data_${timestamp}.json`;
+            
+            downloadFile(jsonString, filename, 'application/json');
+            addToFileList(filename, 'JSON Daten', jsonString.length);
+        }
+        
+        // Datei herunterladen
+        function downloadFile(data, filename, mimeType) {
+            const blob = new Blob([data], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.style.display = 'none';
+            
+            document.body.appendChild(a);
+            a.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+            
+            recordStatus.textContent = `📥 Datei "${filename}" wird heruntergeladen...`;
+            setTimeout(() => {
+                recordStatus.textContent = `✅ Datei "${filename}" gespeichert`;
+            }, 1500);
+        }
+        
+        // AudioBuffer zu WAV konvertieren
+        function audioBufferToWav(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1; // PCM
+            const bitDepth = 16;
+            
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = buffer.length * blockAlign;
+            
+            const bufferLength = 44 + dataSize;
+            const arrayBuffer = new ArrayBuffer(bufferLength);
+            const view = new DataView(arrayBuffer);
+            
+            // RIFF identifier
+            writeString(view, 0, 'RIFF');
+            // RIFF chunk length
+            view.setUint32(4, 36 + dataSize, true);
+            // RIFF type
+            writeString(view, 8, 'WAVE');
+            // format chunk identifier
+            writeString(view, 12, 'fmt ');
+            // format chunk length
+            view.setUint32(16, 16, true);
+            // sample format (raw)
+            view.setUint16(20, format, true);
+            // channel count
+            view.setUint16(22, numChannels, true);
+            // sample rate
+            view.setUint32(24, sampleRate, true);
+            // byte rate (sample rate * block align)
+            view.setUint32(28, byteRate, true);
+            // block align (channel count * bytes per sample)
+            view.setUint16(32, blockAlign, true);
+            // bits per sample
+            view.setUint16(34, bitDepth, true);
+            // data chunk identifier
+            writeString(view, 36, 'data');
+            // data chunk length
+            view.setUint32(40, dataSize, true);
+            
+            // write audio data
+            const channelData = buffer.getChannelData(0);
+            let offset = 44;
+            for (let i = 0; i < channelData.length; i++) {
+                const sample = Math.max(-1, Math.min(1, channelData[i]));
+                view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                offset += 2;
+            }
+            
+            return arrayBuffer;
+        }
+        
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+        
+        // Datei zur Liste hinzufügen
+        function addToFileList(filename, type, size) {
+            const sizeKB = (size / 1024).toFixed(1);
+            const fileItem = {
+                id: Date.now(),
+                filename,
+                type,
+                size: sizeKB + ' KB',
+                timestamp: new Date().toLocaleTimeString()
+            };
+            
+            savedFiles.unshift(fileItem);
+            if (savedFiles.length > 5) savedFiles.pop();
+            
+            updateFileList();
+        }
+        
+        // Dateiliste aktualisieren
+        function updateFileList() {
+            downloadLinks.innerHTML = '<h3>📁 Zuletzt gespeicherte Dateien:</h3>';
+            
+            if (savedFiles.length === 0) {
+                downloadLinks.innerHTML += '<p style="opacity:0.7; padding:10px;">Noch keine Dateien gespeichert</p>';
+                return;
+            }
+            
+            savedFiles.forEach(file => {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'file-item';
+                fileDiv.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-name">${file.filename}</div>
+                        <div class="file-meta">${file.type} • ${file.size} • ${file.timestamp}</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="file-action-btn" onclick="shareFile('${file.filename}')">
+                            ↗️ Teilen
+                        </button>
+                    </div>
+                `;
+                downloadLinks.appendChild(fileDiv);
+            });
+            
+            const helpDiv = document.createElement('div');
+            helpDiv.style.marginTop = '15px';
+            helpDiv.style.fontSize = '0.85em';
+            helpDiv.style.opacity = '0.8';
+            helpDiv.innerHTML = `
+                <strong>ℹ️ Speicherort auf iOS:</strong> Dateien → "Auf meinem iPhone" → Downloads<br>
+                <strong>ℹ️ Speicherort auf Android:</strong> Downloads-Ordner
+            `;
+            downloadLinks.appendChild(helpDiv);
+        }
+        
+        // Datei teilen (Web Share API)
+        function shareFile(filename) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Gyroskop Aufnahme',
+                    text: `Gyroskop Aufnahme: ${filename}`,
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                alert(`Dateiname: ${filename}\n\nDie Datei wurde in deinem Downloads-Ordner gespeichert.`);
+            }
+        }
+        
+        function handleOrientation(event) {
+            if (event.alpha !== null) alphaElem.textContent = event.alpha.toFixed(2);
+            if (event.beta !== null) betaElem.textContent = event.beta.toFixed(2);
+            if (event.gamma !== null) gammaElem.textContent = event.gamma.toFixed(2);
+            
+            updateVisualizer(event.alpha, event.beta, event.gamma);
+            updateColorBasedOnMotion(event.beta, event.gamma);
+        }
+        
+        function handleMotion(event) {
+            if (event.accelerationIncludingGravity) {
+                const acc = event.accelerationIncludingGravity;
+                if (acc.x !== null) accelXElem.textContent = acc.x.toFixed(2);
+                if (acc.y !== null) accelYElem.textContent = acc.y.toFixed(2);
+                if (acc.z !== null) accelZElem.textContent = acc.z.toFixed(2);
+            }
+        }
+        
+        function updateColorBasedOnMotion(beta, gamma) {
+            const intensity = Math.min(100, 
+                (Math.abs(beta || 0) + Math.abs(gamma || 0)) / 3
+            );
+            const color = `rgb(${100 + intensity}, 180, ${200 - intensity})`;
+            
+            document.querySelectorAll('#alpha, #beta, #gamma').forEach(el => {
+                el.style.color = color;
+            });
+        }
+        
+        // Automatisch Berechtigung anfordern auf Nicht-iOS Geräten
+        if (!isIOS) {
+            setTimeout(() => {
+                permissionGranted = true;
+                startGyroBtn.disabled = false;
+                requestPermissionBtn.style.display = 'none';
+                gyroStatus.textContent = "Bereit - Starte Gyroskop";
+                initAudio();
+            }, 500);
+        }
+        
+        // Initialisierungen
+        setTimeout(initVisualizer, 100);
+        updateFileList();
+        
+        // Event Listeners
+        window.addEventListener('resize', initVisualizer);
+        
+        // Globale Funktion für Buttons
+        window.shareFile = shareFile;
+    </script>
+</body>
+</html>
