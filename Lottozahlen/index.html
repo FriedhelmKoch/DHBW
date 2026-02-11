@@ -14,7 +14,10 @@
  * Vollständiger Lizenztext: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.de
  * Mensch-lesbare Zusammenfassung: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de
  * 
- * Historische Daten - Parsing von: https://www.lottozahlen-rechner.de/lottozahlen-datenbank-mit-gewinnzahlen-seit-1955
+ * Historische Daten von: 
+ * for (let jahr = 1992; jahr <= 2026; jahr++) {
+ *   https://www.lottozahlenonline.de/statistik/beide-spieltage/lottozahlen-archiv.php?j=${jahr}#lottozahlen-archiv
+ *}
  * ============================================================================
  * 
  * Bedingungen der CC BY-NC-SA 4.0 Lizenz:
@@ -33,7 +36,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotto KI - Historische Daten ab 1956</title>
+    <title>Lotto KI - Historische Daten ab 1992</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.20.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -348,13 +351,13 @@
     <!-- Ihr komplettes UI bleibt GENAU gleich -->
     <div class="header">
         <h1>🎲 Lottozahlen KI</h1>
-        <p>Mit einer Analyse historischer Daten ab 1955</p>
+        <p>Mit einer Analyse historischer Daten ab 1992</p>
     </div>
 
     <div class="data-warning">
-        <strong>📅 Wichtig:</strong> Diese Web-App verwendet <strong>komplette historische Daten ab 1955</strong> 
-        (über 6.800 Ziehungen). Das Training dauert entsprechend länger - bitte haben Sie Geduld!<br />
-        <p>Die Dauer das Modell zu trainieren ist stark davon abhänging, ob eine <strong>NPU</strong> (Neural Processing Unit) im ausführenden Device vornaden ist. Diese ist in der Lage komplexe Matrizenoperationen effizienter durchzuführen als herkömmliche CPU-Prozessoren.</p><br />
+        <strong>📅 Wichtig:</strong> Diese Web-App verwendet <strong>komplette historische Daten ab 1992 </strong> 
+        (<span id="totalDrawsCount">über 3.094</span> Ziehungen). Das Training dauert entsprechend länger - bitte haben Sie Geduld!<br />
+        <p>Die Dauer das Modell zu trainieren ist stark davon abhänging, ob eine <strong>NPU</strong> (Neural Processing Unit) im ausführenden Device vorhanden ist. Diese ist in der Lage komplexe Matrizenoperationen effizienter durchzuführen als herkömmliche CPU-Prozessoren.</p><br />
         <p>Selbst wenn die »KI-LSTM Vorhersage« eine "hohe Konfidenz" von z.B. 85% anzeigt, bedeutet das <strong>nicht</strong>,
         dass die Vorhersage zu 85% richtig liegt. Es bedeutet nur, dass das Modell <em>selbst sehr sicher ist</em> –
         ein klassisches Beispiel für »Overconfidence bei Overfitting«!</p><br />
@@ -375,11 +378,11 @@
             <li class="step-item active" id="step1">
                 <div class="step-number">1</div>
                 <div class="step-content">
-                    <h3>Historische Daten laden (1955-2024)</h3>
-                    <p>Lädt alle Lottoziehungen seit Beginn 1955 inklusive Superzahlen.</p>
+                    <h3>Historische Daten laden (ab 1992)</h3>
+                    <p>Lädt alle Lottoziehungen seit Beginn 1992 inklusive Superzahlen.</p>
                     <div class="step-actions">
                         <button class="btn" onclick="startDataLoading()" id="loadBtn">
-                            📊 Historische Daten ab 1955 laden
+                            📊 Historische Daten ab 1992 laden
                         </button>
                         <div id="status" style="margin-top: 10px; color: #666; font-size: 14px;"></div>
                         <div style="width: 100%; height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 10px; overflow: hidden;">
@@ -521,8 +524,8 @@
                     <div class="number">?</div><div class="number">?</div><div class="number">?</div>
                     <div class="number super-number">?</div>
                 </div>
-                <div id="predictionDetails" style="text-align: center; margin-top: 15px;">
-                    <em>Bitte zuerst alle Schritte durchführen</em>
+                <div id="predictionDetails" style="font-size: 90%; text-align: center; margin-top: 15px;">
+                    <em>Bitte zuerst alle 4 Schritte durchführen</em>
                 </div>
                 <div id="modelInfo" style="font-size: 12px; color: #666; margin-top: 15px;">
                     <strong>Modell-Status:</strong> Nicht trainiert<br>
@@ -532,11 +535,14 @@
             
             <div class="result-card">
                 <h3>Statistische Fakten</h3>
-                <div id="statsInfo">
-                    <p><strong>📅 Historischer Zeitraum:</strong> 1955-2024</p>
+                <div id="statsInfo" style="font-size: 90%;">
+                    <!-- Diese IDs werden dynamisch befüllt -->
+                    <p><strong>📅 Historischer Zeitraum:</strong> <span id="statsTimeframe">1992-2026</span></p>
+                    <p><strong>🎲 Datensätze in DB:</strong> <span id="statsRecordCount">3.094</span> Ziehungen</p>
+                    <p><strong>📊 Datenstand vom:</strong> <span id="statsDataDate">-</span></p>
                     <p><strong>🎲 Grundwahrscheinlichkeit:</strong> 1:139.838.160</p>
                     <p><strong>🧠 KI-Architektur:</strong> LSTM mit 32 Memory-Zellen</p>
-                    <p><strong>📊 Trainingsdauer:</strong> ~30 Epochen (ca. 2-3 Minuten)</p>
+                    <p><strong>📊 Trainingsdauer:</strong> ~30 Epochen (je nach CPU/NPU, 30 Sek. bis zu 2 Min.)</p>
                     <p><strong>⚠️ Wichtig:</strong> KI findet nur statistisches Rauschen, keine echten Muster!</p>
                 </div>
             </div>
@@ -546,8 +552,8 @@
         <footer class="footer" style="padding: 15px; text-align: center; font-size: 0.85em;">
             <p class="footer-text">
                 <span style="vertical-align: middle;">
-                    Lotto KI | mittels TensorFlow | Historische Daten - Parsing von:<br />
-                    https://www.lottozahlen-rechner.de/lottozahlen-datenbank-mit-gewinnzahlen-seit-1955<br />
+                    Lotto KI | mittels TensorFlow | Historische Daten:<br />
+                    www.lottozahlenonline.de/statistik/beide-spieltage/lottozahlen-archiv<br />
                     Copyright © <script>document.write(new Date().getFullYear())</script> 
                     Friedhelm Koch | Lizenz: 
                     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
@@ -556,6 +562,35 @@
             </p>
         </footer>
         
+        <!-- DATENSTATISTIK ERGÄNZUNG -->
+        <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; border-left: 4px solid #4CAF50;">
+            <h4 style="color: #2E7D32; margin-bottom: 10px;">📂 Historische Lotto-Daten (JSON-Datenbank Status)</h4>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 12px; color: #666;">JSON-Datensätze</div>
+                    <div id="jsonRecordCount" style="font-size: 28px; font-weight: bold; color: #2E7D32;">?</div>
+                    <small>Gespeicherte Ziehungen</small>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 12px; color: #666;">JSON-Dateigröße</div>
+                    <div id="jsonFileSize" style="font-size: 28px; font-weight: bold; color: #2E7D32;">?</div>
+                    <small>Ungefähre Größe</small>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 12px; color: #666;">Datenstand</div>
+                    <div id="jsonLastUpdate" style="font-size: 20px; font-weight: bold; color: #2E7D32;">-</div>
+                    <small>Letzte Aktualisierung</small>
+                </div>
+            </div>
+            
+            <div id="jsonLoadingStatus" style="font-size: 13px; color: #666; text-align: center;">
+                <em>JSON-Daten werden analysiert...</em>
+            </div>
+        </div>
+
         <div class="chart-container">
             <canvas id="trainingChart"></canvas>
         </div>
@@ -664,7 +699,7 @@
         // ============================================
         // 2. DATEN LADEN (SCHRITT 1)
         // ============================================
-        
+
         async function startDataLoading() {
             updateStep('step1', 'active');
             updateButton('loadBtn', false, '⏳ Lade historische Daten...', true);
@@ -676,12 +711,32 @@
                 progress.style.width = '10%';
                 details.textContent = 'Initialisiere...';
                 
+                // Führe zuerst die JSON-Analyse durch
+                const jsonStats = await analyzeJSONData();
+                progress.style.width = '30%';
+                
                 // Lade echte oder simulierte Daten
                 historicalData = await loadLottoData();
                 
                 if (historicalData.length === 0) {
                     throw new Error('Keine Daten geladen');
                 }
+                
+                // Aktualisiere Anzeige mit den geladenen Daten
+                updateTotalDrawsCount(historicalData.length);
+                
+                // *** NEU: Aktualisiere Statistische Fakten mit historischen Daten ***
+                const years = historicalData.map(d => d.year).filter(y => y);
+                const firstYear = years.length > 0 ? Math.min(...years) : 1992;
+                const lastYear = years.length > 0 ? Math.max(...years) : 2026;
+                const lastDraw = historicalData[historicalData.length - 1];
+                const lastDate = lastDraw && lastDraw.date ? formatGermanDate(new Date(lastDraw.date)) : '-';
+                
+                updateStatsFacts({
+                    totalRecords: historicalData.length,
+                    firstDate: formatGermanDate(new Date(historicalData[0].date)),
+                    lastDate: lastDate
+                });
                 
                 progress.style.width = '90%';
                 details.textContent = `✅ ${historicalData.length} Ziehungen geladen`;
@@ -699,6 +754,9 @@
                 status.textContent = 'Daten erfolgreich geladen!';
                 progress.style.width = '100%';
                 
+                // JSON-Statistiken im Modell-Info aktualisieren
+                updateModelInfoWithJSONStats(jsonStats);
+                
                 console.log(`✅ ${historicalData.length} historische Ziehungen geladen`);
                 
             } catch (error) {
@@ -706,6 +764,25 @@
                 status.textContent = `❌ Fehler: ${error.message}`;
                 updateButton('loadBtn', true, '🔄 Erneut versuchen');
             }
+        }
+
+        function updateModelInfoWithJSONStats(jsonStats) {
+            const modelInfoEl = document.getElementById('modelInfo');
+            
+            if (!jsonStats) {
+                modelInfoEl.innerHTML = `
+                    <strong>Modell-Status:</strong> Bereit für Training<br>
+                    <strong>Trainingsdaten:</strong> ${historicalData.length.toLocaleString()} Ziehungen<br>
+                    <strong>JSON-Datenbank:</strong> Nicht verfügbar
+                `;
+                return;
+            }
+            
+            modelInfoEl.innerHTML = `
+                <strong>Modell-Status:</strong> Bereit für Training<br>
+                <strong>Trainingsdaten:</strong> ${historicalData.length.toLocaleString()} Ziehungen<br>
+                <strong>JSON-Datenbank:</strong> ${jsonStats.recordCount.toLocaleString()} Datensätze (${jsonStats.fileSizeMB > 1 ? jsonStats.fileSizeMB + ' MB' : (jsonStats.fileSizeBytes / 1024).toFixed(1) + ' KB'})
+            `;
         }
         
         async function loadLottoData() {
@@ -727,124 +804,134 @@
         
         async function loadPublicData() {
             try {
-                console.log('Versuche echte Lottodaten zu laden...');
+                console.log('Lade lokale JSON-Daten von lottozahlen_1992-2026.json...');
                 
-                // OPTION 1: Direkter Abruf über Proxy-Service (CORS Anywhere)
-                //const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-                const targetUrl = 'https://www.lottozahlen-rechner.de/lottozahlen-datenbank-mit-gewinnzahlen-seit-1955';
-                
-                const response = await fetch(proxyUrl + targetUrl);
+                // Lade die lokale JSON-Datei
+                const response = await fetch('lottozahlen_1992-2026.json');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP-Fehler: ${response.status}`);
                 }
                 
-                const html = await response.text();
-                console.log('HTML erfolgreich geladen, parse Daten...');
+                const jsonData = await response.json();
+                console.log('JSON erfolgreich geladen, konvertiere Daten...');
                 
-                return parseLottoData(html);
+                // Konvertiere das JSON-Format in unser internes Format
+                return convertLocalJSONData(jsonData);
                 
             } catch (error) {
-                console.error('Fehler beim Laden der echten Daten:', error);
+                console.error('Fehler beim Laden der lokalen JSON-Daten:', error);
                 
-                // OPTION 2: Alternative - Lade JSON-Daten von einer anderen Quelle
+                // Fallback: Versuche die Datei mit einem alternativen Pfad zu laden
                 try {
-                    console.log('Versuche alternative Datenquelle...');
-                    return await loadAlternativeData();
+                    console.log('Versuche alternativen Pfad...');
+                    const fallbackResponse = await fetch('./lottozahlen_1992-2026.json');
+                    if (fallbackResponse.ok) {
+                        const jsonData = await fallbackResponse.json();
+                        return convertLocalJSONData(jsonData);
+                    }
                 } catch (fallbackError) {
-                    console.error('Auch alternative Quelle fehlgeschlagen:', fallbackError);
-                    return []; // Rückfall zu simulierten Daten
+                    console.error('Auch alternativer Pfad fehlgeschlagen:', fallbackError);
                 }
+                
+                return []; // Rückfall zu simulierten Daten
             }
         }
 
-        // Parser für die HTML-Daten der Website
-        function parseLottoData(html) {
-            const lottoData = [];
+        // Funktion zur Konvertierung deines JSON-Formats
+        function convertLocalJSONData(jsonData) {
+            const converted = [];
             
-            try {
-                // Erstelle ein temporäres DOM-Element zum Parsen
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
+            console.log(`📂 JSON-Datenbank: ${jsonData.length} Datensätze geladen`);
+            
+            // Zeige JSON-Statistiken in der Console für Debugging
+            console.log('📊 JSON-Datenanalyse:');
+            console.log('- Anzahl Datensätze:', jsonData.length);
+            
+            // Analysiere die Datenstruktur
+            if (jsonData.length > 0) {
+                const firstEntry = jsonData[0];
+                const lastEntry = jsonData[jsonData.length - 1];
                 
-                // Finde Tabellen mit Lottozahlen (Anpassung je nach Website-Struktur nötig)
-                const tables = doc.querySelectorAll('table');
+                console.log('- Erster Eintrag:', firstEntry);
+                console.log('- Letzter Eintrag:', lastEntry);
                 
-                if (tables.length === 0) {
-                    throw new Error('Keine Tabellen gefunden');
-                }
+                // Extrahiere alle Jahre
+                const years = [...new Set(jsonData.map(d => d.jahr).filter(y => y))];
+                console.log('- Enthaltene Jahre:', years.sort((a, b) => a - b));
                 
-                console.log(`Gefundene Tabellen: ${tables.length}`);
-                
-                // Gehe durch alle Tabellen und extrahiere Daten
-                tables.forEach((table, tableIndex) => {
-                    const rows = table.querySelectorAll('tr');
-                    
-                    rows.forEach((row, rowIndex) => {
-                        // Überspringe Kopfzeilen
-                        if (rowIndex === 0) return;
-                        
-                        const cells = row.querySelectorAll('td');
-                        if (cells.length >= 8) { // Mindestens Datum + 6 Zahlen + Superzahl
-                            try {
-                                const dateStr = cells[0].textContent.trim();
-                                const numbers = [];
-                                
-                                // Extrahiere die 6 Lottozahlen
-                                for (let i = 1; i <= 6; i++) {
-                                    const num = parseInt(cells[i].textContent.trim());
-                                    if (!isNaN(num) && num >= 1 && num <= 49) {
-                                        numbers.push(num);
-                                    }
-                                }
-                                
-                                // Extrahiere Superzahl
-                                let superzahl = 0;
-                                const superCell = cells[7] || cells[6]; // Superzahl könnte in Zelle 7 oder 6 sein
-                                if (superCell) {
-                                    const superMatch = superCell.textContent.match(/\d/);
-                                    if (superMatch) {
-                                        superzahl = parseInt(superMatch[0]);
-                                    }
-                                }
-                                
-                                // Validiere Daten
-                                if (numbers.length === 6 && dateStr) {
-                                    // Konvertiere Datum
-                                    const dateParts = dateStr.split('.');
-                                    if (dateParts.length === 3) {
-                                        const date = new Date(
-                                            parseInt(dateParts[2]), 
-                                            parseInt(dateParts[1]) - 1, 
-                                            parseInt(dateParts[0])
-                                        );
-                                        
-                                        lottoData.push({
-                                            id: lottoData.length + 1,
-                                            date: date.toISOString().split('T')[0],
-                                            numbers: numbers.sort((a, b) => a - b),
-                                            superzahl: superzahl,
-                                            year: parseInt(dateParts[2])
-                                        });
-                                    }
-                                }
-                            } catch (cellError) {
-                                console.warn(`Fehler beim Parsen der Zeile ${rowIndex}:`, cellError);
-                            }
-                        }
-                    });
+                // Zähle Ziehungen pro Jahr
+                const drawsPerYear = {};
+                jsonData.forEach(entry => {
+                    drawsPerYear[entry.jahr] = (drawsPerYear[entry.jahr] || 0) + 1;
                 });
-                
-                // Sortiere nach Datum (älteste zuerst)
-                lottoData.sort((a, b) => new Date(a.date) - new Date(b.date));
-                
-                console.log(`✅ Erfolgreich ${lottoData.length} echte Lottoziehungen geparst`);
-                return lottoData;
-                
-            } catch (parseError) {
-                console.error('Fehler beim Parsen der HTML-Daten:', parseError);
-                return [];
+                console.log('- Ziehungen pro Jahr:', drawsPerYear);
             }
+            
+            jsonData.forEach((entry, index) => {
+                try {
+                    // Extrahiere das Jahr
+                    let year = entry.jahr;
+                    
+                    // Falls jahr nicht direkt vorhanden, parse es aus dem Datum
+                    if (!year && entry.datum) {
+                        const dateParts = entry.datum.split('.');
+                        if (dateParts.length === 3) {
+                            year = parseInt(dateParts[2]);
+                        }
+                    }
+                    
+                    // Stelle sicher, dass wir ein gültiges Jahr haben
+                    if (!year || year < 1992 || year > new Date().getFullYear()) {
+                        year = 1992 + Math.floor(index / 104); // Approximiere Jahr
+                    }
+                    
+                    // Stelle sicher, dass die Zahlen sortiert sind
+                    const sortedNumbers = entry.gewinnzahlen 
+                        ? [...entry.gewinnzahlen].sort((a, b) => a - b)
+                        : generateRandomNumbers();
+                    
+                    converted.push({
+                        id: index + 1,
+                        date: formatDateString(entry.datum),
+                        numbers: sortedNumbers,
+                        superzahl: entry.superzahl || 0,
+                        year: year
+                    });
+                    
+                } catch (error) {
+                    console.warn(`Fehler beim Konvertieren von Eintrag ${index}:`, error);
+                }
+            });
+            
+            // Sortiere nach Datum (älteste zuerst)
+            converted.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                if (isNaN(dateA) || isNaN(dateB)) {
+                    return a.id - b.id; // Fallback nach ID sortieren
+                }
+                return dateA - dateB;
+            });
+            
+            console.log(`✅ Erfolgreich ${converted.length} Lottoziehungen aus JSON konvertiert`);
+            return converted;
+        }
+
+        // Hilfsfunktion zum Formatieren des Datums
+        function formatDateString(germanDate) {
+            if (!germanDate) return new Date().toISOString().split('T')[0];
+            
+            // Konvertiere DD.MM.YYYY zu YYYY-MM-DD
+            const parts = germanDate.split('.');
+            if (parts.length === 3) {
+                const day = parts[0].padStart(2, '0');
+                const month = parts[1].padStart(2, '0');
+                const year = parts[2];
+                return `${year}-${month}-${day}`;
+            }
+            
+            return germanDate;
         }
 
         // Alternative Datenquelle als Fallback
@@ -903,6 +990,449 @@
             }
             
             return converted;
+        }
+
+        // ============================================
+        // INITIALISIERE DIE JSON-ANALYSE BEIM LADEN
+        // ============================================
+
+        // Initialisierung beim Seitenladen
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Lotto KI App geladen, starte Datenanalyse...');
+            
+            // Initialisiere mit Standardwerten
+            setTimeout(() => {
+                // Prüfe zuerst, ob bereits Daten im localStorage sind
+                const lastScrape = localStorage.getItem('lotto_last_scrape');
+                if (lastScrape) {
+                    try {
+                        const scrapedData = localStorage.getItem('lotto_scraped_data');
+                        if (scrapedData) {
+                            const parsedData = JSON.parse(scrapedData);
+                            if (Array.isArray(parsedData) && parsedData.length > 0) {
+                                updateStatsFacts({
+                                    totalRecords: parsedData.length,
+                                    lastDate: new Date(lastScrape).toLocaleDateString('de-DE')
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Konnte gespeicherte Daten nicht laden:', e);
+                    }
+                }
+                
+                // Starte die JSON-Analyse
+                analyzeJSONData().catch(err => {
+                    console.log('JSON-Analyse im Hintergrund fehlgeschlagen:', err);
+                    
+                    // Fallback: Zeige zumindest Standardwerte
+                    const element = document.getElementById('totalDrawsCount');
+                    if (element && historicalData && historicalData.length > 0) {
+                        element.textContent = historicalData.length.toLocaleString('de-DE');
+                        updateStatsFacts({
+                            totalRecords: historicalData.length,
+                            lastDate: new Date().toLocaleDateString('de-DE')
+                        });
+                    }
+                });
+            }, 500);
+        });
+
+        // ============================================
+        // JSON-DATEN ANALYSE UND ANZEIGE
+        // ============================================
+        async function analyzeJSONData() {
+            const countEl = document.getElementById('jsonRecordCount');
+            const sizeEl = document.getElementById('jsonFileSize');
+            const updateEl = document.getElementById('jsonLastUpdate');
+            const statusEl = document.getElementById('jsonLoadingStatus');
+            
+            if (!countEl || !sizeEl || !updateEl || !statusEl) {
+                console.error('JSON-Analyse: UI-Elemente nicht gefunden');
+                return null;
+            }
+            
+            try {
+                statusEl.innerHTML = '<span style="color: #FF9800;">⏳ Analysiere JSON-Datenbank...</span>';
+                
+                console.log('Lade JSON-Datei...');
+                const response = await fetch('lottozahlen_1992-2026.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const jsonData = await response.json();
+                console.log('JSON geladen:', jsonData.length, 'Einträge');
+                
+                if (!Array.isArray(jsonData)) {
+                    throw new Error('JSON-Daten sind kein Array');
+                }
+                
+                if (jsonData.length === 0) {
+                    throw new Error('JSON-Daten sind leer');
+                }
+                
+                // Aktualisiere die Anzeige in der Warning-Box
+                updateTotalDrawsCount(jsonData.length);
+                
+                // Berechne Dateigröße
+                const jsonString = JSON.stringify(jsonData);
+                const fileSizeBytes = new Blob([jsonString]).size;
+                const fileSizeKB = (fileSizeBytes / 1024).toFixed(1);
+                const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
+                
+                // Führe detaillierte Analyse durch
+                console.log('Starte detaillierte Analyse...');
+                const detailedAnalysis = performDetailedAnalysis(jsonData);
+                
+                // *** NEU: Aktualisiere die Statistischen Fakten ***
+                updateStatsFacts(detailedAnalysis);
+                
+                // Update UI
+                countEl.textContent = detailedAnalysis.totalRecords.toLocaleString('de-DE');
+                sizeEl.textContent = fileSizeMB > 1 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+                updateEl.textContent = detailedAnalysis.lastDate;
+                
+                statusEl.innerHTML = `
+                    <span style="color: #4CAF50;">✅ JSON-Datenbank erfolgreich analysiert</span><br>
+                    <small>Zeitraum: ${detailedAnalysis.firstDate} bis ${detailedAnalysis.lastDate}</small>
+                `;
+                
+                // Füge detaillierte Analyse hinzu
+                setTimeout(() => {
+                    try {
+                        displayDetailedAnalysisUI(detailedAnalysis);
+                    } catch (uiError) {
+                        console.error('Fehler beim Anzeigen der detaillierten Analyse:', uiError);
+                    }
+                }, 100);
+                
+                return {
+                    recordCount: detailedAnalysis.totalRecords,
+                    fileSizeBytes,
+                    fileSizeMB,
+                    ...detailedAnalysis
+                };
+                
+            } catch (error) {
+                console.error('JSON-Analyse fehlgeschlagen:', error);
+                
+                // Fallback-UI anzeigen
+                countEl.textContent = '0';
+                sizeEl.textContent = '0 KB';
+                updateEl.textContent = '-';
+                
+                statusEl.innerHTML = `
+                    <span style="color: #f44336;">⚠️ JSON-Daten nicht verfügbar</span><br>
+                    <small>Fehler: ${error.message}</small>
+                `;
+                
+                // *** NEU: Fallback auf historische Daten ***
+                if (historicalData && historicalData.length > 0) {
+                    updateTotalDrawsCount(historicalData.length);
+                    updateStatsFacts({ totalRecords: historicalData.length });
+                }
+                
+                return null;
+            }
+        }
+
+        // Funktion für detaillierte Analyse
+        function performDetailedAnalysis(jsonData) {
+            console.log('Starte detaillierte Analyse von', jsonData.length, 'Datensätzen');
+            
+            const analysis = {
+                totalRecords: jsonData.length,
+                years: {},
+                yearCount: 0,
+                firstDate: 'unbekannt',
+                lastDate: 'unbekannt',
+                averagePerYear: 0, // Durchschnittliche Ziehungen pro Jahr
+                numberFrequency: new Array(50).fill(0),
+                superNumberFrequency: new Array(10).fill(0),
+                dataFields: [],
+                mostFrequentNumber: 0,
+                mostFrequentCount: 0,
+                mostFrequentSuper: 0,
+                mostFrequentSuperCount: 0
+            };
+            
+            // Temp-Variablen für Datumsberechnung
+            let earliestDate = null;
+            let latestDate = null;
+            
+            jsonData.forEach((entry, index) => {
+                try {
+                    // 1. Jahre zählen
+                    let year = entry.jahr;
+                    
+                    // Falls jahr nicht vorhanden, versuche es aus datum zu extrahieren
+                    if (!year && entry.datum) {
+                        const parts = entry.datum.split('.');
+                        if (parts.length === 3) {
+                            year = parseInt(parts[2], 10);
+                        }
+                    }
+                    
+                    if (year && !isNaN(year)) {
+                        analysis.years[year] = (analysis.years[year] || 0) + 1;
+                    }
+                    
+                    // 2. Datum für Zeitraum-Berechnung
+                    if (entry.datum) {
+                        try {
+                            const parts = entry.datum.split('.');
+                            if (parts.length === 3) {
+                                const day = parseInt(parts[0], 10);
+                                const month = parseInt(parts[1], 10) - 1;
+                                const year = parseInt(parts[2], 10);
+                                
+                                const date = new Date(year, month, day);
+                                if (!isNaN(date.getTime())) {
+                                    if (!earliestDate || date < earliestDate) {
+                                        earliestDate = date;
+                                    }
+                                    if (!latestDate || date > latestDate) {
+                                        latestDate = date;
+                                    }
+                                }
+                            }
+                        } catch (dateError) {
+                            // Ignoriere Datumsfehler
+                        }
+                    }
+                    
+                    // 3. Lottozahlen-Häufigkeiten
+                    if (entry.gewinnzahlen && Array.isArray(entry.gewinnzahlen)) {
+                        entry.gewinnzahlen.forEach(num => {
+                            const numInt = parseInt(num, 10);
+                            if (!isNaN(numInt) && numInt >= 1 && numInt <= 49) {
+                                analysis.numberFrequency[numInt]++;
+                            }
+                        });
+                    }
+                    
+                    // 4. Superzahl-Häufigkeiten
+                    if (entry.superzahl !== undefined && entry.superzahl !== null) {
+                        const superNum = parseInt(entry.superzahl, 10);
+                        if (!isNaN(superNum) && superNum >= 0 && superNum <= 9) {
+                            analysis.superNumberFrequency[superNum]++;
+                        }
+                    }
+                    
+                    // 5. Datenfelder sammeln
+                    Object.keys(entry).forEach(key => {
+                        if (!analysis.dataFields.includes(key)) {
+                            analysis.dataFields.push(key);
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.warn(`Fehler bei Analyse von Eintrag ${index}:`, error);
+                }
+            });
+            
+            // Berechnungen nach der Schleife
+            analysis.yearCount = Object.keys(analysis.years).length;
+            
+            // Datumsformatierung
+            if (earliestDate) {
+                analysis.firstDate = formatGermanDate(earliestDate);
+            }
+            if (latestDate) {
+                analysis.lastDate = formatGermanDate(latestDate);
+            }
+            
+            // DURCHSCHNITT: Gesamtziehungen ÷ Anzahl Jahre
+            if (analysis.yearCount > 0) {
+                analysis.averagePerYear = (analysis.totalRecords / analysis.yearCount).toFixed(1);
+            }
+            
+            // Häufigste Lottozahl finden
+            for (let i = 1; i <= 49; i++) {
+                if (analysis.numberFrequency[i] > analysis.mostFrequentCount) {
+                    analysis.mostFrequentCount = analysis.numberFrequency[i];
+                    analysis.mostFrequentNumber = i;
+                }
+            }
+            
+            // Häufigste Superzahl finden
+            for (let i = 0; i < 10; i++) {
+                if (analysis.superNumberFrequency[i] > analysis.mostFrequentSuperCount) {
+                    analysis.mostFrequentSuperCount = analysis.superNumberFrequency[i];
+                    analysis.mostFrequentSuper = i;
+                }
+            }
+            
+            console.log('Analyse abgeschlossen:', {
+                totalRecords: analysis.totalRecords,
+                yearCount: analysis.yearCount,
+                averagePerYear: analysis.averagePerYear,
+                dateRange: `${analysis.firstDate} - ${analysis.lastDate}`,
+                topYears: Object.entries(analysis.years)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3)
+            });
+            
+            return analysis;
+        }
+
+        // Hilfsfunktion für Datumsformatierung (die du schon hast)
+        function formatGermanDate(date) {
+            if (!(date instanceof Date) || isNaN(date.getTime())) {
+                return 'unbekannt';
+            }
+            
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            
+            return `${day}.${month}.${year}`;
+        }
+
+        // Neue Funktion für UI-Anzeige der detaillierten Analyse
+        function displayDetailedAnalysisUI(analysis) {
+            const container = document.getElementById('jsonLoadingStatus');
+            
+            if (!container) return;
+            
+            // Sortiere Jahre nach Ziehungsanzahl (absteigend)
+            const topYears = Object.entries(analysis.years)
+                .sort((a, b) => b[1] - a[1]) // Sortieren nach Anzahl (absteigend)
+                .slice(0, 5); // Top 5 Jahre nehmen
+            
+            // Erstelle erweiterte Anzeige mit klaren Bezeichnungen
+            const detailsHtml = `
+                <div id="detailedJSONAnalysis" style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ddd;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong style="color: #2196F3;">📈 Detaillierte Datenanalyse</strong>
+                        <button onclick="toggleDetailedAnalysis()" style="background: none; border: none; color: #666; cursor: pointer; font-size: 12px;">
+                            🔽 Einblenden
+                        </button>
+                    </div>
+                    
+                    <div id="detailedAnalysisContent" style="display: none; font-size: 13px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 15px;">
+                            <div style="text-align: center; padding: 8px; background: #f5f5f5; border-radius: 5px;">
+                                <div style="font-size: 11px; color: #666;">Enthaltene Jahre</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #2196F3;">${analysis.yearCount}</div>
+                                <small>insgesamt</small>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #f5f5f5; border-radius: 5px;">
+                                <div style="font-size: 11px; color: #666;">Ø Ziehungen pro Jahr</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #2196F3;">${analysis.averagePerYear}</div>
+                                <small>Durchschnitt</small>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #f5f5f5; border-radius: 5px;">
+                                <div style="font-size: 11px; color: #666;">Häufigste Zahl</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #2196F3;">${analysis.mostFrequentNumber}</div>
+                                <small>${analysis.mostFrequentCount}x gezogen</small>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <strong>📊 Jahre mit den meisten Ziehungen (Top 5):</strong><br>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                                ${topYears.map(([year, count]) => `
+                                    <span style="padding: 6px 12px; background: #e3f2fd; border-radius: 20px; font-size: 12px; display: inline-flex; align-items: center;">
+                                        <span style="font-weight: bold; margin-right: 4px;">${year}:</span>
+                                        <span style="background: #2196F3; color: white; padding: 2px 8px; border-radius: 12px;">${count} Ziehungen</span>
+                                        ${count >= 156 ? ' 🎲' : count >= 104 ? ' 🎲🎲' : ''}
+                                    </span>
+                                `).join('')}
+                            </div>
+                            <small style="color: #666; display: block; margin-top: 8px;">
+                                ℹ️ Seit 2013: 3 Ziehungen/Woche (Dienstag, Mittwoch, Samstag) ≈ 156 Ziehungen/Jahr
+                            </small>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <strong>📅 Entwicklung der Ziehungen pro Jahr:</strong><br>
+                            <div style="max-height: 150px; overflow-y: auto; margin-top: 8px; padding-right: 5px;">
+                                ${Object.entries(analysis.years)
+                                    .sort((a, b) => parseInt(b[0]) - parseInt(a[0])) // Neueste Jahre zuerst
+                                    .map(([year, count]) => `
+                                        <div style="display: flex; align-items: center; margin-bottom: 4px; padding: 3px 0; border-bottom: 1px dotted #eee;">
+                                            <span style="width: 60px; font-weight: bold;">${year}:</span>
+                                            <div style="flex: 1; margin: 0 10px;">
+                                                <div style="display: inline-block; height: 20px; width: ${Math.min(100, (count / 156) * 100)}%; background: ${count >= 156 ? '#4CAF50' : count >= 104 ? '#FF9800' : '#2196F3'}; border-radius: 10px; transition: width 0.3s;"></div>
+                                            </div>
+                                            <span style="min-width: 80px; text-align: right;">${count} Ziehungen</span>
+                                            <span style="margin-left: 8px; font-size: 11px; color: #666;">
+                                                ${count >= 156 ? '3x/Woche' : count >= 104 ? '2x/Woche' : '1x/Woche'}
+                                            </span>
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px; font-size: 12px; color: #666; padding: 10px; background: #f9f9f9; border-radius: 5px;">
+                            <strong>📋 Datenbank-Zusammenfassung:</strong><br>
+                            • ${analysis.totalRecords.toLocaleString('de-DE')} Lottoziehungen insgesamt<br>
+                            • ${analysis.yearCount} Jahre im Zeitraum ${analysis.firstDate} - ${analysis.lastDate}<br>
+                            • ${analysis.averagePerYear} Ziehungen pro Jahr (Durchschnitt)<br>
+                            • Häufigste Zahl: ${analysis.mostFrequentNumber} (${analysis.mostFrequentCount}x)<br>
+                            • Häufigste Superzahl: ${analysis.mostFrequentSuper} (${analysis.mostFrequentSuperCount}x)<br>
+                            • Datenfelder: ${analysis.dataFields.join(', ')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Entferne alte Analyse falls vorhanden
+            const oldAnalysis = document.getElementById('detailedJSONAnalysis');
+            if (oldAnalysis) {
+                oldAnalysis.remove();
+            }
+            
+            // Füge nach dem Status-Container hinzu
+            container.insertAdjacentHTML('afterend', detailsHtml);
+        }
+
+        // Toggle-Funktion für die detaillierte Anzeige
+        function toggleDetailedAnalysis() {
+            const content = document.getElementById('detailedAnalysisContent');
+            const button = document.querySelector('#detailedJSONAnalysis button');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                button.innerHTML = '🔼 Ausblenden';
+            } else {
+                content.style.display = 'none';
+                button.innerHTML = '🔽 Einblenden';
+            }
+        }
+
+
+        function formatGermanDate(date) {
+            if (!(date instanceof Date) || isNaN(date)) return 'unbekannt';
+            
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            
+            return `${day}.${month}.${year}`;
+        }
+
+        // ============================================
+        // FUNKTION ZUM AKTUALISIEREN DER ZIEHUNGSANZAHL
+        // ============================================
+
+        function updateTotalDrawsCount(count) {
+            const element = document.getElementById('totalDrawsCount');
+            if (!element) return;
+            
+            if (count && count > 0) {
+                // Formatiere die Zahl mit Tausendertrennzeichen
+                const formattedCount = count.toLocaleString('de-DE');
+                element.textContent = formattedCount;
+                
+                // Optional: Füge auch einen Tooltip hinzu
+                element.title = `${formattedCount} Lottoziehungen von 1992 bis heute`;
+                
+                console.log(`📊 Anzeige aktualisiert: ${formattedCount} Ziehungen`);
+            }
         }
 
         // ============================================
@@ -1354,6 +1884,196 @@
             updateButton('trainBtn', true, '🔄 Training erneut starten');
             showElement('trainingProgress', false);
         }
+
+
+        // ============================================
+        // DETAILLIERTE JSON-ANALYSE (OPTIONAL)
+        // ============================================
+
+        async function showDetailedJSONAnalysis() {
+            try {
+                const response = await fetch('lottozahlen_1992-2026.json');
+                const jsonData = await response.json();
+                
+                // Erstelle eine detaillierte Analyse
+                const analysis = {
+                    totalRecords: jsonData.length,
+                    years: {},
+                    numberFrequency: new Array(50).fill(0),
+                    superNumberFrequency: new Array(10).fill(0),
+                    dataStructure: {}
+                };
+                
+                // Analysiere die Daten
+                jsonData.forEach(entry => {
+                    // Jahre zählen
+                    const year = entry.jahr || new Date().getFullYear();
+                    analysis.years[year] = (analysis.years[year] || 0) + 1;
+                    
+                    // Zahlhäufigkeiten
+                    if (entry.gewinnzahlen && Array.isArray(entry.gewinnzahlen)) {
+                        entry.gewinnzahlen.forEach(num => {
+                            if (num >= 1 && num <= 49) {
+                                analysis.numberFrequency[num]++;
+                            }
+                        });
+                    }
+                    
+                    // Superzahl
+                    if (entry.superzahl !== undefined && entry.superzahl >= 0 && entry.superzahl <= 9) {
+                        analysis.superNumberFrequency[entry.superzahl]++;
+                    }
+                    
+                    // Datenstruktur analysieren
+                    Object.keys(entry).forEach(key => {
+                        analysis.dataStructure[key] = analysis.dataStructure[key] || {
+                            count: 0,
+                            example: entry[key]
+                        };
+                        analysis.dataStructure[key].count++;
+                    });
+                });
+                
+                // Zeige die Analyse in einem Modal oder Console
+                console.log('📊 Detaillierte JSON-Analyse:', analysis);
+                
+                // Oder zeige es in der UI an
+                displayDetailedAnalysis(analysis);
+                
+                return analysis;
+                
+            } catch (error) {
+                console.error('Detaillierte Analyse fehlgeschlagen:', error);
+                return null;
+            }
+        }
+
+        function displayDetailedAnalysis(analysis) {
+            // Erstelle ein Modal oder erweitere die bestehende Anzeige
+            const detailsHtml = `
+                <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 15px;">
+                    <h5>📊 Detaillierte JSON-Analyse</h5>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 15px 0;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 12px; color: #666;">Datensätze</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #2196F3;">${analysis.totalRecords}</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 12px; color: #666;">Enthaltene Jahre</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #2196F3;">${Object.keys(analysis.years).length}</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 12px; color: #666;">Durchschnitt/Jahr</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #2196F3;">${Math.round(analysis.totalRecords / Object.keys(analysis.years).length)}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="font-size: 13px; color: #666; margin-top: 10px;">
+                        <strong>Datenfelder:</strong> ${Object.keys(analysis.dataStructure).join(', ')}
+                    </div>
+                </div>
+            `;
+            
+            // Füge zur UI hinzu oder zeige als Modal
+            const container = document.getElementById('jsonLoadingStatus');
+            if (container) {
+                container.insertAdjacentHTML('afterend', detailsHtml);
+            }
+        }
+
+        // ============================================
+        // STATISTISCHE FAKTEN AKTUALISIEREN
+        // ============================================
+
+        function updateStatsFacts(data) {
+            // Hole die Elemente
+            const timeframeEl = document.getElementById('statsTimeframe');
+            const recordCountEl = document.getElementById('statsRecordCount');
+            const dataDateEl = document.getElementById('statsDataDate');
+            
+            if (!timeframeEl || !recordCountEl || !dataDateEl) {
+                console.warn('Statistische Fakten Elemente nicht gefunden');
+                return;
+            }
+            
+            let recordCount = 0;
+            let firstYear = '1992';
+            let lastYear = '2026';
+            let lastDate = '-';
+            
+            // 1. Priorität: Daten aus der JSON-Analyse
+            if (data && data.totalRecords) {
+                recordCount = data.totalRecords;
+                if (data.firstDate) {
+                    const firstYearFromDate = data.firstDate.split('.').pop();
+                    if (firstYearFromDate) firstYear = firstYearFromDate;
+                }
+                if (data.lastDate) {
+                    lastDate = data.lastDate;
+                    const lastYearFromDate = lastDate.split('.').pop();
+                    if (lastYearFromDate) lastYear = lastYearFromDate;
+                }
+            }
+            // 2. Priorität: Historische Daten
+            else if (historicalData && historicalData.length > 0) {
+                recordCount = historicalData.length;
+                
+                const years = historicalData.map(d => d.year).filter(y => y);
+                if (years.length > 0) {
+                    firstYear = Math.min(...years).toString();
+                    lastYear = Math.max(...years).toString();
+                }
+                
+                // Letztes Datum aus historischen Daten
+                if (historicalData.length > 0) {
+                    const lastDraw = historicalData[historicalData.length - 1];
+                    if (lastDraw.date) {
+                        const date = new Date(lastDraw.date);
+                        if (!isNaN(date.getTime())) {
+                            lastDate = formatGermanDate(date);
+                        }
+                    }
+                }
+            }
+            // 3. Priorität: Letzter Scrape aus localStorage
+            else {
+                const lastScrape = localStorage.getItem('lotto_last_scrape');
+                if (lastScrape) {
+                    lastDate = new Date(lastScrape).toLocaleDateString('de-DE');
+                }
+                
+                // Versuche gescrapte Daten zu laden
+                try {
+                    const scrapedData = localStorage.getItem('lotto_scraped_data');
+                    if (scrapedData) {
+                        const parsedData = JSON.parse(scrapedData);
+                        if (Array.isArray(parsedData) && parsedData.length > 0) {
+                            recordCount = parsedData.length;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Konnte gescrapte Daten nicht laden:', e);
+                }
+            }
+            
+            // 4. Fallback: Wenn keine Daten, verwende Standardwerte
+            if (recordCount === 0) {
+                recordCount = 3094; // Standardwert aus deinem HTML
+            }
+            
+            // UI aktualisieren
+            timeframeEl.textContent = `${firstYear}-${lastYear}`;
+            recordCountEl.textContent = recordCount.toLocaleString('de-DE');
+            dataDateEl.textContent = lastDate;
+            
+            // Füge Tooltips hinzu
+            timeframeEl.title = `Daten von ${firstYear} bis ${lastYear}`;
+            recordCountEl.title = `${recordCount.toLocaleString('de-DE')} Lottoziehungen in der Datenbank`;
+            dataDateEl.title = `Letzte Aktualisierung: ${lastDate}`;
+            
+            console.log(`📊 Statistische Fakten aktualisiert: ${firstYear}-${lastYear}, ${recordCount} Ziehungen, Stand: ${lastDate}`);
+        }
+
         
         // ============================================
         // 5. VORHERSAGE (SCHRITT 4)
